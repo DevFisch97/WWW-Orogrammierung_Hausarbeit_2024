@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Startseite</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <ul class="nav-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#products_old">Neu</a></li>
+                <li><a href="#products_new">Gebraucht</a></li>
+                <li><a href="about.html">Über uns</a></li>
+                <li><a href="contact.html">Kontakt</a></li>
+            </ul>
+            <div class="logo-container">
+                <img src="/assets/Logo.png" alt="Spielgut Logo" class="site-logo">
+            </div>
+            <div class="user-actions">
+                <a href="account.html" class="icon-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="sr-only">Login</span>
+                </a>
+                <a href="shopping_cart.html" class="icon-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                        <circle cx="8" cy="21" r="1"></circle>
+                        <circle cx="19" cy="21" r="1"></circle>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                    </svg>
+                    <span class="sr-only">Warenkorb</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section class="products">
+            <h1>Unsere Highlights</h1>
+            <div class="product-slideshow">
+                <div class="product-container">
+                    <div class="product-card">
+                        <img src="/assets/holzauto.jpeg" alt="Auto" class="product-image">
+                        <h1 class="product-title">Auto</h1>
+                        <h2 class="product-description">29,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/Holzhausklotz.jpeg" alt="Hausklotz" class="product-image">
+                        <h1 class="product-title">Hausklotz</h1>
+                        <h2 class="product-description">19,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/holzkugelbahn.jpeg" alt="Kugelbahn" class="product-image">
+                        <h1 class="product-title">Kugelbahn</h1>
+                        <h2 class="product-description">23,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/Holzpferd.jpeg" alt="Pferd" class="product-image">
+                        <h1 class="product-title">Pferd</h1>
+                        <h2 class="product-description">59,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/holzpuppe.jpeg" alt="Puppe" class="product-image">
+                        <h1 class="product-title">Puppe</h1>
+                        <h2 class="product-description">12,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/holzsteckpuzzle.jpeg" alt="Steckpuzzle" class="product-image">
+                        <h1 class="product-title">Steckpuzzle</h1>
+                        <h2 class="product-description">15,99€</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="slideshow-controls">
+                <button id="prevButton" class="control-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button id="nextButton" class="control-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </section>
+        <section class="sell-used">
+            <h2>Verkaufen Sie Ihre gebrauchten Spielzeuge</h2>
+            <p>Bei Spielgut haben Sie die Möglichkeit, Ihre gebrauchten Holzspielzeuge zu verkaufen. Geben Sie Ihren Spielsachen ein zweites Leben und unterstützen Sie andere Familien mit qualitativ hochwertigen Produkten zu günstigen Preisen.</p>
+            <a href="#" class="button">Jetzt verkaufen</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Meine Startseite. Alle Rechte vorbehalten.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
