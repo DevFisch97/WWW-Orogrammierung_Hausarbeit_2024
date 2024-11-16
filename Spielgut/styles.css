@@ -1,8 +1,40 @@
+
+/*Allgemein*/
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+    overflow-y: auto;
+}
+
+h1{
+    font-size: 2rem;
+    color: #ff7300;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+h2{
+    font-size: 1.5rem;
+    color: #ff7300;
+    margin-bottom: 2rem;
+}
+
+
+footer {
+    background-color: #ff7300;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
 }
 
 .navbar {
@@ -86,7 +118,6 @@ body {
     border-width: 0;
 }
 
-
 .hero {
     display: flex;
     justify-content: center;
@@ -95,23 +126,13 @@ body {
     background-color: #f4f4f4;
 }
 
-/*.title {
-    font-size: 2rem;
-    margin-right: 1rem;
-}*/
-
-/*.logo {
-    width: 100px;
-    height: auto;
-}*/
-
 .site-logo {
     margin-top: 2.5rem;
     max-height: 14rem;
     width: auto;
 }
 
-
+/*Produkt Slideshow*/
 .products {
     padding: 2rem;
 }
@@ -167,17 +188,284 @@ body {
     background-color: #f8ab52;
 }
 
-
-footer {
-    background-color: #ff7300;
-    color: white;
+/*Startseite*/
+.sell-used {
+    background-color: #f4f4f4;
+    padding: 2rem;
     text-align: center;
-    padding: 1rem;
     margin-top: 2rem;
 }
+
+.sell-used h2 {
+    color: #ff7300;
+    margin-bottom: 1rem;
+}
+
+.button {
+    display: inline-block;
+    background-color: #ff7300;
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #f8ab52;
+}
+
+.h1hovern {
+    transition: transform 0.3s ease;
+}
+
+.h1hovern:hover {
+    transform: scale(1.05);
+}
+
+.h1hovern a {
+    color: #ff7300;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.h1hovern:hover a {
+    color: #f8ab52;
+}
+
+/*Produkt-Seite*/
+.product-page {
+    padding: 2rem;
+}
+
+.product-page-title {
+    font-size: 2rem;
+    color: #ff7300;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.product-page-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-page-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-page-image {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.product-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.product-price {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ff7300;
+}
+
+
+/*Kontakt-Seite*/
+.contact-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.contact-section h1 {
+    color: #ff7300;
+    margin-bottom: 1.5rem;
+}
+
+.contact-section h2 {
+    color: #f8ab52;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.contact-info, .contact-form {
+    margin-bottom: 2rem;
+}
+
+.contact-info p {
+    margin-bottom: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.button {
+    display: inline-block;
+    background-color: #ff7300;
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #f8ab52;
+}
+
+/*About*/
+
+.about-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.about-hero {
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 4rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.about-hero h1 {
+    font-size: 2.5rem;
+    color: #ff7300;
+    margin-bottom: 1rem;
+}
+
+
+.about-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.about-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.timeline {
+    margin: 4rem 0;
+}
+
+.timeline-container {
+    position: relative;
+    padding: 2rem 0;
+}
+
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background-color: #ff7300;
+}
+
+.timeline-item {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.timeline-content {
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    padding: 1rem;
+    width: calc(50% - 2rem);
+}
+
+.timeline-item:nth-child(odd) .timeline-content {
+    margin-left: auto;
+}
+
+.timeline-content h3 {
+    color: #ff7300;
+    margin-bottom: 0.5rem;
+}
+
+.values-grid, .testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.value-item, .testimonial-item {
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.value-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    color: #ff7300;
+}
+
+.testimonial-author {
+    font-style: italic;
+    margin-top: 1rem;
+    color: #666;
+}
+
+.mission {
+    background-color: #ff7300;
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin: 4rem 0;
+    border-radius: 8px;
+}
+
+.mission h2 {
+    margin-bottom: 1rem;
+}
+
+
 @media screen and (max-width: 768px) {
     .product-grid {
-        grid-template-columns: 1fr; /* 1 Spalte für Handy */
+        grid-template-columns: 1fr; 
     }
 
     .hero {
@@ -207,7 +495,21 @@ footer {
     .nav-list li {
         margin-bottom: 0.5rem;
     }
+
+    .timeline-container::before {
+        left: 0;
+    }
+
+    .timeline-content {
+        width: calc(100% - 2rem);
+        margin-left: 2rem !important;
+    }
+
+    .values-grid, .testimonial-grid {
+        grid-template-columns: 1fr;
+    }
 }
+
 
 @media screen and (max-width: 1024px) {
     .product-grid {
@@ -225,131 +527,5 @@ footer {
     .img_logo {
         width: 60px; /* Smaller size for mobile */
     }
-
-    
-
-    .about-section, .contact-section {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    
-    .about-section h1, .contact-section h1 {
-        color: #ff7300;
-        margin-bottom: 1rem;
-    }
-    
-    .about-section h2, .contact-section h2 {
-        color: #f8ab52;
-        margin-top: 1.5rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .about-section p, .contact-section p {
-        line-height: 1.6;
-        margin-bottom: 1rem;
-    }
-
-
-
-
-
-
-
-
-
-    .contact-section {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    
-    .contact-section h1 {
-        color: #ff7300;
-        margin-bottom: 1.5rem;
-    }
-    
-    .contact-section h2 {
-        color: #f8ab52;
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .contact-info, .contact-form {
-        margin-bottom: 2rem;
-    }
-    
-    .contact-info p {
-        margin-bottom: 0.5rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 0.3rem;
-    }
-    
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    
-    .form-group textarea {
-        resize: vertical;
-    }
-    
-    .button {
-        display: inline-block;
-        background-color: #ff7300;
-        color: white;
-        padding: 0.5rem 1rem;
-        text-decoration: none;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-    
-    .button:hover {
-        background-color: #f8ab52;
-    }
-    
-
-    .sell-used {
-        background-color: #f4f4f4;
-        padding: 2rem;
-        text-align: center;
-        margin-top: 2rem;
-    }
-    
-    .sell-used h2 {
-        color: #ff7300;
-        margin-bottom: 1rem;
-    }
-    
-    .button {
-        display: inline-block;
-        background-color: #ff7300;
-        color: white;
-        padding: 0.5rem 1rem;
-        text-decoration: none;
-        border-radius: 4px;
-        margin-top: 1rem;
-        transition: background-color 0.3s ease;
-    }
-    
-    .button:hover {
-        background-color: #f8ab52;
-    }
-
-
-
-
 }
 

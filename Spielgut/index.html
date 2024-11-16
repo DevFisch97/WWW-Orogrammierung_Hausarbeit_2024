@@ -11,8 +11,8 @@
         <nav class="navbar">
             <ul class="nav-list">
                 <li><a href="index.html">Home</a></li>
-                <li><a href="#products_old">Neu</a></li>
-                <li><a href="#products_new">Gebraucht</a></li>
+                <li><a href="new-Products.html">Neu</a></li>
+                <li><a href="used-Products.html">Gebraucht</a></li>
                 <li><a href="about.html">Über uns</a></li>
                 <li><a href="contact.html">Kontakt</a></li>
             </ul>
@@ -40,7 +40,9 @@
     </header>
     <main>
         <section class="products">
-            <h1>Unsere Highlights</h1>
+            <div class="h1hovern">
+            <h1><a href="new-Products.html">Neu Produkte</a></h1>
+            </div>
             <div class="product-slideshow">
                 <div class="product-container">
                     <div class="product-card">
@@ -88,10 +90,63 @@
                 </button>
             </div>
         </section>
+
+        <section class="products">
+            <div class="h1hovern">
+            <h1><a href="used-Products.html">Gebrauchte Produkte</a></h1>
+        </div>
+            <div class="product-slideshow">
+                <div class="product-container">
+                    <div class="product-card">
+                        <img src="/assets/holzauto.jpeg" alt="Auto" class="product-image">
+                        <h1 class="product-title">Auto</h1>
+                        <h2 class="product-description">29,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/Holzhausklotz.jpeg" alt="Hausklotz" class="product-image">
+                        <h1 class="product-title">Hausklotz</h1>
+                        <h2 class="product-description">19,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/holzkugelbahn.jpeg" alt="Kugelbahn" class="product-image">
+                        <h1 class="product-title">Kugelbahn</h1>
+                        <h2 class="product-description">23,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/Holzpferd.jpeg" alt="Pferd" class="product-image">
+                        <h1 class="product-title">Pferd</h1>
+                        <h2 class="product-description">59,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/holzpuppe.jpeg" alt="Puppe" class="product-image">
+                        <h1 class="product-title">Puppe</h1>
+                        <h2 class="product-description">12,99€</h2>
+                    </div>
+                    <div class="product-card">
+                        <img src="/assets/holzsteckpuzzle.jpeg" alt="Steckpuzzle" class="product-image">
+                        <h1 class="product-title">Steckpuzzle</h1>
+                        <h2 class="product-description">15,99€</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="slideshow-controls">
+                <button id="prevButton" class="control-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button id="nextButton" class="control-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
         <section class="sell-used">
             <h2>Verkaufen Sie Ihre gebrauchten Spielzeuge</h2>
             <p>Bei Spielgut haben Sie die Möglichkeit, Ihre gebrauchten Holzspielzeuge zu verkaufen. Geben Sie Ihren Spielsachen ein zweites Leben und unterstützen Sie andere Familien mit qualitativ hochwertigen Produkten zu günstigen Preisen.</p>
-            <a href="#" class="button">Jetzt verkaufen</a>
+            <a href="used-Products.html" class="button">Jetzt verkaufen</a>
         </section>
     </main>
 
