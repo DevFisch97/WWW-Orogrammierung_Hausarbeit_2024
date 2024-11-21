@@ -512,7 +512,7 @@ footer {
     font-weight: bold;
 }
 
-/*Login*/
+/*Login Logo*/
 
 .login-container {
     display: flex;
@@ -646,8 +646,9 @@ footer {
     }
 
     .img_logo {
-        width: 80px; /* Smaller size for tablet */
+        width: 80px; /* Kleinere Größe für mobile-Ansicht */
     }
+    
 
     .nav-list {
         flex-direction: column;
@@ -701,7 +702,7 @@ footer {
     }
 
     .img_logo {
-        width: 60px; /* Smaller size for mobile */
+        width: 60px; /* Kleinere Größe für mobile-Ansicht */
     }
 }
 
