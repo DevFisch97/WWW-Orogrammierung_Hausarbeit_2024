@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="container login-container">
+    <div class="login-form">
+        <h1 class="page-title">Anmelden</h1>
+        <p class="login-description">Melden Sie sich an, um Ihre Bestellungen zu verwalten und Ihre Daten zu aktualisieren.</p>
+        <form action="#" method="POST">
+            <div class="form-group">
+                <label for="email-address" class="sr-only">E-Mail-Adresse</label>
+                <input id="email-address" name="email" type="email" autocomplete="email" required class="form-input" placeholder="E-Mail-Adresse">
+            </div>
+            <div class="form-group">
+                <label for="password" class="sr-only">Passwort</label>
+                <div class="password-input">
+                    <input id="password" name="password" type="password" autocomplete="current-password" required class="form-input" placeholder="Passwort">
+                    <button type="button" class="btn btn-ghost password-toggle" aria-label="Passwort anzeigen">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="form-options">
+                <div class="remember-me">
+                    <input id="remember-me" name="remember-me" type="checkbox" class="form-checkbox">
+                    <label for="remember-me" class="form-label">Angemeldet bleiben</label>
+                </div>
+                <a href="#" class="forgot-password">Passwort vergessen?</a>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Anmelden</button>
+        </form>
+        <p class="register-link">
+            Noch kein Konto? <a href="#">Jetzt registrieren</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

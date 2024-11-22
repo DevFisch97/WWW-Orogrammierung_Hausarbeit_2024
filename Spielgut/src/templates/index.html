@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="products">
+    <div class="h1hovern">
+    <h1><a href="/new-products">Neu Produkte</a></h1>
+    </div>
+    <div class="product-slideshow">
+        <div class="product-container">
+            <div class="product-card">
+                <img src="/assets/holzauto.jpeg" alt="Auto" class="product-image">
+                <h1 class="product-title">Auto</h1>
+                <h2 class="product-description">29,99€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/Holzhausklotz.jpeg" alt="Hausklotz" class="product-image">
+                <h1 class="product-title">Hausklotz</h1>
+                <h2 class="product-description">19,99€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/holzkugelbahn.jpeg" alt="Kugelbahn" class="product-image">
+                <h1 class="product-title">Kugelbahn</h1>
+                <h2 class="product-description">23,99€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/Holzpferd.jpeg" alt="Pferd" class="product-image">
+                <h1 class="product-title">Pferd</h1>
+                <h2 class="product-description">59,99€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/holzpuppe.jpeg" alt="Puppe" class="product-image">
+                <h1 class="product-title">Puppe</h1>
+                <h2 class="product-description">12,99€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/holzsteckpuzzle.jpeg" alt="Steckpuzzle" class="product-image">
+                <h1 class="product-title">Steckpuzzle</h1>
+                <h2 class="product-description">15,99€</h2>
+            </div>
+        </div>
+    </div>
+    <div class="slideshow-controls">
+        <button id="prevButton" class="control-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <button id="nextButton" class="control-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    </div>
+</section>
+
+<section class="products">
+    <div class="h1hovern">
+    <h1><a href="/new-products">Gebrauchte Produkte</a></h1>
+</div>
+    <div class="product-slideshow">
+        <div class="product-container">
+            <div class="product-card">
+                <img src="/assets/Holzangeln.jpeg" alt="Holzangeln" class="product-image">
+                <h1 class="product-title">Angelspiel</h1>
+                <h2 class="product-description">12,50€</h2>                    </div>
+            <div class="product-card">
+                <img src="/assets/Holzdominos.jpeg" alt="Holzdominos" class="product-image">
+                <h1 class="product-title">Dominos</h1>
+                <h2 class="product-description">5,00€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/Holzjenga.jpeg" alt="Holzjenga" class="product-image">
+                <h1 class="product-title">Jenga</h1>
+                <h2 class="product-description">11,00€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/Holzziehpferd.jpeg" alt="Holzziehpferd" class="product-image">
+                <h1 class="product-title">Holz Ziehpferd</h1>
+                <h2 class="product-description">4,50€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/holzseilspiel.jpeg" alt="holzseilspiel" class="product-image">
+                <h1 class="product-title">Holzseilspiel</h1>
+                <h2 class="product-description">3,50€</h2>
+            </div>
+            <div class="product-card">
+                <img src="/assets/Holzxylophon.jpeg" alt="Holzxylophon" class="product-image">
+                <h1 class="product-title">Xylophon</h1>
+                <h2 class="product-description">15,00€</h2>
+            </div>
+        </div>
+    </div>
+    <div class="slideshow-controls">
+        <button id="prevButton" class="control-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <button id="nextButton" class="control-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    </div>
+</section>
+
+<section class="sell-used">
+    <h2>Verkaufen Sie Ihre gebrauchten Spielzeuge</h2>
+    <p>Bei Spielgut haben Sie die Möglichkeit, Ihre gebrauchten Holzspielzeuge zu verkaufen. Geben Sie Ihren Spielsachen ein zweites Leben und unterstützen Sie andere Familien mit qualitativ hochwertigen Produkten zu günstigen Preisen.</p>
+    <a href="used-Products.html" class="button">Jetzt verkaufen</a>
+</section>
+<script src="script.js"></script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="contact-section">
+    <h1>Kontaktieren Sie uns</h1>
+    <div class="contact-info">
+        <h2>Unsere Kontaktdaten</h2>
+        <p><strong>Adresse:</strong> Spielzeugstraße 123, 12345 Spielstadt</p>
+        <p><strong>Telefon:</strong> +49 123 456789</p>
+        <p><strong>E-Mail:</strong> info@spielgut.de</p>
+        <p><strong>Öffnungszeiten:</strong> Mo-Fr 9:00-18:00 Uhr</p>
+    </div>
+    <div class="contact-form">
+        <h2>Kontaktformular</h2>
+        <form action="#" method="POST">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required aria-required="true">
+            </div>
+            <div class="form-group">
+                <label for="email">E-Mail:</label>
+                <input type="email" id="email" name="email" required aria-required="true">
+            </div>
+            <div class="form-group">
+                <label for="subject">Betreff:</label>
+                <input type="text" id="subject" name="subject" required aria-required="true">
+            </div>
+            <div class="form-group">
+                <label for="message">Nachricht:</label>
+                <textarea id="message" name="message" rows="5" required aria-required="true"></textarea>
+            </div>
+            <button type="submit" class="button">Nachricht senden</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

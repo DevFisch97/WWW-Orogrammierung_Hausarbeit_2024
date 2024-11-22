@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holzauto - Spielgut</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <ul class="nav-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="new-Products.html">Neu</a></li>
+                <li><a href="used-Products.html">Gebraucht</a></li>
+                <li><a href="about.html">Über uns</a></li>
+                <li><a href="contact.html">Kontakt</a></li>
+            </ul>
+            <div class="logo-container">
+                <img src="/assets/Logo.png" alt="Spielgut Logo" class="site-logo">
+            </div>
+            <div class="user-actions">
+                <a href="account.html" class="icon-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="sr-only">Login</span>
+                </a>
+                <a href="shopping_cart.html" class="icon-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                        <circle cx="8" cy="21" r="1"></circle>
+                        <circle cx="19" cy="21" r="1"></circle>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                    </svg>
+                    <span class="sr-only">Warenkorb</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="product-container">
+            <div class="product-image">
+                <img src="/assets/holzauto.jpeg" alt="Holzauto" style="max-width: 100%; height: auto;">
+            </div>
+            <div class="product-details">
+                <h1 class="product-title">Holzauto</h1>
+                <p class="product-price">29,99€</p>
+                <p class="product-description">Ein robustes und umweltfreundliches Holzauto für stundenlangen Spielspaß. Dieses handgefertigte Spielzeug fördert die Kreativität und Motorik Ihres Kindes.</p>
+                <form action="#" method="POST">
+                    <label for="quantity">Menge:</label>
+                    <select id="quantity" name="quantity" class="quantity-input">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                    <button type="submit" class="add-to-cart-btn">In den Warenkorb</button>
+                </form>
+            </div>
+        </div>
+    </main>
