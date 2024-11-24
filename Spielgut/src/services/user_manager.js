@@ -1,5 +1,5 @@
-import db from './database.js';
-import bcrypt from 'bcrypt';
+import db from './data/user_managment'
+import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
 
 export async function registerUser(username, email, password) {
   const hashedPassword = await bcrypt.hash(password, 10);

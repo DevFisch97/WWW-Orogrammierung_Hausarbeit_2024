@@ -4,6 +4,7 @@ import { contentType } from "https://deno.land/std@0.177.0/media_types/mod.ts";
 import { initConnection, connection } from "./services/db.js";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 import * as crypto from "https://deno.land/std@0.177.0/crypto/mod.ts";
+import { registerUser, loginUser, getUserRole } from "./services/user_manager.js";
 
 // Initialize the database connection
 initConnection("./src/data/user_managment.db");
@@ -22,51 +23,54 @@ async function handleRegister(request) {
   const { username, email, password } = body;
   
   try {
-    const hashedPassword = await bcrypt.hash(password);
-    const db = connection();
-    await db.query(
-      'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, (SELECT id FROM roles WHERE name = "registered"))',
-      [username, email, hashedPassword]
-    );
-    
-    return new Response(JSON.stringify({ message: 'User registered successfully' }), {
-      status: 201,
-      headers: { 'content-type': 'application/json' }
+    const userId = await registerUser(username, email, password);
+    return new Response(JSON.stringify({ message: 'User registered successfully', userId }), {
+    status: 201,
+    headers: { 'content-type': 'application/json' }
     });
-  } catch (error) {
+    } catch (error) {
     console.error('Registration error:', error);
     return new Response(JSON.stringify({ error: 'Registration failed' }), {
-      status: 400,
-      headers: { 'content-type': 'application/json' }
-    });
-  }
-}
-
-async function handleLogin(request) {
-  const body = await request.json();
-  const { username, password } = body;
-  
-  const db = connection();
-  const user = await db.query('SELECT * FROM users WHERE username = ?', [username]).then(([user]) => user);
-  
-  if (user && await bcrypt.compare(password, user.password)) {
-    const sessionId = crypto.randomUUID();
-    sessions.set(sessionId, { userId: user.id });
-    
-    return new Response(JSON.stringify({ message: 'Login successful' }), {
-      status: 200,
-      headers: {
-        'content-type': 'application/json',
-        'Set-Cookie': `session=${sessionId}; Path=/; HttpOnly`
-      }
-    });
-  }
-  
-  return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
-    status: 401,
+    status: 400,
     headers: { 'content-type': 'application/json' }
-  });
-}
+    });
+    }
+    }
+
+    async function handleLogin(request) {
+      const body = await request.json();
+      const { email, password } = body;
+      
+      try {
+      const user = await loginUser(email, password);
+      if (user) {
+      const sessionId = crypto.randomUUID();
+      sessions.set(sessionId, { userId: user.id });
+      
+      plaintext
+        return new Response(JSON.stringify({ message: 'Login successful' }), {
+          status: 200,
+          headers: {
+            'content-type': 'application/json',
+            'Set-Cookie': `session=${sessionId}; Path=/; HttpOnly`
+          }
+        });
+      } else {
+        return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' }
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return new Response(JSON.stringify({ error: 'Login failed' }), {
+      status: 500,
+      headers: { 'content-type': 'application/json' }
+      });
+      }
+      }
+      
+  
 
 function getUserFromSession(request) {
   const cookie = request.headers.get('cookie');
