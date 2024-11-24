@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block content %}
+        <section class="registration-form">
+            <h2>Registrierung</h2>
+            <form action="/register" method="POST">
+                <div class="form-group">
+                    <label for="username">Benutzername</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-Mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="password-repeat">Passwort wiederholen</label>
+                    <input type="password" id="password-repeat" name="password-repeat" required>
+                </div>
+                <button type="submit" class="submit-button">Registrieren</button>
+            </form>
+        </section>
+    <script src="script.js"></script>
+{% endblock %}

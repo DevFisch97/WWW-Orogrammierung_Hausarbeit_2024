@@ -1,0 +1,25 @@
+{% block content %}
+        <section class="message-detail">
+            <h1>Kundennachricht Details</h1>
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-title">Frage zum Holzauto</span>
+                    <span class="message-date">15.03.2024, 14:30 Uhr</span>
+                </div>
+                <div class="message-body">
+                    <p>Hallo,</p>
+                    <p>ich interessiere mich für das gebrauchte Holzauto. Ist es noch verfügbar? Wenn ja, können Sie mir bitte mehr Informationen zum Zustand geben? Hat es Gebrauchsspuren oder Beschädigungen?</p>
+                    <p>Vielen Dank im Voraus!</p>
+                    <p>Mit freundlichen Grüßen,<br>Max Mustermann</p>
+                </div>
+            </div>
+            <div class="reply-form">
+                <h2>Antworten</h2>
+                <form action="/send-reply" method="POST">
+                    <textarea name="reply" placeholder="Ihre Antwort hier eingeben..." required></textarea>
+                    <button type="submit" class="submit-button">Antwort senden</button>
+                </form>
+            </div>
+        </section>
+    <script src="script.js"></script>
+    {% endblock %}
