@@ -1,31 +1,75 @@
-import db from './data/user_managment'
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
+import { connection } from "./db.js";
+import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 export async function registerUser(username, email, password) {
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const result = await db.run(
-    'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, (SELECT id FROM roles WHERE name = "registered"))',
+  const db = connection();
+  const hashedPassword = await bcrypt.hash(password);
+  const result = db.query(
+    'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, 2)',
     [username, email, hashedPassword]
   );
-  return result.lastID;
+  return result.lastInsertId;
 }
 
-export async function loginUser(username, password) {
-  const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
-  if (!user) {
-    return null;
+export async function loginUser(email, password) {
+  const db = connection();
+  
+  console.log('Attempting to fetch user:', email);
+  
+  try {
+      const result = db.query('SELECT * FROM users WHERE email = ?', [email]);
+      const user = result[0]; // Nehmen Sie den ersten (und einzigen) Benutzer aus dem Ergebnis
+      
+      console.log('Database query result:', user);
+      
+      if (!user) {
+          console.log('User not found:', email);
+          return null;
+      }
+      
+      // Zugriff auf die Spalten über den Index
+      const storedPassword = user[3]; // Das Passwort ist an der vierten Stelle (Index 3)
+      
+      if (!storedPassword) {
+          console.error('Hashed password is missing for user:', email);
+          return null;
+      }
+      
+      console.log('Stored hashed password:', storedPassword);
+      console.log('Provided password:', password);
+
+      try {
+          const match = await bcrypt.compare(password, storedPassword);
+          console.log('Password match result:', match);
+
+          if (match) {
+              console.log('Password match for user:', email);
+              // Erstellen Sie ein Benutzerobjekt ohne das Passwort
+              const userData = {
+                  id: user[0],
+                  username: user[1],
+                  email: user[2],
+                  role: user[4]
+              };
+              return userData;
+          }
+      } catch (error) {
+          console.error('Error comparing passwords:', error);
+      }
+  } catch (dbError) {
+      console.error('Database error:', dbError);
   }
-  const match = await bcrypt.compare(password, user.password);
-  if (match) {
-    return user;
-  }
+  
+  console.log('Invalid password for user:', email);
   return null;
 }
 
 export async function getUserRole(userId) {
-  const result = await db.get(
+  const db = connection();
+  const [result] = db.query(
     'SELECT roles.name FROM users JOIN roles ON users.role_id = roles.id WHERE users.id = ?',
     [userId]
   );
   return result ? result.name : null;
 }
+

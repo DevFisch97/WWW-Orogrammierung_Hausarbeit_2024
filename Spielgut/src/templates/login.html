@@ -5,7 +5,7 @@
     <div class="login-form">
         <h1 class="page-title">Anmelden</h1>
         <p class="login-description">Melden Sie sich an, um Ihre Bestellungen zu verwalten und Ihre Daten zu aktualisieren.</p>
-        <form action="/api/login" method="POST" id="loginForm">
+        <form id="loginForm">
             <div class="form-group">
                 <label for="email-address" class="sr-only">E-Mail-Adresse</label>
                 <input id="email-address" name="email" type="email" autocomplete="email" required class="form-input" placeholder="E-Mail-Adresse">
@@ -36,4 +36,5 @@
         </p>
     </div>
 </section>
+<script src="/static/login.js"></script>
 {% endblock %}

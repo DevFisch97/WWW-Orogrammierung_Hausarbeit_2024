@@ -1,10 +1,8 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { render } from "./services/render.js";
 import { contentType } from "https://deno.land/std@0.177.0/media_types/mod.ts";
-import { initConnection, connection } from "./services/db.js";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-import * as crypto from "https://deno.land/std@0.177.0/crypto/mod.ts";
-import { registerUser, loginUser, getUserRole } from "./services/user_manager.js";
+import { initConnection } from "./services/db.js";
+import { registerUser, loginUser } from "./services/user_manager.js";
 
 // Initialize the database connection
 initConnection("./src/data/user_managment.db");
@@ -18,6 +16,16 @@ const PERMISSIONS = {
   UNREGISTERED: ['view_content']
 };
 
+// Function to generate a random session ID
+function generateSessionId(length = 32) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 async function handleRegister(request) {
   const body = await request.json();
   const { username, email, password } = body;
@@ -25,52 +33,49 @@ async function handleRegister(request) {
   try {
     const userId = await registerUser(username, email, password);
     return new Response(JSON.stringify({ message: 'User registered successfully', userId }), {
-    status: 201,
-    headers: { 'content-type': 'application/json' }
+      status: 201,
+      headers: { 'content-type': 'application/json' }
     });
-    } catch (error) {
+  } catch (error) {
     console.error('Registration error:', error);
     return new Response(JSON.stringify({ error: 'Registration failed' }), {
-    status: 400,
-    headers: { 'content-type': 'application/json' }
+      status: 400,
+      headers: { 'content-type': 'application/json' }
     });
-    }
-    }
+  }
+}
 
-    async function handleLogin(request) {
-      const body = await request.json();
-      const { email, password } = body;
-      
-      try {
-      const user = await loginUser(email, password);
-      if (user) {
-      const sessionId = crypto.randomUUID();
+async function handleLogin(request) {
+  const body = await request.json();
+  const { email, password } = body;
+  
+  try {
+    const user = await loginUser(email, password);
+    if (user) {
+      const sessionId = generateSessionId();
       sessions.set(sessionId, { userId: user.id });
       
-      plaintext
-        return new Response(JSON.stringify({ message: 'Login successful' }), {
-          status: 200,
-          headers: {
-            'content-type': 'application/json',
-            'Set-Cookie': `session=${sessionId}; Path=/; HttpOnly`
-          }
-        });
-      } else {
-        return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
-          status: 401,
-          headers: { 'content-type': 'application/json' }
-        });
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      return new Response(JSON.stringify({ error: 'Login failed' }), {
+      return new Response(JSON.stringify({ message: 'Login successful' }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+          'Set-Cookie': `session=${sessionId}; Path=/; HttpOnly; SameSite=Strict`
+        }
+      });
+    } else {
+      return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+        status: 401,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    return new Response(JSON.stringify({ error: 'Login failed' }), {
       status: 500,
       headers: { 'content-type': 'application/json' }
-      });
-      }
-      }
-      
-  
+    });
+  }
+}
 
 function getUserFromSession(request) {
   const cookie = request.headers.get('cookie');
@@ -132,7 +137,7 @@ const handler = async (request) => {
 
   // Handle existing routes with authentication check
   let content = "";
-  let respone_contentType = "text/html";
+  let response_contentType = "text/html";
   
   // Check authentication for protected routes
   const protectedRoutes = ['/account', '/new-products'];
@@ -140,7 +145,7 @@ const handler = async (request) => {
     const user = getUserFromSession(request);
     if (!user) {
       return new Response(await render("login.html"), {
-        headers: { "content-type": respone_contentType}
+        headers: { "content-type": response_contentType}
       });
     }
   }
@@ -175,7 +180,7 @@ const handler = async (request) => {
   }
 
   return new Response(content, {
-    headers: { "content-type": respone_contentType},
+    headers: { "content-type": response_contentType},
   });
 };
 
