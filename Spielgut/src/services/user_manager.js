@@ -1,14 +1,33 @@
 import { connection } from "./db.js";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
-export async function registerUser(username, email, password) {
+export async function registerUser(username, email, password, straße, hausnummer, stadt, plz) {
   const db = connection();
   const hashedPassword = await bcrypt.hash(password);
-  const result = db.query(
-    'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, 2)',
-    [username, email, hashedPassword]
-  );
-  return result.lastInsertId;
+  
+  // Start a transaction
+  db.query('BEGIN');
+  
+  try {
+    const userResult = db.query(
+      'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, 2)',
+      [username, email, hashedPassword]
+    );
+    const userId = userResult.lastInsertId;
+    
+    db.query(
+      'INSERT INTO adress (user_id, str, hausnummer, stadt, plz) VALUES (?, ?, ?, ?, ?)',
+      [userId, straße, hausnummer, stadt, plz]
+    );
+    
+    db.query('COMMIT');
+    
+    return userId;
+  } catch (error) {
+
+    db.query('ROLLBACK');
+    throw error;
+  }
 }
 
 export async function loginUser(email, password) {
@@ -18,7 +37,7 @@ export async function loginUser(email, password) {
   
   try {
       const result = db.query('SELECT * FROM users WHERE email = ?', [email]);
-      const user = result[0]; // Nehmen Sie den ersten (und einzigen) Benutzer aus dem Ergebnis
+      const user = result[0]; 
       
       console.log('Database query result:', user);
       

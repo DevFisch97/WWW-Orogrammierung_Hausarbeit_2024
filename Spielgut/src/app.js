@@ -27,23 +27,35 @@ function generateSessionId(length = 32) {
 }
 
 async function handleRegister(request) {
-  const body = await request.json();
-  const { username, email, password } = body;
-  
   try {
-    const userId = await registerUser(username, email, password);
+    const contentType = request.headers.get("content-type");
+    let body;
+
+    if (contentType && contentType.includes("application/json")) {
+      body = await request.json();
+    } else {
+      const formData = await request.formData();
+      body = Object.fromEntries(formData.entries());
+    }
+
+    console.log('Empfangene Daten:', body);
+
+    const { username, email, password, straße, hausnummer, stadt, plz } = body;
+    
+    const userId = await registerUser(username, email, password, straße, hausnummer, stadt, plz);
     return new Response(JSON.stringify({ message: 'User registered successfully', userId }), {
       status: 201,
       headers: { 'content-type': 'application/json' }
     });
   } catch (error) {
     console.error('Registration error:', error);
-    return new Response(JSON.stringify({ error: 'Registration failed' }), {
+    return new Response(JSON.stringify({ error: 'Registration failed', details: error.message }), {
       status: 400,
       headers: { 'content-type': 'application/json' }
     });
   }
 }
+
 
 async function handleLogin(request) {
   const body = await request.json();
