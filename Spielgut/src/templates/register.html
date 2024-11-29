@@ -1,47 +1,45 @@
 {% extends "layout.html" %}
 
 {% block content %}
-        <section class="registration-form">
-            <h2>Registrierung</h2>
-            <form action="/api/register" method="POST" id="registerForm">
-                <div class="form-group">
-                    <label for="username">Benutzername</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">E-Mail</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Passwort</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="password-repeat">Passwort wiederholen</label>
-                    <input type="password" id="password-repeat" name="password-repeat" required>
-                </div>
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="name" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="straße">Straße</label>
-                    <input type="straße" id="straße" name="straße" required>
-                </div>
-                <div class="form-group">
-                    <label for="hausnummer">Hausnummer</label>
-                    <input type="hausnummer" id="hausnummer" name="hausnummer" required>
-                </div>
-                <div class="form-group">
-                    <label for="stadt">Stadt</label>
-                    <input type="stadt" id="stadt" name="stadt" required>
-                </div>
-                <div class="form-group">
-                    <label for="plz">PLZ</label>
-                    <input type="plz" id="plz" name="plz" required>
-                </div>
-                <button type="submit" class="submit-button">Registrieren</button>
-            </form>
-        </section>
-    <script src="register.js"></script>
+<section class="registration-form">
+    <h2>Registrierung</h2>
+    {% if error %}
+    <p class="error-message" style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form action="/api/register" method="POST">
+        <div class="form-group">
+            <label for="username">Benutzername</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">E-Mail</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Passwort</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="password-repeat">Passwort wiederholen</label>
+            <input type="password" id="password-repeat" name="password-repeat" required>
+        </div>
+        <div class="form-group">
+            <label for="straße">Straße</label>
+            <input type="text" id="straße" name="straße" required>
+        </div>
+        <div class="form-group">
+            <label for="hausnummer">Hausnummer</label>
+            <input type="text" id="hausnummer" name="hausnummer" required>
+        </div>
+        <div class="form-group">
+            <label for="stadt">Stadt</label>
+            <input type="text" id="stadt" name="stadt" required>
+        </div>
+        <div class="form-group">
+            <label for="plz">PLZ</label>
+            <input type="text" id="plz" name="plz" required>
+        </div>
+        <button type="submit" class="submit-button">Registrieren</button>
+    </form>
+</section>
 {% endblock %}
