@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok) {
                 console.log('Login successful');
-                window.location.href = '/dashboard';
+                window.location.href = '/index';
             } else {
                 console.log('Login failed:', data.error);
                 errorMessage.textContent = data.error || 'Login fehlgeschlagen';
