@@ -8,13 +8,12 @@
     <div class="product-slideshow">
         <div class="product-container">
             {% for product in newProducts %}
-            <div class="product-card">
-                <img src="{{ product.image_path }}" alt="{{ product.name }}" class="product-image">
-                <h1 class="product-title">{{ product.name }}</h1>
-                <h2 class="product-description">{{ product.price }}€</h2>
-            </div>
+                <div class="product-card">
+                    <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-image">
+                    <h1 class="product-title">{{ product.name }}</h1>
+                    <h2 class="product-description">{{ product.preis }}€</h2>
+                </div>
             {% endfor %}
-            </div>
         </div>
     </div>
     <div class="slideshow-controls">
@@ -33,18 +32,17 @@
 
 <section class="products">
     <div class="h1hovern">
-    <h1><a href="/new-products">Gebrauchte Produkte</a></h1>
-</div>
+    <h1><a href="/used-products">Gebrauchte Produkte</a></h1>
+    </div>
     <div class="product-slideshow">
         <div class="product-container">
             {% for product in usedProducts %}
             <div class="product-card">
-                <img src="{{ product.image_path }}" alt="{{ product.name }}" class="product-image">
+                <img src="{{ product.bild_pfad  }}" alt="{{ product.name }}" class="product-image">
                 <h1 class="product-title">{{ product.name }}</h1>
-                <h2 class="product-description">{{ product.price }}€</h2>
+                <h2 class="product-description">{{ product.preis }}€</h2>
             </div>
             {% endfor %}
-            </div>
         </div>
     </div>
     <div class="slideshow-controls">
@@ -64,7 +62,8 @@
 <section class="sell-used">
     <h2>Verkaufen Sie Ihre gebrauchten Spielzeuge</h2>
     <p>Bei Spielgut haben Sie die Möglichkeit, Ihre gebrauchten Holzspielzeuge zu verkaufen. Geben Sie Ihren Spielsachen ein zweites Leben und unterstützen Sie andere Familien mit qualitativ hochwertigen Produkten zu günstigen Preisen.</p>
-    <a href="used-Products.html" class="button">Jetzt verkaufen</a>
+    <a href="/used-products" class="button">Jetzt verkaufen</a>
 </section>
-<script src="script.js"></script>
+<script src="/static/script.js"></script>
 {% endblock %}
+

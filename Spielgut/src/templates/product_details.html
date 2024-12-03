@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="product-detail">
+  <div class="product-image-container">
+    <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-detail-image">
+  </div>
+  <div class="product-info">
+    <h1 class="product-title">{{ product.name }}</h1>
+    <p class="product-description">{{ product.beschreibung }}</p>
+    <p class="product-price">{{ product.preis }}€</p>
+    <button class="add-to-cart-button">In den Warenkorb</button>
+    {% if user and user.role == 'ADMIN' %}
+    <div class="admin-actions">
+      <a href="/product/{{ product.id }}/edit" class="edit-button">Produkt bearbeiten</a>
+      <form action="/product/{{ product.id }}/delete" method="POST" onsubmit="return confirm('Sind Sie sicher, dass Sie dieses Produkt löschen möchten?');">
+        <button type="submit" class="delete-button">Produkt löschen</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

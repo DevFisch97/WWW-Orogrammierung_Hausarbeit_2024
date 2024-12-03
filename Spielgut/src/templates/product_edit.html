@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="product-edit">
+  <h1>Produkt bearbeiten</h1>
+  <form action="/product/{{ product.id }}/edit" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" value="{{ product.name }}" required>
+    </div>
+    <div class="form-group">
+      <label for="beschreibung">Beschreibung:</label>
+      <textarea id="beschreibung" name="beschreibung" required>{{ product.beschreibung }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="preis">Preis (€):</label>
+      <input type="number" id="preis" name="preis" value="{{ product.preis }}" step="0.01" required>
+    </div>
+    <div class="form-group">
+      <label for="show_dia">Anzeigen:</label>
+      <input type="checkbox" id="show_dia" name="show_dia" {% if product.show_dia %}checked{% endif %}>
+    </div>
+    <div class="form-group">
+      <label for="bild">Bild:</label>
+      <input type="file" id="bild" name="bild" accept="image/*">
+      <img src="{{ product.bild_pfad }}" alt="Aktuelles Produktbild" class="current-image">
+    </div>
+    <button type="submit" class="save-button">Änderungen speichern</button>
+  </form>
+</section>
+{% endblock %}

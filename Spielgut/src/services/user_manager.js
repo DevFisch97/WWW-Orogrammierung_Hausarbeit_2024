@@ -5,27 +5,38 @@ export async function registerUser(username, email, password, straße, hausnumme
   const db = connection();
   const hashedPassword = await bcrypt.hash(password);
   
-  // Start a transaction
-  db.query('BEGIN');
-  
+  console.log("Starting user registration process");
+
   try {
+    db.query('BEGIN');
+    
+    console.log("Inserting user into database");
     const userResult = db.query(
       'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, 2)',
       [username, email, hashedPassword]
     );
     const userId = userResult.lastInsertId;
+    console.log("User inserted, ID:", userId);
     
+    console.log("Inserting address into database");
     db.query(
       'INSERT INTO adress (user_id, str, hausnummer, stadt, plz) VALUES (?, ?, ?, ?, ?)',
       [userId, straße, hausnummer, stadt, plz]
     );
+    console.log("Address inserted");
     
     db.query('COMMIT');
+    console.log("Transaction committed");
     
     return userId;
   } catch (error) {
-
-    db.query('ROLLBACK');
+    console.error("Error during registration:", error);
+    try {
+      db.query('ROLLBACK');
+      console.log("Transaction rolled back");
+    } catch (rollbackError) {
+      console.error("Error during rollback:", rollbackError);
+    }
     throw error;
   }
 }
