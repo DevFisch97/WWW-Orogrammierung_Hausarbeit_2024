@@ -8,7 +8,7 @@ export async function registerUser(username, email, password, straße, hausnumme
   console.log("Starting user registration process");
 
   try {
-    db.query('BEGIN');
+    db.query('BEGIN TRANSACTION');
     
     console.log("Inserting user into database");
     const userResult = db.query(
@@ -31,15 +31,20 @@ export async function registerUser(username, email, password, straße, hausnumme
     return userId;
   } catch (error) {
     console.error("Error during registration:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
     try {
       db.query('ROLLBACK');
       console.log("Transaction rolled back");
     } catch (rollbackError) {
       console.error("Error during rollback:", rollbackError);
+      console.error("Rollback error details:", rollbackError.message);
     }
     throw error;
   }
 }
+
+
 
 export async function loginUser(email, password) {
   const db = connection();
