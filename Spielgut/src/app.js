@@ -39,7 +39,8 @@ function getUserFromSession(request) {
   if (!cookie) return null;
   
   const sessionId = cookie.split('=')[1];
-  return sessions.get(sessionId);
+  const session = sessions.get(sessionId);
+  return session ? { id: session.userId, role: session.role } : null;
 }
 
 // Handle user registration
@@ -90,7 +91,7 @@ async function handleLogin(request) {
     const user = await loginUser(email, password);
     if (user) {
       const sessionId = generateSessionId();
-      sessions.set(sessionId, { userId: user.id });
+      sessions.set(sessionId, { userId: user.id, role: user.role });
       return new Response("", {
         status: 302,
         headers: {
@@ -135,11 +136,9 @@ async function serveStaticFile(path) {
   const filePath = path.startsWith("/static/") 
     ? `./src${path}`
     : `./src/static${path}`;
-  console.log(`Attempting to serve file: ${filePath}`);
   try {
     const file = await Deno.readFile(filePath);
     const mimeType = contentType(path.split(".").pop() || "") || "application/octet-stream";
-    console.log(`Successfully read file: ${filePath} with MIME type: ${mimeType}`);
     return new Response(file, {
       headers: { "content-type": mimeType },
     });
@@ -163,11 +162,9 @@ async function serveAssetFile(path) {
     // For other assets
     filePath = `./assets${path}`;
   }
-  console.log(`Attempting to serve asset file: ${filePath}`);
   try {
     const file = await Deno.readFile(filePath);
     const mimeType = contentType(path.split(".").pop() || "") || "application/octet-stream";
-    console.log(`Successfully read asset file: ${filePath} with MIME type: ${mimeType}`);
     return new Response(file, {
       headers: { "content-type": mimeType },
     });
@@ -181,7 +178,6 @@ async function serveAssetFile(path) {
 const handler = async (request) => {
   const url = new URL(request.url);
   const path = url.pathname;
-  console.log(`Received request for: ${path}`);
 
   // Serve static files
   if (path.startsWith("/static/") || path === "/styles.css" || path === "/script.js") {
@@ -223,6 +219,7 @@ const handler = async (request) => {
 
   // Get user for all routes
   const user = getUserFromSession(request);
+  console.log('Current user:', user);  // Add this line for debugging
 
   switch (path) {
     case "/":
@@ -230,25 +227,48 @@ const handler = async (request) => {
       const usedProducts = await getUsedProductsDia();
       content = await render("index.html", { user, newProducts, usedProducts });
       break;
+
     case "/new-products":
       const allNewProducts = await getAllNewProducts();
       content = await render("new-products.html", { user, allNewProducts });
       break;
+
     case (path.match(/^\/product\/\d+$/) || {}).input:
       const productId = parseInt(path.split('/')[2]);
       const product = await getSingleProduct(productId);
       content = await render("product_details.html", { user, product });
       break;
+
     case (path.match(/^\/product\/\d+\/edit$/) || {}).input:
-      if (!user || user.role !== 'ADMIN') {
-        return new Response("Unauthorized", { status: 401 });
-      }
       const editProductId = parseInt(path.split('/')[2]);
-      const editProduct = await getSingleProduct(editProductId);
-      content = await render("product_edit.html", { user, product: editProduct });
+        if (request.method === 'GET') {
+          if (!user || user.role !== 'admin') {  
+            console.log('Unauthorized access attempt. User:', user);
+            return new Response("Unauthorized", { status: 401 });
+          }
+          const editProduct = await getSingleProduct(editProductId);
+          content = await render("product_edit.html", { user, product: editProduct });
+        } else if (request.method === 'POST') {
+          if (!user || user.role !== 'admin') {
+            return new Response("Unauthorized", { status: 401 });
+          }
+          const formData = await request.formData();
+          const updatedData = {
+            name: formData.get('name'),
+            preis: parseFloat(formData.get('preis')),
+            beschreibung: formData.get('beschreibung'),
+            show_dia: formData.get('show_dia') === 'on'
+          };
+          await updateProduct(editProductId, updatedData);
+          return new Response("", {
+            status: 302,
+            headers: { "Location": `/product/${editProductId}` },
+          });
+        }
       break;
+
     case (path.match(/^\/product\/\d+\/delete$/) || {}).input:
-      if (!user || user.role !== 'ADMIN') {
+      if (!user || user.role !== 'admin') {
         return new Response("Unauthorized", { status: 401 });
       }
       if (request.method === 'POST') {
@@ -260,24 +280,31 @@ const handler = async (request) => {
         });
       }
       break;
+
     case "/used-products":
       content = await render("used-products.html", { user });
       break;
+
     case "/about":
       content = await render("about.html", { user });
       break;
+
     case "/contact":
       content = await render("contact.html", { user });
       break;
+
     case "/login":
       content = await render("login.html", { user });
       break;
+
     case "/register":
       content = await render("register.html", { user });
       break;
+
     case "/shopping_cart":
       content = await render("shopping_cart.html", { user });
       break;
+
     default:
       content = await render("error404.html", { user });
   }
