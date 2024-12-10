@@ -1,6 +1,47 @@
 {% extends "layout.html" %}
 
 {% block content %}
+  <!-- search and filter funktion -->
+<div class="search-filter-container">
+    <div class="search-container">
+      <form action="#" method="get" class="search-form">
+        <input type="text" name="search" placeholder="Suche nach Produkten..." class="search-input">
+        <button type="submit" class="search-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </form>
+    </div>
+    <div class="filter-container">
+      <button id="filterButton" class="filter-button">Filter</button>
+    </div>
+  </div>
+  
+  <div id="filterPanel" class="filter-panel">
+    <h3>Filter Optionen</h3>
+    <div class="filter-section">
+      <h4>Preis</h4>
+      <input type="range" id="priceRange" min="0" max="100" step="10" value="50">
+      <span id="priceValue">50€</span>
+    </div>
+    <div class="filter-section">
+      <h4>Art</h4>
+      <label><input type="checkbox" name="type" value="new"> Neu</label>
+      <label><input type="checkbox" name="type" value="used"> Gebraucht</label>
+    </div>
+    <div class="filter-section">
+      <h4>Kategorie</h4>
+      <select name="category" id="category">
+        <option value="">Alle Kategorien</option>
+        <option value="toys">Spielzeug</option>
+        <option value="furniture">Möbel</option>
+        <option value="clothes">Kleidung</option>
+      </select>
+    </div>
+    <button id="applyFilters" class="apply-filters-button">Filter anwenden</button>
+  </div>
 <section class="product-page">
     <h1 class="product-page-title">Gebrauchte Produkte</h1>
     <div class="product-grid">

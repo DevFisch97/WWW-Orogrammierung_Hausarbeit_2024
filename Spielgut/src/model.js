@@ -125,3 +125,57 @@ export async function deleteProduct(id) {
   await db.query("DELETE FROM bilder WHERE produkt_id = ?", [id]);
 }
 
+export async function addToCart(userId, productId, quantity) {
+  const db = connection();
+  const existingItem = await db.query(
+    "SELECT * FROM cart_items WHERE user_id = ? AND product_id = ?",
+    [userId, productId]
+  );
+
+  if (existingItem.length > 0) {
+    await db.query(
+      "UPDATE cart_items SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?",
+      [quantity, userId, productId]
+    );
+  } else {
+    await db.query(
+      "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)",
+      [userId, productId, quantity]
+    );
+  }
+}
+
+export async function updateCartItem(userId, productId, quantity) {
+  const db = connection();
+  await db.query(
+    "UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?",
+    [quantity, userId, productId]
+  );
+}
+
+export async function removeFromCart(userId, productId) {
+  const db = connection();
+  await db.query(
+    "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?",
+    [userId, productId]
+  );
+}
+
+export async function getCartItems(userId) {
+  const db = connection();
+  const items = await db.query(`
+    SELECT ci.product_id, ci.quantity, p.name, p.preis, b.bild_pfad
+    FROM cart_items ci
+    JOIN produkte p ON ci.product_id = p.id
+    LEFT JOIN bilder b ON p.id = b.produkt_id
+    WHERE ci.user_id = ?
+  `, [userId]);
+  return items.map(([productId, quantity, name, preis, bild_pfad]) => ({
+    productId,
+    quantity,
+    name,
+    preis,
+    bild_pfad
+  }));
+}
+

@@ -1,7 +1,18 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { render } from "./services/render.js";
 import { initConnection } from "./services/db.js";
-import { getNewProductsDia, getUsedProductsDia, getAllNewProducts, getSingleProduct, updateProduct, deleteProduct } from "./model.js";
+import {
+  getNewProductsDia,
+  getUsedProductsDia,
+  getAllNewProducts,
+  getSingleProduct,
+  updateProduct,
+  deleteProduct,
+  addToCart,
+  updateCartItem,
+  removeFromCart,
+  getCartItems
+} from "./model.js";
 import { Login_Controller } from "./controllers/login_controller.js";
 import { Register_Controller } from "./controllers/register_controller.js";
 import { StaticFileController } from "./controllers/staticFile_controller.js";
@@ -105,6 +116,48 @@ const handler = async (request) => {
   const user = getUserFromSession(request);
   console.log('Current user:', user);  // Add this line for debugging
 
+  // New routes for cart actions
+  if (path === "/api/cart/add" && request.method === "POST") {
+    const user = getUserFromSession(request);
+    if (!user) {
+      return new Response(JSON.stringify({ success: false, message: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    const formData = await request.formData();
+    const productId = parseInt(formData.get("productId"));
+    const quantity = parseInt(formData.get("quantity"));
+    await addToCart(user.id, productId, quantity);
+    return new Response(JSON.stringify({ success: true, message: "Product added to cart" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (path === "/api/cart/update" && request.method === "POST") {
+    const user = getUserFromSession(request);
+    if (!user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+    const formData = await request.formData();
+    const productId = parseInt(formData.get("productId"));
+    const quantity = parseInt(formData.get("quantity"));
+    await updateCartItem(user.id, productId, quantity);
+    return new Response("", { status: 200 });
+  }
+
+  if (path === "/api/cart/remove" && request.method === "POST") {
+    const user = getUserFromSession(request);
+    if (!user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+    const formData = await request.formData();
+    const productId = parseInt(formData.get("productId"));
+    await removeFromCart(user.id, productId);
+    return new Response("", { status: 200 });
+  }
+
   switch (path) {
     case "/":
       const newProducts = await getNewProductsDia();
@@ -186,7 +239,14 @@ const handler = async (request) => {
       break;
 
     case "/shopping_cart":
-      content = await render("shoppingcart.html", { user });
+      if (!user) {
+        return new Response("", {
+          status: 302,
+          headers: { "Location": "/login" },
+        });
+      }
+      const cartItems = await getCartItems(user.id);
+      content = await render("shoppingcart.html", { user, cartItems });
       break;
 
     default:

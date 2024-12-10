@@ -4,60 +4,73 @@
 <section class="container">
     <h1 class="page-title">Warenkorb</h1>
     <div class="cart-items">
+        {% for item in cartItems %}
         <div class="cart-item">
             <div class="item-info">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                    <circle cx="8" cy="21" r="1"></circle>
-                    <circle cx="19" cy="21" r="1"></circle>
-                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-                </svg>
+                <img src="{{ item.bild_pfad }}" alt="{{ item.name }}" class="cart-item-image">
                 <div>
-                    <h2>Holzauto</h2>
-                    <p>29,99€</p>
+                    <h2>{{ item.name }}</h2>
+                    <p>{{ item.preis }}€</p>
                 </div>
             </div>
             <div class="item-actions">
-                <button class="btn btn-outline" aria-label="Reduziere Menge von Holzauto">-</button>
-                <input type="number" value="1" min="0" class="quantity-input" aria-label="Menge von Holzauto">
-                <button class="btn btn-outline" aria-label="Erhöhe Menge von Holzauto">+</button>
-                <button class="btn btn-danger" aria-label="Entferne Holzauto aus dem Warenkorb">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                        <path d="M3 6h18"></path>
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                    </svg>
-                </button>
+                <form action="/api/cart/update" method="POST" class="quantity-form">
+                    <input type="hidden" name="productId" value="{{ item.productId }}">
+                    <button type="button" class="btn btn-outline decrease-quantity" aria-label="Reduziere Menge von {{ item.name }}">-</button>
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" aria-label="Menge von {{ item.name }}">
+                    <button type="button" class="btn btn-outline increase-quantity" aria-label="Erhöhe Menge von {{ item.name }}">+</button>
+                </form>
+                <form action="/api/cart/remove" method="POST" class="remove-form">
+                    <input type="hidden" name="productId" value="{{ item.productId }}">
+                    <button type="submit" class="btn btn-danger" aria-label="Entferne {{ item.name }} aus dem Warenkorb">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </form>
             </div>
         </div>
-        <div class="cart-item">
-            <div class="item-info">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                    <circle cx="8" cy="21" r="1"></circle>
-                    <circle cx="19" cy="21" r="1"></circle>
-                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-                </svg>
-                <div>
-                    <h2>Hausklotz</h2>
-                    <p>19,99€</p>
-                </div>
-            </div>
-            <div class="item-actions">
-                <button class="btn btn-outline" aria-label="Reduziere Menge von Hausklotz">-</button>
-                <input type="number" value="2" min="0" class="quantity-input" aria-label="Menge von Hausklotz">
-                <button class="btn btn-outline" aria-label="Erhöhe Menge von Hausklotz">+</button>
-                <button class="btn btn-danger" aria-label="Entferne Hausklotz aus dem Warenkorb">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                        <path d="M3 6h18"></path>
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
+        {% endfor %}
     </div>
     <div class="cart-summary">
-        <p class="total">Gesamtsumme: 69,97€</p>
+        <p class="total">Gesamtsumme: {{ cartItems | sum(attribute='preis') }}€</p>
         <button class="btn btn-primary">Zur Kasse</button>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityForms = document.querySelectorAll('.quantity-form');
+    const removeForms = document.querySelectorAll('.remove-form');
+
+    quantityForms.forEach(form => {
+        const decreaseBtn = form.querySelector('.decrease-quantity');
+        const increaseBtn = form.querySelector('.increase-quantity');
+        const quantityInput = form.querySelector('.quantity-input');
+
+        decreaseBtn.addEventListener('click', () => {
+            if (quantityInput.value > 1) {
+                quantityInput.value = parseInt(quantityInput.value) - 1;
+                form.submit();
+            }
+        });
+
+        increaseBtn.addEventListener('click', () => {
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+            form.submit();
+        });
+    });
+
+    removeForms.forEach(form => {
+        form.addEventListener('submit', (e) => {
+            if (!confirm('Sind Sie sicher, dass Sie diesen Artikel aus dem Warenkorb entfernen möchten?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
+

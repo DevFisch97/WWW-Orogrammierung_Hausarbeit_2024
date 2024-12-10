@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Startseite</title>
+    <title>{% block title %}Spielgut{% endblock %}</title>
     <link rel="stylesheet" href="/static/styles.css">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <header>
@@ -48,13 +49,19 @@
             </div>
         </nav>
     </header>
-  <main>
-    {% block content %}{% endblock %}
-  </main>
-  <footer>
-    <p>&copy; 2024 Spielgut. Alle Rechte vorbehalten.</p>
-</footer>
-  <script src="/static/script.js"></script>
-  <script src="/static/product-details.js"></script>
+
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Spielgut. Alle Rechte vorbehalten.</p>
+    </footer>
+
+    <script src="/static/script.js"></script>
+    <script src="/static/product-details.js"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
+

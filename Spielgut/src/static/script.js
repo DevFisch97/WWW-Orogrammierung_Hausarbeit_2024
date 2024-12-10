@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Funktion zur Erstellung einer Slideshow
+    // Existing slideshow functionality
     function createSlideshow(containerSelector, prevButtonSelector, nextButtonSelector) {
         let currentSlide = 0;
         const slideInterval = 5000; // 5 Sekunden
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
         prevButton.addEventListener('click', resetSlideshow);
     }
 
-    // Erstelle Slideshows für neue und gebrauchte Produkte
+    // Create slideshows for new and used products
     createSlideshow('.products:nth-child(1) .product-container', 
                     '.products:nth-child(1) #prevButton', 
                     '.products:nth-child(1) #nextButton');
@@ -70,6 +70,33 @@ document.addEventListener('DOMContentLoaded', function() {
     createSlideshow('.products:nth-child(2) .product-container', 
                     '.products:nth-child(2) #prevButton', 
                     '.products:nth-child(2) #nextButton');
+
+    // New filter functionality
+    const filterButton = document.getElementById('filterButton');
+    const filterPanel = document.getElementById('filterPanel');
+    const applyFiltersButton = document.getElementById('applyFilters');
+    const priceRange = document.getElementById('priceRange');
+    const priceValue = document.getElementById('priceValue');
+
+    filterButton.addEventListener('click', function() {
+        filterPanel.classList.toggle('active');
+    });
+
+    applyFiltersButton.addEventListener('click', function() {
+        // Here you would typically handle the filter application logic
+        console.log('Filters applied');
+        filterPanel.classList.remove('active');
+    });
+
+    priceRange.addEventListener('input', function() {
+        priceValue.textContent = this.value + '€';
+    });
+
+    // Close the filter panel when clicking outside of it
+    document.addEventListener('click', function(event) {
+        if (!filterPanel.contains(event.target) && event.target !== filterButton) {
+            filterPanel.classList.remove('active');
+        }
+    });
 });
 
-  
