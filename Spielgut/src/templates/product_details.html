@@ -9,7 +9,12 @@
     <h1 class="product-title">{{ product.name }}</h1>
     <p class="product-description">{{ product.beschreibung }}</p>
     <p class="product-price">{{ product.preis }}€</p>
-    <button class="add-to-cart-button">In den Warenkorb</button>
+    <div class="quantity-selector">
+      <button class="quantity-button" id="decrease">-</button>
+      <input type="number" id="quantity" value="1" min="1" readonly>
+      <button class="quantity-button" id="increase">+</button>
+    </div>
+    <button class="add-to-cart-button" id="addToCart">In den Warenkorb</button>
     {% if user and user.role == 'admin' %}
     <div class="admin-actions">
       <a href="/product/{{ product.id }}/edit" class="edit-button">Produkt bearbeiten</a>
@@ -21,3 +26,4 @@
   </div>
 </section>
 {% endblock %}
+
