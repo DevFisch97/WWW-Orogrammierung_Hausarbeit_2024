@@ -4,26 +4,41 @@
 <section class="product-detail">
   <div class="product-image-container">
     <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-detail-image">
+    <form id="addToCartForm" action="/api/cart/add" method="POST">
+      <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+      <input type="hidden" name="productId" value="{{ product.id }}">
+      <input type="hidden" name="quantity" value="{{ quantity|default(1) }}">
+      <button type="submit" name="action" value="add" class="add-to-cart-button">In den Warenkorb</button>
+    </form>
   </div>
   <div class="product-info">
     <h1 class="product-title">{{ product.name }}</h1>
     <p class="product-description">{{ product.beschreibung }}</p>
     <p class="product-price">{{ product.preis }}€</p>
+    <div class="quantity-selector">
+      <form method="GET" action="/product/{{ product.id }}" style="display: inline;">
+        <input type="hidden" name="quantity" value="{{ quantity|default(1) - 1 }}">
+        <button type="submit" class="quantity-button" {% if quantity|default(1) <= 1 %}disabled{% endif %}>-</button>
+      </form>
+      <span id="quantity">{{ quantity|default(1) }}</span>
+      <form method="GET" action="/product/{{ product.id }}" style="display: inline;">
+        <input type="hidden" name="quantity" value="{{ quantity|default(1) + 1 }}">
+        <button type="submit" class="quantity-button">+</button>
+      </form>
+    </div>
     <form id="addToCartForm" action="/api/cart/add" method="POST">
       <input type="hidden" name="productId" value="{{ product.id }}">
-      <div class="quantity-selector">
-        <button type="button" class="quantity-button" id="decrease">-</button>
-        <input type="number" id="quantity" name="quantity" value="1" min="1" readonly>
-        <button type="button" class="quantity-button" id="increase">+</button>
-      </div>
-      <button type="submit" id="addToCartButton" class="add-to-cart-button">In den Warenkorb</button>
-      <div id="addToCartSuccess" class="add-to-cart-success" style="display: none;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        Zum Warenkorb hinzugefügt
-      </div>
+      <input type="hidden" name="quantity" value="{{ quantity|default(1) }}">
+      <button type="submit" name="action" value="add" class="add-to-cart-button">In den Warenkorb</button>
     </form>
+    {% if addToCartSuccess %}
+    <div class="add-to-cart-success">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      Zum Warenkorb hinzugefügt
+    </div>
+    {% endif %}
     {% if user and user.role == 'admin' %}
     <div class="admin-actions">
       <a href="/product/{{ product.id }}/edit" class="edit-button">Produkt bearbeiten</a>
@@ -34,71 +49,5 @@
     {% endif %}
   </div>
 </section>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const quantityInput = document.getElementById('quantity');
-  const decreaseBtn = document.getElementById('decrease');
-  const increaseBtn = document.getElementById('increase');
-  const addToCartForm = document.getElementById('addToCartForm');
-  const addToCartButton = document.getElementById('addToCartButton');
-  const addToCartSuccess = document.getElementById('addToCartSuccess');
-
-  decreaseBtn.addEventListener('click', () => {
-    if (quantityInput.value > 1) {
-      quantityInput.value = parseInt(quantityInput.value) - 1;
-    }
-  });
-
-  increaseBtn.addEventListener('click', () => {
-    quantityInput.value = parseInt(quantityInput.value) + 1;
-  });
-
-  addToCartForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(addToCartForm);
-
-    try {
-      const response = await fetch('/api/cart/add', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        addToCartButton.style.display = 'none';
-        addToCartSuccess.style.display = 'flex';
-        setTimeout(() => {
-          addToCartButton.style.display = 'block';
-          addToCartSuccess.style.display = 'none';
-        }, 3000);
-      } else {
-        const data = await response.json();
-        if (response.status === 401) {
-          window.location.href = '/login';
-        } else {
-          alert(data.message || 'Fehler beim Hinzufügen zum Warenkorb');
-        }
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Fehler beim Hinzufügen zum Warenkorb');
-    }
-  });
-});
-</script>
-
-<style>
-.add-to-cart-success {
-  display: flex;
-  align-items: center;
-  color: #4CAF50;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-.add-to-cart-success svg {
-  margin-right: 5px;
-}
-</style>
 {% endblock %}
 

@@ -3,9 +3,13 @@
 {% block content %}
 <section class="registration-form">
     <h2>Registrierung</h2>
-    {% if error %}
-    <p class="error-message" style="color: red;">{{ error }}</p>
-    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     <form action="/api/register" method="POST">
         <div class="form-group">
             <label for="username">Benutzername</label>
@@ -43,3 +47,4 @@
     </form>
 </section>
 {% endblock %}
+

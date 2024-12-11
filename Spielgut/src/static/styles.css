@@ -716,6 +716,19 @@ footer {
     text-decoration: none;
 }
 
+.add-to-cart-success {
+    display: flex;
+    align-items: center;
+    color: #4CAF50;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .add-to-cart-success svg {
+    margin-right: 5px;
+  }
+
+
 /* Button Styles */
 .btn {
     padding: 0.5rem 1rem;
@@ -1027,8 +1040,34 @@ footer {
   .apply-filters-button:hover {
     background-color: #f8ab52;
   }
-
+/*Flash Nachrichten*/
+.flash-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 300px;
+    word-wrap: break-word;
+}
+.flash-success { background-color: #d4edda; color: #155724; }
+.flash-error { background-color: #f8d7da; color: #721c24; }
+.flash-info { background-color: #d1ecf1; color: #0c5460; }
+.flash-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
 @media (max-width: 768px) {
+    .flash-message {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
     .product-grid {
         grid-template-columns: 1fr; 
     }

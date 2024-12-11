@@ -8,15 +8,14 @@ import {
   getSingleProduct,
   updateProduct,
   deleteProduct,
-  addToCart,
-  updateCartItem,
-  removeFromCart,
-  getCartItems
 } from "./model.js";
 import { Login_Controller } from "./controllers/login_controller.js";
 import { Register_Controller } from "./controllers/register_controller.js";
 import { StaticFileController } from "./controllers/staticFile_controller.js";
 import { AssetFileController } from "./controllers/assetFile_controller.js";
+import { Cart_Controller } from "./controllers/cart_controller.js";
+import { setCookie, getCookies } from "https://deno.land/std@0.177.0/http/cookie.ts";
+import { generateCSRFToken, verifyCSRFToken } from "./csrf.js";
 
 // Initialize the database connection
 try {
@@ -51,6 +50,7 @@ const loginController = new Login_Controller(render, sessions);
 const registerController = new Register_Controller(render);
 const staticFileController = new StaticFileController();
 const assetFileController = new AssetFileController();
+const cartController = new Cart_Controller(render);
 
 // Handle user logout
 function handleLogout(request) {
@@ -60,202 +60,249 @@ function handleLogout(request) {
     const sessionId = cookie.split('=')[1];
     sessions.delete(sessionId);
   }
-  return new Response("", {
+  const response = new Response("", {
     status: 302,
     headers: {
       "Location": "/",
       "Set-Cookie": "session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
     }
   });
+  setFlashMessage(response, "Sie wurden erfolgreich abgemeldet.", "success");
+  return response;
+}
+
+// Function to set flash message
+function setFlashMessage(response, message, type = 'info') {
+  const flashMessage = JSON.stringify({ message, type, timestamp: Date.now() });
+  setCookie(response.headers, {
+    name: "flashMessage",
+    value: encodeURIComponent(flashMessage),
+    path: "/",
+    maxAge: 60, // 1 minute
+  });
+}
+
+// Function to get and clear flash message
+function getAndClearFlashMessage(request, response) {
+  const cookies = getCookies(request.headers);
+  const flashMessage = cookies.flashMessage;
+  if (flashMessage) {
+    const decodedMessage = JSON.parse(decodeURIComponent(flashMessage));
+    const currentTime = Date.now();
+    if (currentTime - decodedMessage.timestamp < 5000) { // 5 seconds
+      // Clear the flash message cookie
+      setCookie(response.headers, {
+        name: "flashMessage",
+        value: "",
+        path: "/",
+        maxAge: 0,
+      });
+      return decodedMessage;
+    }
+  }
+  return null;
 }
 
 // Main request handler
 const handler = async (request) => {
-  const url = new URL(request.url);
-  const path = url.pathname;
+  try {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const searchParams = url.searchParams;
 
-  // Serve static files
-  if (path.startsWith("/static/") || path === "/styles.css" || path === "/script.js") {
-    return await staticFileController.serveStaticFile(path);
-  }
-
-  // Serve asset files (including logo and product images)
-  if (path.startsWith("/assets/") || path.endsWith(".jpeg") || path.endsWith(".png")) {
-    return await assetFileController.serveAssetFile(path);
-  }
-
-  // Handle authentication routes
-  if (path === "/api/register" && request.method === "POST") {
-    return await registerController.handleRegister(request);
-  }
-  
-  if (path === "/api/login" && request.method === "POST") {
-    return await loginController.handleLogin(request);
-  }
-  
-  if (path === "/api/logout") {
-    return handleLogout(request);
-  }
-
-  // Handle existing routes with authentication check
-  let content = "";
-  let response_contentType = "text/html";
-  
-  // Check authentication for protected routes
-  const protectedRoutes = ['/account'];
-  if (protectedRoutes.includes(path)) {
-    const user = getUserFromSession(request);
-    if (!user) {
-      return new Response(await render("login.html"), {
-        headers: { "content-type": response_contentType}
-      });
+    // Serve static files
+    if (path.startsWith("/static/") || path === "/styles.css" || path === "/script.js") {
+      return await staticFileController.serveStaticFile(path);
     }
-  }
 
-  // Get user for all routes
-  const user = getUserFromSession(request);
-  console.log('Current user:', user);  // Add this line for debugging
-
-  // New routes for cart actions
-  if (path === "/api/cart/add" && request.method === "POST") {
-    const user = getUserFromSession(request);
-    if (!user) {
-      return new Response(JSON.stringify({ success: false, message: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+    // Serve asset files (including logo and product images)
+    if (path.startsWith("/assets/") || path.endsWith(".jpeg") || path.endsWith(".png")) {
+      return await assetFileController.serveAssetFile(path);
     }
-    const formData = await request.formData();
-    const productId = parseInt(formData.get("productId"));
-    const quantity = parseInt(formData.get("quantity"));
-    await addToCart(user.id, productId, quantity);
-    return new Response(JSON.stringify({ success: true, message: "Product added to cart" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+
+    // Handle authentication routes
+    if (path === "/api/register" && request.method === "POST") {
+      const response = await registerController.handleRegister(request);
+      setFlashMessage(response, "Registrierung erfolgreich! Sie können sich jetzt anmelden.", "success");
+      return response;
+    }
+    
+    if (path === "/api/login" && request.method === "POST") {
+      const response = await loginController.handleLogin(request);
+      if (response.status === 302) {
+        setFlashMessage(response, "Anmeldung erfolgreich!", "success");
+      }
+      return response;
+    }
+    
+    if (path === "/api/logout") {
+      return handleLogout(request);
+    }
+
+    // Handle existing routes with authentication check
+    let content = "";
+    let response_contentType = "text/html";
+    
+    // Check authentication for protected routes
+    const protectedRoutes = ['/account', '/shopping_cart', '/api/cart/add', '/api/cart/update', '/api/cart/remove'];
+    if (protectedRoutes.includes(path)) {
+      const user = getUserFromSession(request);
+      if (!user) {
+        const response = new Response("", {
+          status: 302,
+          headers: { "Location": "/login" }
+        });
+        setFlashMessage(response, "Bitte melden Sie sich an, um fortzufahren.", "info");
+        return response;
+      }
+    }
+
+    // Get user for all routes
+    const user = getUserFromSession(request);
+    console.log('Current user:', user);  // Add this line for debugging
+
+    // Generate CSRF token for authenticated users
+    let csrfToken = null;
+    if (user) {
+      csrfToken = await generateCSRFToken(user.sessionId);
+    }
+
+    // Verify CSRF token for POST, PUT, DELETE requests
+    if (["POST", "PUT", "DELETE"].includes(request.method) && user) {
+      const formData = await request.formData();
+      const token = formData.get("_csrf");
+      if (!token || !(await verifyCSRFToken(token, user.sessionId))) {
+        return new Response("Invalid CSRF token", { status: 403 });
+      }
+    }
+
+    // Get flash message
+    const flashMessage = getAndClearFlashMessage(request);
+
+    // Handle cart routes
+    if (path === "/api/cart/add" && request.method === "POST") {
+      return await cartController.handleAddToCart(request, user);
+    }
+
+    if (path === "/api/cart/update" && request.method === "POST") {
+      return await cartController.handleUpdateCartItem(request, user);
+    }
+
+    if (path === "/api/cart/remove" && request.method === "POST") {
+      return await cartController.handleRemoveFromCart(request, user);
+    }
+
+    switch (path) {
+      case "/":
+        const newProducts = await getNewProductsDia();
+        const usedProducts = await getUsedProductsDia();
+        content = await render("index.html", { user, newProducts, usedProducts, flashMessage });
+        break;
+
+      case "/new-products":
+        const allNewProducts = await getAllNewProducts();
+        content = await render("new-products.html", { user, allNewProducts, flashMessage });
+        break;
+
+      case (path.match(/^\/product\/\d+$/) || {}).input:
+        const productId = parseInt(path.split('/')[2]);
+        const quantity = searchParams.get('quantity');
+        const addToCartSuccess = searchParams.get('success') === 'true';
+        return await cartController.renderProductDetails(user, productId, quantity, addToCartSuccess, flashMessage);
+
+      case (path.match(/^\/product\/\d+\/edit$/) || {}).input:
+        const editProductId = parseInt(path.split('/')[2]);
+          if (request.method === 'GET') {
+            if (!user || user.role !== 'admin') {  
+              console.log('Unauthorized access attempt. User:', user);
+              return new Response("Unauthorized", { status: 401 });
+            }
+            const editProduct = await getSingleProduct(editProductId);
+            content = await render("product_edit.html", { user, product: editProduct, flashMessage });
+          } else if (request.method === 'POST') {
+            if (!user || user.role !== 'admin') {
+              return new Response("Unauthorized", { status: 401 });
+            }
+            const formData = await request.formData();
+            const updatedData = {
+              name: formData.get('name'),
+              preis: parseFloat(formData.get('preis')),
+              beschreibung: formData.get('beschreibung'),
+              show_dia: formData.get('show_dia') === 'on'
+            };
+            await updateProduct(editProductId, updatedData);
+            const response = new Response("", {
+              status: 302,
+              headers: { "Location": `/product/${editProductId}` },
+            });
+            setFlashMessage(response, "Produkt erfolgreich aktualisiert.", "success");
+            return response;
+          }
+        break;
+
+      case (path.match(/^\/product\/\d+\/delete$/) || {}).input:
+        if (!user || user.role !== 'admin') {
+          return new Response("Unauthorized", { status: 401 });
+        }
+        if (request.method === 'POST') {
+          const deleteProductId = parseInt(path.split('/')[2]);
+          await deleteProduct(deleteProductId);
+          const response = new Response("", {
+            status: 302,
+            headers: { "Location": "/new-products" },
+          });
+          setFlashMessage(response, "Produkt erfolgreich gelöscht.", "success");
+          return response;
+        }
+        break;
+
+      case "/used-products":
+        content = await render("used-products.html", { user, flashMessage });
+        break;
+
+      case "/about":
+        content = await render("about.html", { user, flashMessage });
+        break;
+
+      case "/contact":
+        content = await render("contact.html", { user, flashMessage });
+        break;
+
+      case "/login":
+        content = await render("login.html", { user, flashMessage });
+        break;
+
+      case "/register":
+        content = await render("register.html", { user, flashMessage });
+        break;
+
+      case "/shopping_cart":
+        return await cartController.renderShoppingCart(user, flashMessage);
+
+      default:
+        content = await render("error404.html", { user, flashMessage });
+    }
+
+    const response = new Response(content, {
+      headers: { "content-type": response_contentType },
+    });
+
+    // Clear the flash message cookie
+    setCookie(response.headers, {
+      name: "flashMessage",
+      value: "",
+      path: "/",
+      maxAge: 0,
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Error handling request:', error);
+    return new Response("An error occurred. Please try again later.", {
+      status: 500,
+      headers: { "content-type": "text/plain" },
     });
   }
-
-  if (path === "/api/cart/update" && request.method === "POST") {
-    const user = getUserFromSession(request);
-    if (!user) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-    const formData = await request.formData();
-    const productId = parseInt(formData.get("productId"));
-    const quantity = parseInt(formData.get("quantity"));
-    await updateCartItem(user.id, productId, quantity);
-    return new Response("", { status: 200 });
-  }
-
-  if (path === "/api/cart/remove" && request.method === "POST") {
-    const user = getUserFromSession(request);
-    if (!user) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-    const formData = await request.formData();
-    const productId = parseInt(formData.get("productId"));
-    await removeFromCart(user.id, productId);
-    return new Response("", { status: 200 });
-  }
-
-  switch (path) {
-    case "/":
-      const newProducts = await getNewProductsDia();
-      const usedProducts = await getUsedProductsDia();
-      content = await render("index.html", { user, newProducts, usedProducts });
-      break;
-
-    case "/new-products":
-      const allNewProducts = await getAllNewProducts();
-      content = await render("new-products.html", { user, allNewProducts });
-      break;
-
-    case (path.match(/^\/product\/\d+$/) || {}).input:
-      const productId = parseInt(path.split('/')[2]);
-      const product = await getSingleProduct(productId);
-      content = await render("product_details.html", { user, product });
-      break;
-
-    case (path.match(/^\/product\/\d+\/edit$/) || {}).input:
-      const editProductId = parseInt(path.split('/')[2]);
-        if (request.method === 'GET') {
-          if (!user || user.role !== 'admin') {  
-            console.log('Unauthorized access attempt. User:', user);
-            return new Response("Unauthorized", { status: 401 });
-          }
-          const editProduct = await getSingleProduct(editProductId);
-          content = await render("product_edit.html", { user, product: editProduct });
-        } else if (request.method === 'POST') {
-          if (!user || user.role !== 'admin') {
-            return new Response("Unauthorized", { status: 401 });
-          }
-          const formData = await request.formData();
-          const updatedData = {
-            name: formData.get('name'),
-            preis: parseFloat(formData.get('preis')),
-            beschreibung: formData.get('beschreibung'),
-            show_dia: formData.get('show_dia') === 'on'
-          };
-          await updateProduct(editProductId, updatedData);
-          return new Response("", {
-            status: 302,
-            headers: { "Location": `/product/${editProductId}` },
-          });
-        }
-      break;
-
-    case (path.match(/^\/product\/\d+\/delete$/) || {}).input:
-      if (!user || user.role !== 'admin') {
-        return new Response("Unauthorized", { status: 401 });
-      }
-      if (request.method === 'POST') {
-        const deleteProductId = parseInt(path.split('/')[2]);
-        await deleteProduct(deleteProductId);
-        return new Response("", {
-          status: 302,
-          headers: { "Location": "/new-products" },
-        });
-      }
-      break;
-
-    case "/used-products":
-      content = await render("used-products.html", { user });
-      break;
-
-    case "/about":
-      content = await render("about.html", { user });
-      break;
-
-    case "/contact":
-      content = await render("contact.html", { user });
-      break;
-
-    case "/login":
-      content = await render("login.html", { user });
-      break;
-
-    case "/register":
-      content = await render("register.html", { user });
-      break;
-
-    case "/shopping_cart":
-      if (!user) {
-        return new Response("", {
-          status: 302,
-          headers: { "Location": "/login" },
-        });
-      }
-      const cartItems = await getCartItems(user.id);
-      content = await render("shoppingcart.html", { user, cartItems });
-      break;
-
-    default:
-      content = await render("error404.html", { user });
-  }
-
-  return new Response(content, {
-    headers: { "content-type": response_contentType},
-  });
 };
 
 const port = 8000;

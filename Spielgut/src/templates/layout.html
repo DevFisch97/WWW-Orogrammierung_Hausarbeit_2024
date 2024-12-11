@@ -51,6 +51,15 @@
     </header>
 
 
+
+    {% if flashMessage %}
+    <div id="flashMessage" class="flash-message flash-{{ flashMessage.type }}">
+        {{ flashMessage.message }}
+    </div>
+{% endif %}
+
+
+    
     <main>
         {% block content %}{% endblock %}
     </main>

@@ -179,3 +179,13 @@ export async function getCartItems(userId) {
   }));
 }
 
+export async function getCartTotal(userId) {
+  const db = connection();
+  const result = await db.query(`
+    SELECT SUM(p.preis * ci.quantity) as total
+    FROM cart_items ci
+    JOIN produkte p ON ci.product_id = p.id
+    WHERE ci.user_id = ?
+  `, [userId]);
+  return result[0].total || 0;
+}
