@@ -11,6 +11,7 @@
       {% endif %}
     {% endwith %}
     <form action="/api/register" method="POST">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
         <div class="form-group">
             <label for="username">Benutzername</label>
             <input type="text" id="username" name="username" required>

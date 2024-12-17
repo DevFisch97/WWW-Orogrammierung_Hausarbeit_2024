@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Existing slideshow functionality
-    function createSlideshow(containerSelector, prevButtonSelector, nextButtonSelector) {
+    function createSlideshow(containerSelector) {
         let currentSlide = 0;
         const slideInterval = 5000; // 5 Sekunden
-        const productContainer = document.querySelector(containerSelector);
+        const productContainer = containerSelector.querySelector('.product-container');
         const productCards = productContainer.querySelectorAll('.product-card');
-        const prevButton = document.querySelector(prevButtonSelector);
-        const nextButton = document.querySelector(nextButtonSelector);
+        const prevButton = containerSelector.querySelector('.prev-button');
+        const nextButton = containerSelector.querySelector('.next-button');
         
         const totalSlides = productCards.length;
         
@@ -63,13 +63,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Create slideshows for new and used products
-    createSlideshow('.products:nth-child(1) .product-container', 
-                    '.products:nth-child(1) #prevButton', 
-                    '.products:nth-child(1) #nextButton');
+    const newProductsSection = document.querySelector('.new-products');
+    const usedProductsSection = document.querySelector('.used-products');
     
-    createSlideshow('.products:nth-child(2) .product-container', 
-                    '.products:nth-child(2) #prevButton', 
-                    '.products:nth-child(2) #nextButton');
+    if (newProductsSection) {
+        createSlideshow(newProductsSection);
+    }
+    
+    if (usedProductsSection) {
+        createSlideshow(usedProductsSection);
+    }
 
     // New filter functionality
     const filterButton = document.getElementById('filterButton');
@@ -78,23 +81,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const priceRange = document.getElementById('priceRange');
     const priceValue = document.getElementById('priceValue');
 
-    filterButton.addEventListener('click', function() {
-        filterPanel.classList.toggle('active');
-    });
+    if (filterButton && filterPanel) {
+        filterButton.addEventListener('click', function() {
+            filterPanel.classList.toggle('active');
+        });
+    }
 
-    applyFiltersButton.addEventListener('click', function() {
-        // Here you would typically handle the filter application logic
-        console.log('Filters applied');
-        filterPanel.classList.remove('active');
-    });
+    if (applyFiltersButton) {
+        applyFiltersButton.addEventListener('click', function() {
+            // Here you would typically handle the filter application logic
+            console.log('Filters applied');
+            filterPanel.classList.remove('active');
+        });
+    }
 
-    priceRange.addEventListener('input', function() {
-        priceValue.textContent = this.value + '€';
-    });
+    if (priceRange && priceValue) {
+        priceRange.addEventListener('input', function() {
+            priceValue.textContent = this.value + '€';
+        });
+    }
 
     // Close the filter panel when clicking outside of it
     document.addEventListener('click', function(event) {
-        if (!filterPanel.contains(event.target) && event.target !== filterButton) {
+        if (filterPanel && !filterPanel.contains(event.target) && event.target !== filterButton) {
             filterPanel.classList.remove('active');
         }
     });

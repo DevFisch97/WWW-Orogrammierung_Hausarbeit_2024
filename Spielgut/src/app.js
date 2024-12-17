@@ -15,7 +15,7 @@ import { StaticFileController } from "./controllers/staticFile_controller.js";
 import { AssetFileController } from "./controllers/assetFile_controller.js";
 import { Cart_Controller } from "./controllers/cart_controller.js";
 import { setCookie, getCookies } from "https://deno.land/std@0.177.0/http/cookie.ts";
-import { generateCSRFToken, verifyCSRFToken } from "./csrf.js";
+import { generateCSRFToken } from "./csrf.js";
 
 // Initialize the database connection
 try {
@@ -28,6 +28,7 @@ try {
 
 // Simple session storage (in production, use a proper session store)
 const sessions = new Map();
+const csrfTokens = new Map();
 
 const PERMISSIONS = {
   ADMIN: ['manage_users', 'create_post', 'send_message', 'view_content'],
@@ -42,7 +43,7 @@ function getUserFromSession(request) {
   
   const sessionId = cookie.split('=')[1];
   const session = sessions.get(sessionId);
-  return session ? { id: session.userId, role: session.role } : null;
+  return session ? { id: session.userId, role: session.role, sessionId } : null;
 }
 
 // Create instances of the controllers
@@ -59,6 +60,7 @@ function handleLogout(request) {
     const cookie = request.headers.get('cookie');
     const sessionId = cookie.split('=')[1];
     sessions.delete(sessionId);
+    csrfTokens.delete(sessionId);
   }
   const response = new Response("", {
     status: 302,
@@ -101,6 +103,11 @@ function getAndClearFlashMessage(request, response) {
     }
   }
   return null;
+}
+
+// Function to replace CSRF token in content
+function replaceCSRFToken(content, csrfToken) {
+  return content.replace(/\{\{\s*csrfToken\s*\}\}/g, csrfToken || '');
 }
 
 // Main request handler
@@ -165,79 +172,103 @@ const handler = async (request) => {
     let csrfToken = null;
     if (user) {
       csrfToken = await generateCSRFToken(user.sessionId);
+      csrfTokens.set(user.sessionId, csrfToken);
+      console.log("Generated CSRF token:", csrfToken); // Debugging
     }
 
     // Verify CSRF token for POST, PUT, DELETE requests
     if (["POST", "PUT", "DELETE"].includes(request.method) && user) {
-      const formData = await request.formData();
+      let formData;
+      try {
+        formData = await request.formData();
+      } catch (error) {
+        console.error("Error parsing form data:", error);
+        return new Response("Error processing request", { status: 400 });
+      }
+      
       const token = formData.get("_csrf");
-      if (!token || !(await verifyCSRFToken(token, user.sessionId))) {
+      console.log("Received CSRF token:", token); // Debugging
+      console.log("Expected CSRF token:", csrfTokens.get(user.sessionId)); // Debugging
+      
+      if (!token || token !== csrfTokens.get(user.sessionId)) {
+        console.log("CSRF token validation failed"); // Debugging
         return new Response("Invalid CSRF token", { status: 403 });
       }
+      
+      // Store formData for later use
+      request.parsedFormData = formData;
     }
 
     // Get flash message
-    const flashMessage = getAndClearFlashMessage(request);
+    let flashMessage = null;
+    let response = null;
+    if (response) {
+      flashMessage = getAndClearFlashMessage(request, response);
+    }
 
     // Handle cart routes
     if (path === "/api/cart/add" && request.method === "POST") {
-      return await cartController.handleAddToCart(request, user);
+      response = await cartController.handleAddToCart(request, user);
+      flashMessage = getAndClearFlashMessage(request, response);
     }
 
     if (path === "/api/cart/update" && request.method === "POST") {
-      return await cartController.handleUpdateCartItem(request, user);
+      response = await cartController.handleUpdateCartItem(request, user);
+      flashMessage = getAndClearFlashMessage(request, response);
     }
 
     if (path === "/api/cart/remove" && request.method === "POST") {
-      return await cartController.handleRemoveFromCart(request, user);
+      response = await cartController.handleRemoveFromCart(request, user);
+      flashMessage = getAndClearFlashMessage(request, response);
     }
 
     switch (path) {
       case "/":
         const newProducts = await getNewProductsDia();
         const usedProducts = await getUsedProductsDia();
-        content = await render("index.html", { user, newProducts, usedProducts, flashMessage });
+        content = await render("index.html", { user, newProducts, usedProducts, flashMessage, csrfToken });
         break;
 
       case "/new-products":
         const allNewProducts = await getAllNewProducts();
-        content = await render("new-products.html", { user, allNewProducts, flashMessage });
+        content = await render("new-products.html", { user, allNewProducts, flashMessage, csrfToken });
         break;
 
       case (path.match(/^\/product\/\d+$/) || {}).input:
         const productId = parseInt(path.split('/')[2]);
         const quantity = searchParams.get('quantity');
         const addToCartSuccess = searchParams.get('success') === 'true';
-        return await cartController.renderProductDetails(user, productId, quantity, addToCartSuccess, flashMessage);
+        response = await cartController.renderProductDetails(user, productId, quantity, addToCartSuccess, flashMessage, csrfToken);
+        return response;
 
       case (path.match(/^\/product\/\d+\/edit$/) || {}).input:
         const editProductId = parseInt(path.split('/')[2]);
-          if (request.method === 'GET') {
-            if (!user || user.role !== 'admin') {  
-              console.log('Unauthorized access attempt. User:', user);
-              return new Response("Unauthorized", { status: 401 });
-            }
-            const editProduct = await getSingleProduct(editProductId);
-            content = await render("product_edit.html", { user, product: editProduct, flashMessage });
-          } else if (request.method === 'POST') {
-            if (!user || user.role !== 'admin') {
-              return new Response("Unauthorized", { status: 401 });
-            }
-            const formData = await request.formData();
-            const updatedData = {
-              name: formData.get('name'),
-              preis: parseFloat(formData.get('preis')),
-              beschreibung: formData.get('beschreibung'),
-              show_dia: formData.get('show_dia') === 'on'
-            };
-            await updateProduct(editProductId, updatedData);
-            const response = new Response("", {
-              status: 302,
-              headers: { "Location": `/product/${editProductId}` },
-            });
-            setFlashMessage(response, "Produkt erfolgreich aktualisiert.", "success");
-            return response;
+        if (request.method === 'GET') {
+          if (!user || user.role !== 'admin') {  
+            console.log('Unauthorized access attempt. User:', user);
+            return new Response("Unauthorized", { status: 401 });
           }
+          const editProduct = await getSingleProduct(editProductId);
+          content = await render("product_edit.html", { user, product: editProduct, flashMessage, csrfToken });
+        } else if (request.method === 'POST') {
+          if (!user || user.role !== 'admin') {
+            return new Response("Unauthorized", { status: 401 });
+          }
+          const formData = request.parsedFormData;
+          const updatedData = {
+            name: formData.get('name'),
+            preis: parseFloat(formData.get('preis')),
+            beschreibung: formData.get('beschreibung'),
+            show_dia: formData.get('show_dia') === 'on'
+          };
+          await updateProduct(editProductId, updatedData);
+          response = new Response("", {
+            status: 302,
+            headers: { "Location": `/product/${editProductId}` },
+          });
+          setFlashMessage(response, "Produkt erfolgreich aktualisiert.", "success");
+          return response;
+        }
         break;
 
       case (path.match(/^\/product\/\d+\/delete$/) || {}).input:
@@ -247,7 +278,7 @@ const handler = async (request) => {
         if (request.method === 'POST') {
           const deleteProductId = parseInt(path.split('/')[2]);
           await deleteProduct(deleteProductId);
-          const response = new Response("", {
+          response = new Response("", {
             status: 302,
             headers: { "Location": "/new-products" },
           });
@@ -257,33 +288,38 @@ const handler = async (request) => {
         break;
 
       case "/used-products":
-        content = await render("used-products.html", { user, flashMessage });
+        content = await render("used-products.html", { user, flashMessage, csrfToken });
         break;
 
       case "/about":
-        content = await render("about.html", { user, flashMessage });
+        content = await render("about.html", { user, flashMessage, csrfToken });
         break;
 
       case "/contact":
-        content = await render("contact.html", { user, flashMessage });
+        content = await render("contact.html", { user, flashMessage, csrfToken });
         break;
 
       case "/login":
-        content = await render("login.html", { user, flashMessage });
+        content = await render("login.html", { user, flashMessage, csrfToken });
         break;
 
       case "/register":
-        content = await render("register.html", { user, flashMessage });
+        content = await render("register.html", { user, flashMessage, csrfToken });
         break;
 
       case "/shopping_cart":
-        return await cartController.renderShoppingCart(user, flashMessage);
+        response = await cartController.renderShoppingCart(user, flashMessage, csrfToken);
+        return response;
 
       default:
-        content = await render("error404.html", { user, flashMessage });
+        content = await render("error404.html", { user, flashMessage, csrfToken });
     }
 
-    const response = new Response(content, {
+    if (user && csrfToken) {
+      content = replaceCSRFToken(content, csrfToken);
+    }
+
+    response = new Response(content, {
       headers: { "content-type": response_contentType },
     });
 

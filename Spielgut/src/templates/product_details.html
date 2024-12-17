@@ -27,6 +27,7 @@
       </form>
     </div>
     <form id="addToCartForm" action="/api/cart/add" method="POST">
+      <input type="hidden" name="_csrf" value="{{ csrfToken }}">
       <input type="hidden" name="productId" value="{{ product.id }}">
       <input type="hidden" name="quantity" value="{{ quantity|default(1) }}">
       <button type="submit" name="action" value="add" class="add-to-cart-button">In den Warenkorb</button>
@@ -43,6 +44,7 @@
     <div class="admin-actions">
       <a href="/product/{{ product.id }}/edit" class="edit-button">Produkt bearbeiten</a>
       <form action="/product/{{ product.id }}/delete" method="POST" onsubmit="return confirm('Sind Sie sicher, dass Sie dieses Produkt löschen möchten?');">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
         <button type="submit" class="delete-button">Produkt löschen</button>
       </form>
     </div>

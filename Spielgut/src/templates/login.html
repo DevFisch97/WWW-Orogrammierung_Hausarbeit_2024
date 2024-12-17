@@ -9,6 +9,7 @@
         <p class="error-message" style="color: red;">{{ error }}</p>
         {% endif %}
         <form action="/api/login" method="POST">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <div class="form-group">
                 <label for="email-address" class="sr-only">E-Mail-Adresse</label>
                 <input id="email-address" name="email" type="email" autocomplete="email" required class="form-input" placeholder="E-Mail-Adresse">
