@@ -5,6 +5,7 @@ import {
   getNewProductsDia,
   getUsedProductsDia,
   getAllNewProducts,
+  getAllUsedProducts,
   getSingleProduct,
   updateProduct,
   deleteProduct,
@@ -230,8 +231,16 @@ const handler = async (request) => {
         break;
 
       case "/new-products":
-        const allNewProducts = await getAllNewProducts();
-        content = await render("new-products.html", { user, allNewProducts, flashMessage, csrfToken });
+        const page = parseInt(searchParams.get('page') || '1');
+        const { products: allNewProducts, totalPages } = await getAllNewProducts(page);
+        content = await render("new-products.html", { 
+          user, 
+          products: allNewProducts, 
+          currentPage: page, 
+          totalPages, 
+          flashMessage, 
+          csrfToken 
+        });
         break;
 
       case (path.match(/^\/product\/\d+$/) || {}).input:
@@ -288,7 +297,16 @@ const handler = async (request) => {
         break;
 
       case "/used-products":
-        content = await render("used-products.html", { user, flashMessage, csrfToken });
+        const usedPage = parseInt(searchParams.get('page') || '1');
+        const { products: allUsedProducts, totalPages: usedTotalPages } = await getAllUsedProducts(usedPage);
+        content = await render("used-products.html", { 
+          user, 
+          products: allUsedProducts, 
+          currentPage: usedPage, 
+          totalPages: usedTotalPages, 
+          flashMessage, 
+          csrfToken 
+        });
         break;
 
       case "/about":

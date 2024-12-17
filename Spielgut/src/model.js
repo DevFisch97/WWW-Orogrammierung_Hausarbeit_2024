@@ -77,15 +77,54 @@ export async function getUsedProductsDia() {
   return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
 }
 
-export async function getAllNewProducts() {
+export async function getAllNewProducts(page = 1, itemsPerPage = 6) {
   const db = connection();
+  const offset = (page - 1) * itemsPerPage;
   const products = await db.query(`
     SELECT p.id, p.name, p.preis, b.bild_pfad
     FROM produkte p
     LEFT JOIN bilder b ON p.id = b.produkt_id
+    WHERE p.show_dia = 1
     ORDER BY p.id DESC
+    LIMIT ? OFFSET ?
+  `, [itemsPerPage, offset]);
+
+  const [{ total }] = await db.query(`
+    SELECT COUNT(*) as total
+    FROM produkte
+    WHERE show_dia = 1
   `);
-  return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
+
+  return {
+    products: products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad })),
+    total,
+    totalPages: Math.ceil(total / itemsPerPage)
+  };
+}
+
+export async function getAllUsedProducts(page = 1, itemsPerPage = 6) {
+  const db = connection();
+  const offset = (page - 1) * itemsPerPage;
+  const products = await db.query(`
+    SELECT p.id, p.name, p.preis, b.bild_pfad
+    FROM produkte p
+    LEFT JOIN bilder b ON p.id = b.produkt_id
+    WHERE p.show_dia = 0
+    ORDER BY p.id DESC
+    LIMIT ? OFFSET ?
+  `, [itemsPerPage, offset]);
+
+  const [{ total }] = await db.query(`
+    SELECT COUNT(*) as total
+    FROM produkte
+    WHERE show_dia = 0
+  `);
+
+  return {
+    products: products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad })),
+    total,
+    totalPages: Math.ceil(total / itemsPerPage)
+  };
 }
 
 export async function getSingleProduct(id) {
@@ -189,3 +228,4 @@ export async function getCartTotal(userId) {
   `, [userId]);
   return result[0].total || 0;
 }
+
