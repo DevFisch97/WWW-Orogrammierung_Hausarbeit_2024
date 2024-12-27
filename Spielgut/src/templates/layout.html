@@ -21,6 +21,16 @@
                 <img src="assets\Logo.png" alt="Spielgut Logo" class="site-logo">
             </div>
             <div class="user-actions">
+                <!--Suchfunktion-->
+                <form action="/search" method="get" class="header-search-form">
+                    <div class="search-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="search" name="q" placeholder="Suchen..." class="header-search-input" aria-label="Suchen">
+                    </div>
+                </form>
                 <a href="/account" class="icon-link">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
                         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>

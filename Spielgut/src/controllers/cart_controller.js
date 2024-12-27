@@ -9,7 +9,7 @@ export class Cart_Controller {
     if (!user) {
       return this.redirect("/login");
     }
-    const formData = await request.formData();
+    const formData = request.parsedFormData;
     const productId = parseInt(formData.get("productId"));
     const quantity = parseInt(formData.get("quantity"));
 
@@ -21,7 +21,7 @@ export class Cart_Controller {
     if (!user) {
       return this.redirect("/login");
     }
-    const formData = await request.formData();
+    const formData = request.parsedFormData;
     const productId = parseInt(formData.get("productId"));
     const action = formData.get("action");
     
@@ -47,7 +47,7 @@ export class Cart_Controller {
     if (!user) {
       return this.redirect("/login");
     }
-    const formData = await request.formData();
+    const formData = request.parsedFormData;
     const productId = parseInt(formData.get("productId"));
     await removeFromCart(user.id, productId);
     return this.redirect("/shopping_cart");

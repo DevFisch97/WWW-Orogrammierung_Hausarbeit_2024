@@ -1,46 +1,54 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="search-filter-container">
-  <div class="search-container">
-    <form action="#" method="get" class="search-form">
-      <input type="text" name="search" placeholder="Suche nach Produkten..." class="search-input">
-      <button type="submit" class="search-button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </button>
-    </form>
+<!-- filter-Funktion -->
+<form action="/used-products" method="get" class="filter-form">
+  <div class="filter-row">
+    <div class="filter-group">
+      <label for="category">Kategorie:</label>
+      <select id="category" name="category" class="form-input">
+        <option value="">Alle Kategorien</option>
+        <option value="musikinstrumente" {% if request.query.category == 'musikinstrumente' %}selected{% endif %}>Musikinstrumente</option>
+        <option value="kreatives_spielzeug" {% if request.query.category == 'kreatives_spielzeug' %}selected{% endif %}>Kreatives Spielzeug</option>
+        <option value="bewegungsspielzeug" {% if request.query.category == 'bewegungsspielzeug' %}selected{% endif %}>Bewegungsspielzeug</option>
+        <option value="lernspielzeug" {% if request.query.category == 'lernspielzeug' %}selected{% endif %}>Lernspielzeug</option>
+        <option value="rollenspiel" {% if request.query.category == 'rollenspiel' %}selected{% endif %}>Rollenspiel</option>
+        <option value="konstruktionsspielzeug" {% if request.query.category == 'konstruktionsspielzeug' %}selected{% endif %}>Konstruktionsspielzeug</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="priceMin">Preis von:</label>
+      <select id="priceMin" name="priceMin" class="form-input">
+        <option value="">Beliebig</option>
+        <option value="5" {% if request.query.priceMin == '5' %}selected{% endif %}>5€</option>
+        <option value="10" {% if request.query.priceMin == '10' %}selected{% endif %}>10€</option>
+        <option value="15" {% if request.query.priceMin == '15' %}selected{% endif %}>15€</option>
+        <option value="20" {% if request.query.priceMin == '20' %}selected{% endif %}>20€</option>
+        <option value="25" {% if request.query.priceMin == '25' %}selected{% endif %}>25€</option>
+        <option value="30" {% if request.query.priceMin == '30' %}selected{% endif %}>30€</option>
+        <option value="35" {% if request.query.priceMin == '35' %}selected{% endif %}>35€</option>
+        <option value="40" {% if request.query.priceMin == '40' %}selected{% endif %}>40€</option>
+        <option value="45" {% if request.query.priceMin == '45' %}selected{% endif %}>45€</option>
+        <option value="50" {% if request.query.priceMin == '50' %}selected{% endif %}>50€</option>
+        <option value="55" {% if request.query.priceMin == '55' %}selected{% endif %}>55€</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="priceMax">Preis bis:</label>
+      <select id="priceMax" name="priceMax" class="form-input">
+        <option value="">Beliebig</option>
+        <option value="10" {% if request.query.priceMax == '10' %}selected{% endif %}>Unter 10€</option>
+        <option value="20" {% if request.query.priceMax == '20' %}selected{% endif %}>Unter 20€</option>
+        <option value="30" {% if request.query.priceMax == '30' %}selected{% endif %}>Unter 30€</option>
+        <option value="40" {% if request.query.priceMax == '40' %}selected{% endif %}>Unter 40€</option>
+        <option value="50" {% if request.query.priceMax == '50' %}selected{% endif %}>Unter 50€</option>
+        <option value="60" {% if request.query.priceMax == '60' %}selected{% endif %}>Unter 60€</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter anwenden</button>
   </div>
-  <div class="filter-container">
-    <button id="filterButton" class="filter-button">Filter</button>
-  </div>
-</div>
+</form>
 
-<div id="filterPanel" class="filter-panel">
-  <h3>Filter Optionen</h3>
-  <div class="filter-section">
-    <h4>Preis</h4>
-    <input type="range" id="priceRange" min="0" max="100" step="10" value="50">
-    <span id="priceValue">50€</span>
-  </div>
-  <div class="filter-section">
-    <h4>Art</h4>
-    <label><input type="checkbox" name="type" value="new"> Neu</label>
-    <label><input type="checkbox" name="type" value="used"> Gebraucht</label>
-  </div>
-  <div class="filter-section">
-    <h4>Kategorie</h4>
-    <select name="category" id="category">
-      <option value="">Alle Kategorien</option>
-      <option value="toys">Spielzeug</option>
-      <option value="furniture">Möbel</option>
-      <option value="clothes">Kleidung</option>
-    </select>
-  </div>
-  <button id="applyFilters" class="apply-filters-button">Filter anwenden</button>
-</div>
 
 <section class="product-page">
   <h1 class="product-page-title">Gebrauchte Produkte</h1>

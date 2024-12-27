@@ -16,7 +16,7 @@ import { StaticFileController } from "./controllers/staticFile_controller.js";
 import { AssetFileController } from "./controllers/assetFile_controller.js";
 import { Cart_Controller } from "./controllers/cart_controller.js";
 import { setCookie, getCookies } from "https://deno.land/std@0.177.0/http/cookie.ts";
-import { generateCSRFToken } from "./csrf.js";
+import { generateCSRFToken, verifyCSRFToken } from "./csrf.js";
 
 // Initialize the database connection
 try {
@@ -47,8 +47,34 @@ function getUserFromSession(request) {
   return session ? { id: session.userId, role: session.role, sessionId } : null;
 }
 
+async function verifyCSRFTokenForRequest(request, user) {
+  if (["POST", "PUT", "DELETE"].includes(request.method) && user) {
+    let formData;
+    try {
+      formData = await request.formData();
+    } catch (error) {
+      console.error("Error parsing form data:", error);
+      return false;
+    }
+    
+    const token = formData.get("_csrf");
+    console.log("Received CSRF token:", token);
+    console.log("Expected CSRF token:", csrfTokens.get(user.sessionId));
+    
+    if (!token || token !== csrfTokens.get(user.sessionId)) {
+      console.log("CSRF token validation failed");
+      return false;
+    }
+    
+    // Store formData for later use
+    request.parsedFormData = formData;
+    return true;
+  }
+  return true;
+}
+
 // Create instances of the controllers
-const loginController = new Login_Controller(render, sessions);
+const loginController = new Login_Controller(render, sessions, csrfTokens);
 const registerController = new Register_Controller(render);
 const staticFileController = new StaticFileController();
 const assetFileController = new AssetFileController();
@@ -172,33 +198,19 @@ const handler = async (request) => {
     // Generate CSRF token for authenticated users
     let csrfToken = null;
     if (user) {
-      csrfToken = await generateCSRFToken(user.sessionId);
-      csrfTokens.set(user.sessionId, csrfToken);
-      console.log("Generated CSRF token:", csrfToken); // Debugging
+      csrfToken = csrfTokens.get(user.sessionId);
+      if (!csrfToken) {
+        csrfToken = await generateCSRFToken(user.sessionId);
+        csrfTokens.set(user.sessionId, csrfToken);
+      }
+      console.log("CSRF token for user:", csrfToken);
     }
 
     // Verify CSRF token for POST, PUT, DELETE requests
-    if (["POST", "PUT", "DELETE"].includes(request.method) && user) {
-      let formData;
-      try {
-        formData = await request.formData();
-      } catch (error) {
-        console.error("Error parsing form data:", error);
-        return new Response("Error processing request", { status: 400 });
-      }
-      
-      const token = formData.get("_csrf");
-      console.log("Received CSRF token:", token); // Debugging
-      console.log("Expected CSRF token:", csrfTokens.get(user.sessionId)); // Debugging
-      
-      if (!token || token !== csrfTokens.get(user.sessionId)) {
-        console.log("CSRF token validation failed"); // Debugging
-        return new Response("Invalid CSRF token", { status: 403 });
-      }
-      
-      // Store formData for later use
-      request.parsedFormData = formData;
+    if (!await verifyCSRFTokenForRequest(request, user)) {
+      return new Response("Invalid CSRF token", { status: 403 });
     }
+
 
     // Get flash message
     let flashMessage = null;
@@ -224,10 +236,17 @@ const handler = async (request) => {
     }
 
     switch (path) {
-      case "/":
+      case '/':
         const newProducts = await getNewProductsDia();
         const usedProducts = await getUsedProductsDia();
-        content = await render("index.html", { user, newProducts, usedProducts, flashMessage, csrfToken });
+        let renderContext = { user, flashMessage, csrfToken, newProducts, usedProducts };
+        content = await render("index.html", renderContext);
+        if (content) {
+          content = replaceCSRFToken(content, csrfToken);
+          response = new Response(content, {
+            headers: { "content-type": response_contentType },
+          });
+        }
         break;
 
       case "/new-products":
