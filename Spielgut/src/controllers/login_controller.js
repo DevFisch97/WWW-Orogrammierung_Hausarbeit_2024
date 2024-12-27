@@ -2,10 +2,10 @@ import { loginUser } from "../services/user_manager.js";
 import { generateCSRFToken } from "../csrf.js";
 
 export class Login_Controller {
-  constructor(render, sessions, csrfToken) {
+  constructor(render, sessions, csrfTokens) {
     this.render = render;
     this.sessions = sessions;
-    this.csrfToken = csrfToken
+    this.csrfTokens = csrfTokens; // Lokale Referenz
   }
 
   async handleLogin(request) {
@@ -21,16 +21,16 @@ export class Login_Controller {
 
       // Generate CSRF token
       const csrfToken = await generateCSRFToken(sessionId);
-      
+
       // Store CSRF token
-      csrfTokens.set(sessionId, csrfToken);
+      this.csrfTokens.set(sessionId, csrfToken);
 
       const response = new Response("", {
         status: 302,
         headers: {
           "Location": "/",
-          "Set-Cookie": `session=${sessionId}; HttpOnly; Path=/; Max-Age=3600`
-        }
+          "Set-Cookie": `session=${sessionId}; HttpOnly; Path=/; Max-Age=3600`,
+        },
       });
 
       return response;
