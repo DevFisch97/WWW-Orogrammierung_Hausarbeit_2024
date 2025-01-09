@@ -1,45 +1,78 @@
 import { loginUser } from "../services/user_manager.js";
+import { setCookie, getCookies } from "https://deno.land/std@0.177.0/http/cookie.ts";
 import { generateCSRFToken } from "../csrf.js";
+import { setFlashMessage } from "./flashmessages_controller.js";
+import { sessions, csrfTokens } from "../data/sessionStore.js";
 
-export class Login_Controller {
-  constructor(render, sessions, csrfTokens) {
-    this.render = render;
-    this.sessions = sessions;
-    this.csrfTokens = csrfTokens; // Lokale Referenz
-  }
+export class LoginController {
+    async handleLogin(request) {
+        try {
+            const formData = await request.formData();
+            const email = formData.get("email");
+            const password = formData.get("password");
 
-  async handleLogin(request) {
-    const formData = await request.formData();
-    const email = formData.get("email");
-    const password = formData.get("password");
+            console.log("Login-Versuch für E-Mail:", email);
 
-    const user = await loginUser(email, password);
+            const user = await loginUser(email, password);
 
-    if (user) {
-      const sessionId = crypto.randomUUID();
-      this.sessions.set(sessionId, { userId: user.id, role: user.role });
+            if (user) {
+                console.log("Login erfolgreich für Benutzer:", user.id);
+                const sessionId = crypto.randomUUID();
+                sessions.set(sessionId, { userId: user.id, role: user.role });
 
-      // Generate CSRF token
-      const csrfToken = await generateCSRFToken(sessionId);
+                const csrfToken = await generateCSRFToken(sessionId);
+                csrfTokens.set(sessionId, csrfToken);
 
-      // Store CSRF token
-      this.csrfTokens.set(sessionId, csrfToken);
-
-      const response = new Response("", {
-        status: 302,
-        headers: {
-          "Location": "/",
-          "Set-Cookie": `session=${sessionId}; HttpOnly; Path=/; Max-Age=3600`,
-        },
-      });
-
-      return response;
-    } else {
-      const content = await this.render("login.html", { error: "Ungültige E-Mail oder Passwort" });
-      return new Response(content, {
-        status: 401,
-        headers: { "content-type": "text/html" },
-      });
+                const response = new Response("", {
+                    status: 302,
+                    headers: {
+                        "Location": "/",
+                        "Set-Cookie": `session=${sessionId}; Path=/; HttpOnly; Max-Age=3600`,
+                    },
+                });
+                setFlashMessage(response, "Sie haben sich erfolgreich angemeldet.", "success");
+                return response;
+            } else {
+                console.log("Login fehlgeschlagen für E-Mail:", email);
+                const response = new Response("", {
+                    status: 302,
+                    headers: { "Location": "/login" },
+                });
+                setFlashMessage(response, "Ungültige E-Mail oder Passwort.", "error");
+                return response;
+            }
+        } catch (error) {
+            console.error("Fehler beim Login:", error);
+            const response = new Response("", {
+                status: 302,
+                headers: { "Location": "/login" },
+            });
+            setFlashMessage(response, "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut.", "error");
+            return response;
+        }
     }
+  
+  
+  handleLogout(request) {
+    const cookies = getCookies(request.headers);
+    const sessionId = cookies.session;
+    if (sessionId) {
+      sessions.delete(sessionId);
+      csrfTokens.delete(sessionId);
+    }
+    const response = new Response("", {
+      status: 302,
+      headers: {
+        "Location": "/",
+      },
+    });
+    setCookie(response.headers, {
+      name: "session",
+      value: "",
+      path: "/",
+      expires: new Date(0),
+    });
+    setFlashMessage(response, "Sie wurden erfolgreich abgemeldet.", "success");
+    return response;
   }
 }

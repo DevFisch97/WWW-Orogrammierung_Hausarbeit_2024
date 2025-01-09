@@ -44,8 +44,6 @@ export async function registerUser(username, email, password, straße, hausnumme
   }
 }
 
-
-
 export async function loginUser(email, password) {
   const db = connection();
   

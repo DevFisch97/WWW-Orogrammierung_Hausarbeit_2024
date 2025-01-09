@@ -4,12 +4,7 @@
 <section class="product-detail">
   <div class="product-image-container">
     <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-detail-image">
-    <form id="addToCartForm" action="/api/cart/add" method="POST">
-      <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-      <input type="hidden" name="productId" value="{{ product.id }}">
-      <input type="hidden" name="quantity" value="{{ quantity|default(1) }}">
-      <button type="submit" name="action" value="add" class="add-to-cart-button">In den Warenkorb</button>
-    </form>
+    
   </div>
   <div class="product-info">
     <h1 class="product-title">{{ product.name }}</h1>

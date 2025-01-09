@@ -1,6 +1,6 @@
 import { registerUser } from "../services/user_manager.js";
 
-export class Register_Controller {
+export class RegisterController {
   constructor(render) {
     this.render = render;
   }

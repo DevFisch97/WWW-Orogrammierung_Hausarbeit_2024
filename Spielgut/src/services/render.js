@@ -8,6 +8,19 @@ nunjucks.configure(templatesDir, {
   noCache: true
 });
 
-export function render(path, data) {
-  return nunjucks.render(path, data);
+export async function render(path, data) {
+  try {
+    const content = await nunjucks.render(path, data);
+    return new Response(content, {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" }
+    });
+  } catch (error) {
+    console.error(`Error rendering template ${path}:`, error);
+    return new Response(`Error rendering page: ${error.message}`, {
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
 }
+
