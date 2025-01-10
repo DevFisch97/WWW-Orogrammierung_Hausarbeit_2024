@@ -11,26 +11,45 @@ export function getUserFromSession(request) {
 }
 
 export function setFlashMessage(response, message, type = 'info') {
-  const flashMessage = JSON.stringify({ message, type, timestamp: Date.now() });
+  const cookies = getCookies(response.headers);
+  let flashMessages = {};
+  
+  if (cookies.flashMessage) {
+    try {
+      flashMessages = JSON.parse(decodeURIComponent(cookies.flashMessage));
+    } catch (error) {
+      console.error("Error parsing flash message:", error);
+    }
+  }
+  
+  flashMessages[type] = message;
+  console.log("Setze Flash-Nachricht:", { type, message });
+  console.log("Aktuelle Flash-Nachrichten:", flashMessages);
+  
+  const encodedFlashMessages = encodeURIComponent(JSON.stringify(flashMessages));
+  
   setCookie(response.headers, {
     name: "flashMessage",
-    value: encodeURIComponent(flashMessage),
+    value: encodedFlashMessages,
     path: "/",
     maxAge: 60, // 1 minute
   });
+  console.log("Flash-Nachricht-Cookie gesetzt:", encodedFlashMessages);
 }
 
 export function getAndClearFlashMessage(request) {
   const cookies = getCookies(request.headers);
   const flashMessage = cookies.flashMessage;
   if (flashMessage) {
-    const decodedMessage = JSON.parse(decodeURIComponent(flashMessage));
-    const currentTime = Date.now();
-    if (currentTime - decodedMessage.timestamp < 5000) { // 5 seconds
-      return decodedMessage;
+    try {
+      const decodedMessages = JSON.parse(decodeURIComponent(flashMessage));
+      console.log("Abgerufene Flash-Nachrichten:", decodedMessages);
+      return decodedMessages;
+    } catch (error) {
+      console.error("Error parsing flash message:", error);
     }
   }
-  return null;
+  return {};
 }
 
 export function clearFlashMessageCookie(response) {
@@ -40,5 +59,6 @@ export function clearFlashMessageCookie(response) {
     path: "/",
     maxAge: 0,
   });
+  console.log("Flash-Nachricht-Cookie gelöscht");
 }
 

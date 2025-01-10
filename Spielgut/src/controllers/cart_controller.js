@@ -1,4 +1,4 @@
-import { addToCart, updateCartItem, removeFromCart, getCartItems, getCartTotal, getSingleProduct } from "../model.js";
+import { addToCart, updateCartItem, removeFromCart, getCartItems, getCartTotal } from "../model.js";
 
 export class CartController {
   constructor(render) {
@@ -7,19 +7,28 @@ export class CartController {
 
   async handleAddToCart(request, user) {
     if (!user) {
-      return this.redirect("/login");
+      return new Response("", {
+        status: 302,
+        headers: { "Location": "/login" },
+      });
     }
     const formData = request.parsedFormData;
     const productId = parseInt(formData.get("productId"));
     const quantity = parseInt(formData.get("quantity"));
 
     await addToCart(user.id, productId, quantity);
-    return this.redirect(`/product/${productId}?success=true&quantity=${quantity}`);
+    return new Response("", {
+      status: 302,
+      headers: { "Location": `/product/${productId}?success=true&quantity=${quantity}` },
+    });
   }
 
   async handleUpdateCartItem(request, user) {
     if (!user) {
-      return this.redirect("/login");
+      return new Response("", {
+        status: 302,
+        headers: { "Location": "/login" },
+      });
     }
     const formData = request.parsedFormData;
     const productId = parseInt(formData.get("productId"));
@@ -29,7 +38,10 @@ export class CartController {
     const currentItem = cartItems.find(item => item.productId === productId);
     
     if (!currentItem) {
-      return this.redirect("/shopping_cart");
+      return new Response("", {
+        status: 302,
+        headers: { "Location": "/shopping_cart" },
+      });
     }
 
     let newQuantity = currentItem.quantity;
@@ -40,50 +52,38 @@ export class CartController {
     }
 
     await updateCartItem(user.id, productId, newQuantity);
-    return this.redirect("/shopping_cart");
+    return new Response("", {
+      status: 302,
+      headers: { "Location": "/shopping_cart" },
+    });
   }
 
   async handleRemoveFromCart(request, user) {
     if (!user) {
-      return this.redirect("/login");
+      return new Response("", {
+        status: 302,
+        headers: { "Location": "/login" },
+      });
     }
     const formData = request.parsedFormData;
     const productId = parseInt(formData.get("productId"));
     await removeFromCart(user.id, productId);
-    return this.redirect("/shopping_cart");
+    return new Response("", {
+      status: 302,
+      headers: { "Location": "/shopping_cart" },
+    });
   }
 
   async renderShoppingCart(user, csrfToken) {
     if (!user) {
-      return this.redirect("/login");
+      return new Response("", {
+        status: 302,
+        headers: { "Location": "/login" },
+      });
     }
     const cartItems = await getCartItems(user.id);
     const cartTotal = await getCartTotal(user.id);
-    const content = await this.render("shoppingcart.html", { user, cartItems, cartTotal, csrfToken });
-    return new Response(content, {
-      headers: { "content-type": "text/html" },
-    });
-  }
-
-  redirect(location) {
-    return new Response("", {
-      status: 302,
-      headers: { "Location": location },
-    });
-  }
-
-  async renderProductDetails(user, productId, quantity, addToCartSuccess, csrfToken) {
-    const product = await getSingleProduct(productId);
-    const content = await this.render("product_details.html", { 
-      user, 
-      product, 
-      quantity: parseInt(quantity) || 1,
-      addToCartSuccess,
-      csrfToken
-    });
-    return new Response(content, {
-      headers: { "content-type": "text/html" },
-    });
+    return { cartItems, cartTotal };
   }
 }
 

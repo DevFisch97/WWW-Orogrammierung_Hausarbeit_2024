@@ -1,20 +1,19 @@
 import { contentType } from "https://deno.land/std@0.177.0/media_types/mod.ts";
+import { join, normalize } from "https://deno.land/std@0.177.0/path/mod.ts";
 
 export class AssetFileController {
+  #assetDir = "./assets";
+
   async serveAssetFile(path) {
-    let filePath;
-    if (path.startsWith("/assets/")) {
-      // For the logo
-      if (path.includes("Logo.png")) {
-        filePath = `.${path}`;
-      } else {
-        // For product images
-        filePath = `.${path}`;
-      }
-    } else {
-      // For other assets
-      filePath = `./assets${path}`;
+    const cleanPath = path.replace(/^\/+/, '').replace(/^assets\//, '');
+    const normalizedPath = normalize(cleanPath);
+    const filePath = join(this.#assetDir, normalizedPath);
+
+    if (!filePath.startsWith(normalize(this.#assetDir))) {
+      console.error(`Versuchter Zugriff außerhalb des Asset-Verzeichnisses: ${path}`);
+      return new Response("Zugriff verweigert", { status: 403 });
     }
+
     try {
       const file = await Deno.readFile(filePath);
       const mimeType = contentType(path.split(".").pop() || "") || "application/octet-stream";
@@ -22,8 +21,8 @@ export class AssetFileController {
         headers: { "content-type": mimeType },
       });
     } catch (error) {
-      console.error(`Error serving asset file: ${filePath}`, error);
-      return new Response("Asset file not found", { status: 404 });
+      console.error(`Fehler beim Bereitstellen der Asset-Datei: ${filePath}`, error);
+      return new Response("Asset-Datei nicht gefunden", { status: 404 });
     }
   }
 }

@@ -2,51 +2,45 @@
 
 {% block content %}
 <section class="container">
-    <h1 class="page-title">Warenkorb</h1>
-    {% if cartItems and cartItems|length > 0 %}
-        <div class="cart-items">
-            {% for item in cartItems %}
-            <div class="cart-item" data-product-id="{{ item.productId }}">
-                <div class="item-info">
-                    <img src="{{ item.bild_pfad }}" alt="{{ item.name }}" class="cart-item-image">
-                    <div>
-                        <h2>{{ item.name }}</h2>
-                        <p>{{ item.preis }}€</p>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <form action="/api/cart/update" method="POST" class="quantity-form">
-                        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-                        <input type="hidden" name="productId" value="{{ item.productId }}">
-                        <button type="submit" name="action" value="decrease" class="btn btn-outline decrease-quantity" aria-label="Reduziere Menge von {{ item.name }}">-</button>
-                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" aria-label="Menge von {{ item.name }}" readonly>
-                        <button type="submit" name="action" value="increase" class="btn btn-outline increase-quantity" aria-label="Erhöhe Menge von {{ item.name }}">+</button>
-                    </form>
-                    <form action="/api/cart/remove" method="POST" class="remove-form">
-                        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-                        <input type="hidden" name="productId" value="{{ item.productId }}">
-                        <button type="submit" class="btn btn-danger" aria-label="Entferne {{ item.name }} aus dem Warenkorb">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                                <path d="M3 6h18"></path>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                            </svg>
-                        </button>
-                    </form>
-                    <p class="item-total">{{ (item.preis * item.quantity) | round(2) }}€</p>
-                </div>
-            </div>
-            {% endfor %}
+  <h1 class="page-title">Warenkorb</h1>
+  {% if cartItems and cartItems|length > 0 %}
+    <div class="cart-items">
+      {% for item in cartItems %}
+      <div class="cart-item" data-product-id="{{ item.productId }}">
+        <div class="item-info">
+          <img src="{{ item.bild_pfad }}" alt="{{ item.name }}" class="cart-item-image">
+          <div>
+            <h3>{{ item.name }}</h3>
+            <p>Preis: {{ item.preis }}€</p>
+          </div>
         </div>
-        <div class="cart-summary">
-            <p class="cart-total">Gesamtsumme: {{ cartTotal | round(2) }}€</p>
-            <form action="/checkout" method="GET">
-                <button type="submit" class="btn btn-primary">Zur Kasse</button>
-            </form>
+        <div class="item-quantity">
+          <form class="quantity-form" action="/api/cart/update" method="POST">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <input type="hidden" name="productId" value="{{ item.productId }}">
+            <button type="submit" name="action" value="decrease" class="quantity-button decrease-quantity">-</button>
+            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" readonly>
+            <button type="submit" name="action" value="increase" class="quantity-button increase-quantity">+</button>
+          </form>
         </div>
-    {% else %}
-        <p>Ihr Warenkorb ist leer.</p>
-    {% endif %}
+        <div class="item-total">
+          {{ (item.preis * item.quantity) | round(2) }}€
+        </div>
+        <form class="remove-form" action="/api/cart/remove" method="POST">
+          <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+          <input type="hidden" name="productId" value="{{ item.productId }}">
+          <button type="submit" class="remove-button">Entfernen</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="cart-total">
+      Gesamtsumme: {{ cartTotal | round(2) }}€
+    </div>
+    <a href="/checkout" class="checkout-button">Zur Kasse</a>
+  {% else %}
+    <p>Ihr Warenkorb ist leer.</p>
+  {% endif %}
 </section>
 {% endblock %}
 

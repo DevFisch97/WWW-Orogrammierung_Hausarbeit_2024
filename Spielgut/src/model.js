@@ -129,14 +129,19 @@ export async function getAllUsedProducts(page = 1, itemsPerPage = 6) {
 
 export async function getSingleProduct(id) {
   const db = connection();
-  const [product] = await db.query(`
+  console.log(`Fetching product with id: ${id}`);
+  const products = await db.query(`
     SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad
     FROM produkte p
     LEFT JOIN bilder b ON p.id = b.produkt_id
     WHERE p.id = ?
   `, [id]);
   
-  if (!product) throw new Error("Produkt nicht gefunden.");
+  console.log(`Query result:`, products);
+  
+  if (products.length === 0) throw new Error("Produkt nicht gefunden.");
+  
+  const product = products[0];
   return { 
     id: product[0], 
     name: product[1], 
@@ -146,6 +151,7 @@ export async function getSingleProduct(id) {
     bild_pfad: product[5]
   };
 }
+
 
 export async function updateProduct(id, data) {
   const db = connection();

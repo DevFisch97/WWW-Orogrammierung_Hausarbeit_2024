@@ -10,7 +10,6 @@ import {
   
   export class ProductController {
     constructor() {
-      // Kein render-Parameter mehr
     }
   
     async getHomePageData(user, flashMessage, csrfToken) {
@@ -30,9 +29,16 @@ import {
     }
   
     async getProductDetailsData(user, productId, quantity, addToCartSuccess, flashMessage, csrfToken) {
-      const product = await getSingleProduct(productId);
-      return { user, product, quantity: parseInt(quantity) || 1, addToCartSuccess, flashMessage, csrfToken };
+      try {
+        const product = await getSingleProduct(productId);
+        return { user, product, quantity: parseInt(quantity) || 1, addToCartSuccess, flashMessage, csrfToken };
+      } catch (error) {
+        console.error(`Error fetching product details: ${error.message}`);
+        return { user, error: "Produkt nicht gefunden", flashMessage, csrfToken };
+      }
     }
+    
+    
   
     async getProductEditData(user, productId, flashMessage, csrfToken) {
       if (!user || user.role !== 'admin') {

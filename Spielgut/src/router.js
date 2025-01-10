@@ -12,7 +12,7 @@ export class Router {
       this.render = render;
       this.productController = new ProductController();
       this.loginController = new LoginController();
-      this.cartController = new CartController();
+      this.cartController = new CartController(render);
       this.registerController = new RegisterController();
       this.staticFileController = new StaticFileController();
       this.assetFileController = new AssetFileController();
@@ -38,6 +38,8 @@ export class Router {
             const csrfToken = user ? await generateCSRFToken(user.sessionId) : null;
             let flashMessage = getAndClearFlashMessage(request);
 
+            console.log("Router: Abgerufene Flash-Nachrichten:", flashMessage);
+
             // Check CSRF token for POST, PUT, DELETE requests
             if (!await csrfProtection(request, user)) {
               return new Response("Invalid CSRF token", { status: 403 });
@@ -48,17 +50,17 @@ export class Router {
 
             switch (path) {
                 case '/':
-                    pageData = await this.productController.getHomePageData();
+                    pageData = await this.productController.getHomePageData(user, flashMessage, csrfToken);
                     response = await this.render("index.html", { ...pageData, user, flashMessage, csrfToken });
                     break;
                 case "/new-products":
                     const page = parseInt(searchParams.get('page') || '1');
-                    pageData = await this.productController.getNewProductsData(page);
+                    pageData = await this.productController.getNewProductsData(user, page, flashMessage, csrfToken);
                     response = await this.render("new-products.html", { ...pageData, user, flashMessage, csrfToken });
                     break;
                 case "/used-products":
                     const usedPage = parseInt(searchParams.get('page') || '1');
-                    pageData = await this.productController.getUsedProductsData(usedPage);
+                    pageData = await this.productController.getUsedProductsData(user, usedPage, flashMessage, csrfToken);
                     response = await this.render("used-products.html", { ...pageData, user, flashMessage, csrfToken });
                     break;
                 case "/about":
@@ -74,6 +76,7 @@ export class Router {
                             headers: { "Location": "/account" },
                         });
                     } else if (request.method === "GET") {
+                        console.log("Rendering Login-Seite mit Flash-Nachrichten:", flashMessage);
                         response = await this.render("login.html", { user, flashMessage, csrfToken });
                     } else if (request.method === "POST") {
                         response = await this.loginController.handleLogin(request);
@@ -101,8 +104,8 @@ export class Router {
                     response = await this.loginController.handleLogout(request);
                     break;
                 case "/shopping_cart":
-                    pageData = await this.cartController.getShoppingCartData(user);
-                    response = await this.render("shopping_cart.html", { ...pageData, user, flashMessage, csrfToken });
+                    pageData = await this.cartController.renderShoppingCart(user, csrfToken);
+                    response = await this.render("shoppingcart.html", { ...pageData, user, flashMessage, csrfToken });
                     break;
                 case "/api/cart/add":
                     if (request.method === "POST") {
@@ -122,14 +125,19 @@ export class Router {
                 default:
                     if (path.match(/^\/product\/\d+$/)) {
                         const productId = parseInt(path.split('/')[2]);
+                        console.log("Extracted productId:", productId); // Debugging line
                         const quantity = searchParams.get('quantity');
                         const addToCartSuccess = searchParams.get('success') === 'true';
-                        pageData = await this.productController.getProductDetailsData(productId, quantity, addToCartSuccess);
-                        response = await this.render("product_details.html", { ...pageData, user, flashMessage, csrfToken });
+                        pageData = await this.productController.getProductDetailsData(user, productId, quantity, addToCartSuccess, flashMessage, csrfToken);
+                        if (pageData.error) {
+                            response = await this.render("error404.html", { user, flashMessage: pageData.error, csrfToken });
+                        } else {
+                            response = await this.render("product_details.html", { ...pageData, user, flashMessage, csrfToken });
+                        }
                     } else if (path.match(/^\/product\/\d+\/edit$/)) {
                         const editProductId = parseInt(path.split('/')[2]);
                         if (request.method === 'GET') {
-                            pageData = await this.productController.getProductEditData(editProductId);
+                            pageData = await this.productController.getProductEditData(user, editProductId, flashMessage, csrfToken);
                             response = await this.render("product_edit.html", { ...pageData, user, flashMessage, csrfToken });
                         } else if (request.method === 'POST') {
                             response = await this.productController.handleProductUpdate(user, editProductId, request.parsedFormData);
@@ -144,7 +152,8 @@ export class Router {
                     }
             }
 
-            if (flashMessage) {
+            if (flashMessage && Object.keys(flashMessage).length > 0) {
+                console.log("Router: Löschen der Flash-Nachrichten nach der Verarbeitung");
                 clearFlashMessageCookie(response);
             }
 

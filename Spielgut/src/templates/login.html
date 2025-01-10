@@ -1,34 +1,58 @@
 {% extends "layout.html" %}
 
+{% block title %}Anmelden | Spielgut{% endblock %}
+
 {% block content %}
 <section class="container login-container">
     <div class="login-form">
         <h1 class="page-title">Anmelden</h1>
         <p class="login-description">Melden Sie sich an, um Ihre Bestellungen zu verwalten und Ihre Daten zu aktualisieren.</p>
-        {% if error %}
-        <p class="error-message" style="color: red;">{{ error }}</p>
+        
+        {% if flashMessage.error %}
+        <div class="alert alert-error">
+            {{ flashMessage.error }}
+        </div>
         {% endif %}
+
         <form action="/login" method="POST">
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            
             <div class="form-group">
                 <label for="email-address" class="sr-only">E-Mail-Adresse</label>
-                <input id="email-address" name="email" type="email" autocomplete="email" required class="form-input" placeholder="E-Mail-Adresse" value="{{ email }}">
+                <input id="email-address" 
+                       name="email" 
+                       type="email" 
+                       autocomplete="email" 
+                       required 
+                       class="form-input" 
+                       placeholder="E-Mail-Adresse" 
+                       value="{{ flashMessage.email if flashMessage.email else '' }}">
             </div>
+            
             <div class="form-group">
                 <label for="password" class="sr-only">Passwort</label>
                 <div class="password-input">
-                    <input id="password" name="password" type="password" autocomplete="current-password" required class="form-input" placeholder="Passwort">
+                    <input id="password" 
+                           name="password" 
+                           type="password" 
+                           autocomplete="current-password" 
+                           required 
+                           class="form-input" 
+                           placeholder="Passwort">
                 </div>
             </div>
+            
             <div class="form-options">
                 <div class="remember-me">
                     <input id="remember-me" name="remember-me" type="checkbox" class="form-checkbox">
                     <label for="remember-me" class="form-label">Angemeldet bleiben</label>
                 </div>
-                <a href="#" class="forgot-password">Passwort vergessen?</a>
+                <a href="/forgot-password" class="forgot-password">Passwort vergessen?</a>
             </div>
+            
             <button type="submit" class="btn btn-primary btn-block">Anmelden</button>
         </form>
+        
         <p class="register-link">
             Noch kein Konto? <a href="/register">Jetzt registrieren</a>
         </p>
