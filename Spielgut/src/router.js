@@ -48,21 +48,38 @@ export class Router {
             let pageData;
             let response;
 
+            // Extrahieren der Filterparameter
+            const filterParams = {
+                category: searchParams.get('category'),
+                priceMin: searchParams.get('priceMin'),
+                priceMax: searchParams.get('priceMax')
+            };
+
             switch (path) {
                 case '/':
                     pageData = await this.productController.getHomePageData(user, flashMessage, csrfToken);
                     response = await this.render("index.html", { ...pageData, user, flashMessage, csrfToken });
                     break;
-                case "/new-products":
-                    const page = parseInt(searchParams.get('page') || '1');
-                    pageData = await this.productController.getNewProductsData(user, page, flashMessage, csrfToken);
-                    response = await this.render("new-products.html", { ...pageData, user, flashMessage, csrfToken });
-                    break;
-                case "/used-products":
-                    const usedPage = parseInt(searchParams.get('page') || '1');
-                    pageData = await this.productController.getUsedProductsData(user, usedPage, flashMessage, csrfToken);
-                    response = await this.render("used-products.html", { ...pageData, user, flashMessage, csrfToken });
-                    break;
+                    case "/new-products":
+                        const page = parseInt(searchParams.get('page') || '1');
+                        const filterParams = {
+                            priceMin: searchParams.get('priceMin'),
+                            priceMax: searchParams.get('priceMax')
+                        };
+                        pageData = await this.productController.getNewProductsData(user, page, flashMessage, csrfToken, filterParams);
+                        response = await this.render("new-products.html", { ...pageData, user, flashMessage, csrfToken, request });
+                        break;
+                        case "/used-products":
+                            const usedPage = parseInt(searchParams.get('page') || '1');
+                            const usedFilterParams = {
+                                priceMin: searchParams.get('priceMin'),
+                                priceMax: searchParams.get('priceMax')
+                            };
+                            pageData = await this.productController.getUsedProductsData(user, usedPage, flashMessage, csrfToken, usedFilterParams);
+                            response = await this.render("used-products.html", { ...pageData, user, flashMessage, csrfToken, request });
+                            break;
+                        
+                        
                 case "/about":
                     response = await this.render("about.html", { user, flashMessage, csrfToken });
                     break;

@@ -77,23 +77,42 @@ export async function getUsedProductsDia() {
   return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
 }
 
-export async function getAllNewProducts(page = 1, itemsPerPage = 6) {
+export async function getAllNewProducts(page = 1, itemsPerPage = 6, filterParams = {}) {
   const db = connection();
   const offset = (page - 1) * itemsPerPage;
-  const products = await db.query(`
+  let query = `
     SELECT p.id, p.name, p.preis, b.bild_pfad
     FROM produkte p
     LEFT JOIN bilder b ON p.id = b.produkt_id
     WHERE p.show_dia = 1
-    ORDER BY p.id DESC
-    LIMIT ? OFFSET ?
-  `, [itemsPerPage, offset]);
-
-  const [{ total }] = await db.query(`
+  `;
+  let countQuery = `
     SELECT COUNT(*) as total
     FROM produkte
     WHERE show_dia = 1
-  `);
+  `;
+  const queryParams = [];
+  const countQueryParams = [];
+
+  // Nur Preisfilter anwenden
+  if (typeof filterParams.priceMin === 'number') {
+    query += ` AND p.preis >= ?`;
+    countQuery += ` AND preis >= ?`;
+    queryParams.push(filterParams.priceMin);
+    countQueryParams.push(filterParams.priceMin);
+  }
+  if (typeof filterParams.priceMax === 'number') {
+    query += ` AND p.preis <= ?`;
+    countQuery += ` AND preis <= ?`;
+    queryParams.push(filterParams.priceMax);
+    countQueryParams.push(filterParams.priceMax);
+  }
+
+  query += ` ORDER BY p.id DESC LIMIT ? OFFSET ?`;
+  queryParams.push(itemsPerPage, offset);
+
+  const products = await db.query(query, queryParams);
+  const [{ total }] = await db.query(countQuery, countQueryParams);
 
   return {
     products: products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad })),
@@ -102,23 +121,43 @@ export async function getAllNewProducts(page = 1, itemsPerPage = 6) {
   };
 }
 
-export async function getAllUsedProducts(page = 1, itemsPerPage = 6) {
+
+export async function getAllUsedProducts(page = 1, itemsPerPage = 6, filterParams = {}) {
   const db = connection();
   const offset = (page - 1) * itemsPerPage;
-  const products = await db.query(`
+  let query = `
     SELECT p.id, p.name, p.preis, b.bild_pfad
     FROM produkte p
     LEFT JOIN bilder b ON p.id = b.produkt_id
     WHERE p.show_dia = 0
-    ORDER BY p.id DESC
-    LIMIT ? OFFSET ?
-  `, [itemsPerPage, offset]);
-
-  const [{ total }] = await db.query(`
+  `;
+  let countQuery = `
     SELECT COUNT(*) as total
     FROM produkte
     WHERE show_dia = 0
-  `);
+  `;
+  const queryParams = [];
+  const countQueryParams = [];
+
+  // Nur Preisfilter anwenden
+  if (typeof filterParams.priceMin === 'number') {
+    query += ` AND p.preis >= ?`;
+    countQuery += ` AND preis >= ?`;
+    queryParams.push(filterParams.priceMin);
+    countQueryParams.push(filterParams.priceMin);
+  }
+  if (typeof filterParams.priceMax === 'number') {
+    query += ` AND p.preis <= ?`;
+    countQuery += ` AND preis <= ?`;
+    queryParams.push(filterParams.priceMax);
+    countQueryParams.push(filterParams.priceMax);
+  }
+
+  query += ` ORDER BY p.id DESC LIMIT ? OFFSET ?`;
+  queryParams.push(itemsPerPage, offset);
+
+  const products = await db.query(query, queryParams);
+  const [{ total }] = await db.query(countQuery, countQueryParams);
 
   return {
     products: products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad })),
@@ -126,6 +165,8 @@ export async function getAllUsedProducts(page = 1, itemsPerPage = 6) {
     totalPages: Math.ceil(total / itemsPerPage)
   };
 }
+
+
 
 export async function getSingleProduct(id) {
   const db = connection();

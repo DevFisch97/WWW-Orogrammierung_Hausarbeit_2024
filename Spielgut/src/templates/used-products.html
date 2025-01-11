@@ -64,13 +64,13 @@
 
   <div class="pagination">
     {% if currentPage > 1 %}
-      <a href="/used-products?page={{ currentPage - 1 }}" class="pagination-button">Vorherige</a>
+      <a href="/new-products?page={{ currentPage - 1 }}{% if request.query.category %}&category={{ request.query.category }}{% endif %}{% if request.query.priceMin %}&priceMin={{ request.query.priceMin }}{% endif %}{% if request.query.priceMax %}&priceMax={{ request.query.priceMax }}{% endif %}" class="pagination-button">Vorherige</a>
     {% endif %}
-
+  
     <span class="pagination-info">Seite {{ currentPage }} von {{ totalPages }}</span>
-
+  
     {% if currentPage < totalPages %}
-      <a href="/used-products?page={{ currentPage + 1 }}" class="pagination-button">Nächste</a>
+      <a href="/new-products?page={{ currentPage + 1 }}{% if request.query.category %}&category={{ request.query.category }}{% endif %}{% if request.query.priceMin %}&priceMin={{ request.query.priceMin }}{% endif %}{% if request.query.priceMax %}&priceMax={{ request.query.priceMax }}{% endif %}" class="pagination-button">Nächste</a>
     {% endif %}
   </div>
 </section>

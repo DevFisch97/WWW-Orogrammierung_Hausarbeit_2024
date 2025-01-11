@@ -18,15 +18,36 @@ import {
       return { user, flashMessage, csrfToken, newProducts, usedProducts };
     }
   
-    async getNewProductsData(user, page, flashMessage, csrfToken) {
-      const { products: allNewProducts, totalPages } = await getAllNewProducts(page);
-      return { user, products: allNewProducts, currentPage: page, totalPages, flashMessage, csrfToken };
+    async getNewProductsData(user, page, flashMessage, csrfToken, filterParams) {
+      // Entfernen Sie ungültige oder leere Filterparameter
+      const validFilterParams = {};
+      if (filterParams.priceMin && !isNaN(parseFloat(filterParams.priceMin))) {
+        validFilterParams.priceMin = parseFloat(filterParams.priceMin);
+      }
+      if (filterParams.priceMax && !isNaN(parseFloat(filterParams.priceMax))) {
+        validFilterParams.priceMax = parseFloat(filterParams.priceMax);
+      }
+    
+      const { products: allNewProducts, totalPages } = await getAllNewProducts(page, 6, validFilterParams);
+      return { user, products: allNewProducts, currentPage: page, totalPages, flashMessage, csrfToken, filterParams: validFilterParams };
     }
-  
-    async getUsedProductsData(user, page, flashMessage, csrfToken) {
-      const { products: allUsedProducts, totalPages: usedTotalPages } = await getAllUsedProducts(page);
-      return { user, products: allUsedProducts, currentPage: page, totalPages: usedTotalPages, flashMessage, csrfToken };
+    
+    async getUsedProductsData(user, page, flashMessage, csrfToken, filterParams) {
+      // Entfernen Sie ungültige oder leere Filterparameter
+      const validFilterParams = {};
+      if (filterParams.priceMin && !isNaN(parseFloat(filterParams.priceMin))) {
+        validFilterParams.priceMin = parseFloat(filterParams.priceMin);
+      }
+      if (filterParams.priceMax && !isNaN(parseFloat(filterParams.priceMax))) {
+        validFilterParams.priceMax = parseFloat(filterParams.priceMax);
+      }
+    
+      const { products: allUsedProducts, totalPages } = await getAllUsedProducts(page, 6, validFilterParams);
+      return { user, products: allUsedProducts, currentPage: page, totalPages, flashMessage, csrfToken, filterParams: validFilterParams };
     }
+    
+    
+    
   
     async getProductDetailsData(user, productId, quantity, addToCartSuccess, flashMessage, csrfToken) {
       try {
