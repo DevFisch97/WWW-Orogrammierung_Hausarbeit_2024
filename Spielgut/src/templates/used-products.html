@@ -49,28 +49,29 @@
   </div>
 </form>
 
-
 <section class="product-page">
-  <h1 class="product-page-title">Gebrauchte Produkte</h1>
+  <p class="total-products">Gefundene Produkte: {{ products|length }} von {{ total }}</p>
+  <h1 class="product-page-title">Alle Produkte (Älteste zuerst)</h1>
   <div class="product-grid">
     {% for product in products %}
     <a href="/product/{{ product.id }}" class="product-page-card">
       <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-page-image">
       <h2 class="product-title">{{ product.name }}</h2>
       <p class="product-description">{{ product.preis }}€</p>
+      <p class="product-category">{{ product.kategorie_name }}</p>
     </a>
     {% endfor %}
   </div>
 
   <div class="pagination">
     {% if currentPage > 1 %}
-      <a href="/new-products?page={{ currentPage - 1 }}{% if request.query.category %}&category={{ request.query.category }}{% endif %}{% if request.query.priceMin %}&priceMin={{ request.query.priceMin }}{% endif %}{% if request.query.priceMax %}&priceMax={{ request.query.priceMax }}{% endif %}" class="pagination-button">Vorherige</a>
+      <a href="/used-products?page={{ currentPage - 1 }}{% if request.query.category %}&category={{ request.query.category }}{% endif %}{% if request.query.priceMin %}&priceMin={{ request.query.priceMin }}{% endif %}{% if request.query.priceMax %}&priceMax={{ request.query.priceMax }}{% endif %}" class="pagination-button">Vorherige</a>
     {% endif %}
   
     <span class="pagination-info">Seite {{ currentPage }} von {{ totalPages }}</span>
   
     {% if currentPage < totalPages %}
-      <a href="/new-products?page={{ currentPage + 1 }}{% if request.query.category %}&category={{ request.query.category }}{% endif %}{% if request.query.priceMin %}&priceMin={{ request.query.priceMin }}{% endif %}{% if request.query.priceMax %}&priceMax={{ request.query.priceMax }}{% endif %}" class="pagination-button">Nächste</a>
+      <a href="/used-products?page={{ currentPage + 1 }}{% if request.query.category %}&category={{ request.query.category }}{% endif %}{% if request.query.priceMin %}&priceMin={{ request.query.priceMin }}{% endif %}{% if request.query.priceMax %}&priceMax={{ request.query.priceMax }}{% endif %}" class="pagination-button">Nächste</a>
     {% endif %}
   </div>
 </section>

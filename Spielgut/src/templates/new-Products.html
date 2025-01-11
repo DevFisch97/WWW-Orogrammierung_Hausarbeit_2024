@@ -49,19 +49,22 @@
   </div>
 </form>
 
-
-
 <section class="product-page">
-  <h1 class="product-page-title">Neue Produkte</h1>
-  <div class="product-grid">
-    {% for product in products %}
-    <a href="/product/{{ product.id }}" class="product-page-card">
-      <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-page-image">
-      <h2 class="product-title">{{ product.name }}</h2>
-      <p class="product-description">{{ product.preis }}€</p>
-    </a>
-    {% endfor %}
-  </div>
+  <h1 class="product-page-title">Alle Produkte (Neueste zuerst)</h1>
+  {% if products and products|length > 0 %}
+    <div class="product-grid">
+      {% for product in products %}
+      <a href="/product/{{ product.id }}" class="product-page-card">
+        <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-page-image">
+        <h2 class="product-title">{{ product.name }}</h2>
+        <p class="product-description">{{ product.preis }}€</p>
+        <p class="product-category">{{ product.kategorie_name }}</p>
+      </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Keine Produkte gefunden.</p>
+  {% endif %}
 
   <div class="pagination">
     {% if currentPage > 1 %}
