@@ -50,33 +50,33 @@
 </form>
 
 <section class="product-page">
-  <h1 class="product-page-title">Alle Produkte (Neueste zuerst)</h1>
-  {% if products and products|length > 0 %}
-    <div class="product-grid">
-      {% for product in products %}
-      <a href="/product/{{ product.id }}" class="product-page-card">
-        <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-page-image">
-        <h2 class="product-title">{{ product.name }}</h2>
-        <p class="product-description">{{ product.preis }}€</p>
-        <p class="product-category">{{ product.kategorie_name }}</p>
-      </a>
-      {% endfor %}
+  <div class="product-page-header">
+    <div>
+      <h1 class="product-page-title">Alle Produkte</h1>
     </div>
-  {% else %}
-    <p>Keine Produkte gefunden.</p>
-  {% endif %}
-
-  <div class="pagination">
-    {% if currentPage > 1 %}
-      <a href="/new-products?page={{ currentPage - 1 }}{% if request.query.category %}&category={{ request.query.category }}{% endif %}{% if request.query.priceMin %}&priceMin={{ request.query.priceMin }}{% endif %}{% if request.query.priceMax %}&priceMax={{ request.query.priceMax }}{% endif %}" class="pagination-button">Vorherige</a>
-    {% endif %}
-  
-    <span class="pagination-info">Seite {{ currentPage }} von {{ totalPages }}</span>
-  
-    {% if currentPage < totalPages %}
-      <a href="/new-products?page={{ currentPage + 1 }}{% if request.query.category %}&category={{ request.query.category }}{% endif %}{% if request.query.priceMin %}&priceMin={{ request.query.priceMin }}{% endif %}{% if request.query.priceMax %}&priceMax={{ request.query.priceMax }}{% endif %}" class="pagination-button">Nächste</a>
+    {% if user and user.role == 'admin' %}
+    <a href="/create-product" class="btn btn-new-product">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="new-product-icon">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Neues Produkt
+    </a>
     {% endif %}
   </div>
+  {% if products and products|length > 0 %}
+  <div class="product-grid">
+    {% for product in products %}
+    <a href="/product/{{ product.id }}" class="product-page-card">
+      <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-page-image">
+      <h2 class="product-title">{{ product.name }}</h2>
+      <p class="product-description">{{ product.preis }}€</p>
+      <p class="product-category">{{ product.kategorie_name }}</p>
+    </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>Keine Produkte gefunden.</p>
+{% endif %}
 </section>
 {% endblock %}
-

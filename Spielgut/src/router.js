@@ -136,11 +136,25 @@ export class Router {
                         response = await this.cartController.handleUpdateCartItem(request, user);
                     }
                     break;
+              
                 case "/api/cart/remove":
                     if (request.method === "POST") {
                         response = await this.cartController.handleRemoveFromCart(request, user);
                     }
                     break;
+                    case "/create-product":
+                        if (!user || user.role !== 'admin') {
+                            response = new Response("", {
+                                status: 302,
+                                headers: { "Location": "/login" },
+                            });
+                        } else if (request.method === "GET") {
+                            response = await this.render("create-product.html", { user, flashMessage, csrfToken });
+                        } else if (request.method === "POST") {
+                            response = await this.productController.handleCreateProduct(request, user);
+                        }
+                        break;
+                        
                 default:
                     if (path.match(/^\/product\/\d+$/)) {
                         const productId = parseInt(path.split('/')[2]);

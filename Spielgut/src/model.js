@@ -75,150 +75,122 @@ export async function getUsedProductsDia() {
   return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
 }
 
-export async function getAllNewProducts(page = 1, itemsPerPage = 6, filterParams = {}) {
+export async function getAllNewProducts(filterParams = {}) {
   const db = connection();
-  const offset = (page - 1) * itemsPerPage;
   let query = `
     SELECT p.id, p.name, p.preis, b.bild_pfad, k.name as kategorie_name
     FROM produkte p
     LEFT JOIN bilder b ON p.id = b.produkt_id
     LEFT JOIN kategorie k ON p.kategorie_id = k.id
+    WHERE 1=1
   `;
-  let countQuery = `
-    SELECT COUNT(*) as total
-    FROM produkte p
-    LEFT JOIN kategorie k ON p.kategorie_id = k.id
-  `;
-  const queryParams = [];
-  const countQueryParams = [];
+  let queryParams = [];
 
-  console.log('Model: Received filter params:', filterParams);
-
-  if (filterParams.category && filterParams.category !== '') {
-    query += ` AND k.name = ?`;
-    countQuery += ` AND k.name = ?`;
-    queryParams.push(filterParams.category);
-    countQueryParams.push(filterParams.category);
+  if (filterParams.name) {
+    query += ` AND p.name LIKE ?`;
+    queryParams.push(`%${filterParams.name}%`);
   }
-  if (typeof filterParams.priceMin === 'number') {
+  if (filterParams.kategorie_id) {
+    query += ` AND p.kategorie_id = ?`;
+    queryParams.push(filterParams.kategorie_id);
+  }
+  if (filterParams.minPreis) {
     query += ` AND p.preis >= ?`;
-    countQuery += ` AND p.preis >= ?`;
-    queryParams.push(filterParams.priceMin);
-    countQueryParams.push(filterParams.priceMin);
+    queryParams.push(filterParams.minPreis);
   }
-  if (typeof filterParams.priceMax === 'number') {
+  if (filterParams.maxPreis) {
     query += ` AND p.preis <= ?`;
-    countQuery += ` AND p.preis <= ?`;
-    queryParams.push(filterParams.priceMax);
-    countQueryParams.push(filterParams.priceMax);
+    queryParams.push(filterParams.maxPreis);
   }
 
-  query += ` ORDER BY p.id DESC LIMIT ? OFFSET ?`;
-  queryParams.push(itemsPerPage, offset);
+  const countQuery = `SELECT COUNT(*) as total FROM produkte p WHERE 1=1`;
+  let countQueryParams = [];
 
-  console.log('Category filter applied:', filterParams.category);
-  console.log('SQL Query:', query);
-  console.log('Query parameters:', queryParams);
+  if (filterParams.name) {
+    countQuery += ` AND p.name LIKE ?`;
+    countQueryParams.push(`%${filterParams.name}%`);
+  }
+  if (filterParams.kategorie_id) {
+    countQuery += ` AND p.kategorie_id = ?`;
+    countQueryParams.push(filterParams.kategorie_id);
+  }
+  if (filterParams.minPreis) {
+    countQuery += ` AND p.preis >= ?`;
+    countQueryParams.push(filterParams.minPreis);
+  }
+  if (filterParams.maxPreis) {
+    countQuery += ` AND p.preis <= ?`;
+    countQueryParams.push(filterParams.maxPreis);
+  }
+
+
+  query += ` ORDER BY p.id DESC`;
 
   const products = await db.query(query, queryParams);
   const [{ total }] = await db.query(countQuery, countQueryParams);
 
-  console.log('Fetched products:', products);
-  console.log('Total products found:', products.length);
-
-  console.log('Model: Products found:', products.length);
-  console.log('Model: Total products:', total);
-
   return {
     products: products.map(([id, name, preis, bild_pfad, kategorie_name]) => ({ id, name, preis, bild_pfad, kategorie_name })),
-    total,
-    totalPages: Math.ceil(total / itemsPerPage)
+    total: parseInt(total)
   };
 }
 
-export async function getAllUsedProducts(page = 1, itemsPerPage = 6, filterParams = {}) {
+export async function getAllUsedProducts(filterParams = {}) {
   const db = connection();
-  const offset = (page - 1) * itemsPerPage;
-  
-  // Überprüfung aller Kategorien und ihrer Produktanzahl
-  const categoriesCount = await db.query(`
-    SELECT k.name, COUNT(p.id) as product_count
-    FROM kategorie k
-    LEFT JOIN produkte p ON k.id = p.kategorie_id 
-    GROUP BY k.id, k.name
-    ORDER BY k.name
-  `);
-  console.log('All categories and their product counts:', categoriesCount.map(c => `${c[0]}: ${c[1]}`));
-
-  // Überprüfung der Kategoriezuordnung für alle Produkte
-  const allProducts = await db.query(`
-    SELECT p.id, p.name, k.name as kategorie_name
-    FROM produkte p
-    LEFT JOIN kategorie k ON p.kategorie_id = k.id
-  `);
-  console.log('All products and their categories:');
-  allProducts.forEach(p => console.log(`Product ${p[0]} (${p[1]}) - Category: ${p[2]}`));
-
   let query = `
     SELECT p.id, p.name, p.preis, b.bild_pfad, k.name as kategorie_name
     FROM produkte p
     LEFT JOIN bilder b ON p.id = b.produkt_id
     LEFT JOIN kategorie k ON p.kategorie_id = k.id
+    WHERE p.status = 'used'
   `;
-  let countQuery = `
-    SELECT COUNT(*) as total
-    FROM produkte p
-    LEFT JOIN kategorie k ON p.kategorie_id = k.id
-  `;
-  const queryParams = [];
-  const countQueryParams = [];
+  let queryParams = [];
 
-  console.log('Filter params:', filterParams);
-
-  if (filterParams.category && filterParams.category !== 'Unkategorisiert') {
-    query += ` AND LOWER(k.name) = LOWER(?)`;
-    countQuery += ` AND LOWER(k.name) = LOWER(?)`;
-    queryParams.push(filterParams.category);
-    countQueryParams.push(filterParams.category);
+  if (filterParams.name) {
+    query += ` AND p.name LIKE ?`;
+    queryParams.push(`%${filterParams.name}%`);
   }
-  if (filterParams.priceMin && !isNaN(parseFloat(filterParams.priceMin))) {
+  if (filterParams.kategorie_id) {
+    query += ` AND p.kategorie_id = ?`;
+    queryParams.push(filterParams.kategorie_id);
+  }
+  if (filterParams.minPreis) {
     query += ` AND p.preis >= ?`;
-    countQuery += ` AND p.preis >= ?`;
-    queryParams.push(parseFloat(filterParams.priceMin));
-    countQueryParams.push(parseFloat(filterParams.priceMin));
+    queryParams.push(filterParams.minPreis);
   }
-  if (filterParams.priceMax && !isNaN(parseFloat(filterParams.priceMax))) {
+  if (filterParams.maxPreis) {
     query += ` AND p.preis <= ?`;
-    countQuery += ` AND p.preis <= ?`;
-    queryParams.push(parseFloat(filterParams.priceMax));
-    countQueryParams.push(parseFloat(filterParams.priceMax));
+    queryParams.push(filterParams.maxPreis);
   }
 
-  query += ` ORDER BY p.id DESC LIMIT ? OFFSET ?`;
-  queryParams.push(itemsPerPage, offset);
+  const countQuery = `SELECT COUNT(*) as total FROM produkte p WHERE p.status = 'used'`;
+  let countQueryParams = [];
 
-  console.log('Final query:', query);
-  console.log('Query params:', queryParams);
+  if (filterParams.name) {
+    countQuery += ` AND p.name LIKE ?`;
+    countQueryParams.push(`%${filterParams.name}%`);
+  }
+  if (filterParams.kategorie_id) {
+    countQuery += ` AND p.kategorie_id = ?`;
+    countQueryParams.push(filterParams.kategorie_id);
+  }
+  if (filterParams.minPreis) {
+    countQuery += ` AND p.preis >= ?`;
+    countQueryParams.push(filterParams.minPreis);
+  }
+  if (filterParams.maxPreis) {
+    countQuery += ` AND p.preis <= ?`;
+    countQueryParams.push(filterParams.maxPreis);
+  }
+
+  query += ` ORDER BY p.id DESC`;
 
   const products = await db.query(query, queryParams);
   const [{ total }] = await db.query(countQuery, countQueryParams);
 
-  console.log('Products found:', products.length);
-  console.log('Total products:', total);
-  console.log('Current page:', page);
-  console.log('Items per page:', itemsPerPage);
-  console.log('Total pages:', Math.ceil(total / itemsPerPage));
-
-  console.log('Total products from count query:', total);
-  console.log('Actual products returned:', products.length);
-
-  // Überprüfung der Kategoriezuordnung für jedes gefundene Produkt
-  products.forEach(p => console.log(`Found product ${p[0]} (${p[1]}) - Category: ${p[4]}`));
-
   return {
     products: products.map(([id, name, preis, bild_pfad, kategorie_name]) => ({ id, name, preis, bild_pfad, kategorie_name })),
-    total: total || 0,
-    totalPages: Math.ceil((total || 0) / itemsPerPage)
+    total: parseInt(total)
   };
 }
 
@@ -327,5 +299,22 @@ export async function getCartTotal(userId) {
     WHERE ci.user_id = ?
   `, [userId]);
   return result[0].total || 0;
+}
+
+export async function createProduct(data) {
+  const db = connection();
+  const result = await db.query(
+    "INSERT INTO produkte (name, preis, produkt_verweis, show_dia, kategorie_id) VALUES (?, ?, ?, ?, ?)",
+    [data.name, data.preis, data.beschreibung, data.show_dia, data.kategorie_id]
+  );
+  return result.insertId;
+}
+
+export async function createImage(productId, imagePath) {
+  const db = connection();
+  await db.query(
+    "INSERT INTO bilder (produkt_id, bild_pfad) VALUES (?, ?)",
+    [productId, imagePath]
+  );
 }
 
