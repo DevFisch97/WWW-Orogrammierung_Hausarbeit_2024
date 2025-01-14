@@ -53,35 +53,28 @@ export class Router {
                     pageData = await this.productController.getHomePageData(user, flashMessage, csrfToken);
                     response = await this.render("index.html", { ...pageData, user, flashMessage, csrfToken });
                     break;
-                case "/new-products":
-                    const page = parseInt(searchParams.get('page') || '1');
-                    const filterParams = {
-                        category: searchParams.get('category'),
-                        priceMin: searchParams.get('priceMin'),
-                        priceMax: searchParams.get('priceMax')
-                    };
-                    console.log('Router: Received filter params:', filterParams);
-                    console.log('Router: Query parameters:', searchParams);
-                    console.log('Router: Category filter:', searchParams.get('category'));
-                    pageData = await this.productController.getNewProductsData(user, page, flashMessage, csrfToken, filterParams);
-                    console.log('Router: Received pageData:', { 
-                        productsCount: pageData.products.length,
-                        currentPage: pageData.currentPage,
-                        totalPages: pageData.totalPages
-                    });
-                    response = await this.render("new-products.html", { ...pageData, user, flashMessage, csrfToken, request });
-                    break;
-                case "/used-products":
-                    const usedPage = parseInt(searchParams.get('page') || '1');
-                    const usedFilterParams = {
-                        category: searchParams.get('category'),
-                        priceMin: searchParams.get('priceMin'),
-                        priceMax: searchParams.get('priceMax')
-                    };
-                    console.log('Router: Received filter params:', usedFilterParams);
-                    pageData = await this.productController.getUsedProductsData(user, usedPage, flashMessage, csrfToken, usedFilterParams);
-                    response = await this.render("used-products.html", { ...pageData, user, flashMessage, csrfToken, request });
-                    break;
+                    case "/new-products":
+                        const filterParams = {
+                            category: searchParams.get('category') || null,
+                            priceMin: searchParams.get('priceMin') || null,
+                            priceMax: searchParams.get('priceMax') || null
+                        };
+                        console.log('Router: Received filter params:', filterParams);
+                        console.log('Router: Query parameters:', searchParams);
+                        console.log('Router: Category filter:', filterParams.category);
+                        pageData = await this.productController.getNewProductsData(user, flashMessage, csrfToken, filterParams);
+                        response = await this.render("new-products.html", { ...pageData, user, flashMessage, csrfToken, request });
+                        break;
+                        case "/used-products":
+                            const usedFilterParams = {
+                                category: searchParams.get('category') || null,
+                                priceMin: searchParams.get('priceMin') || null,
+                                priceMax: searchParams.get('priceMax') || null
+                            };
+                            console.log('Router: Received filter params:', usedFilterParams);
+                            pageData = await this.productController.getUsedProductsData(user, flashMessage, csrfToken, usedFilterParams);
+                            response = await this.render("used-products.html", { ...pageData, user, flashMessage, csrfToken, request });
+                            break;
                 case "/about":
                     response = await this.render("about.html", { user, flashMessage, csrfToken });
                     break;
@@ -142,11 +135,11 @@ export class Router {
                         response = await this.cartController.handleRemoveFromCart(request, user);
                     }
                     break;
-                    case "/create-product":
-                        if (!user || user.role !== 'admin') {
-                            response = new Response("", {
-                                status: 302,
-                                headers: { "Location": "/login" },
+                 case "/create-product":
+                    if (!user || user.role !== 'admin') {
+                        response = new Response("", {
+                        status: 302,
+                        headers: { "Location": "/login" },
                             });
                         } else if (request.method === "GET") {
                             response = await this.render("create-product.html", { user, flashMessage, csrfToken });

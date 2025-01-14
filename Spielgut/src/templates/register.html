@@ -3,13 +3,11 @@
 {% block content %}
 <section class="registration-form">
     <h2>Registrierung</h2>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash-message flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    {% if flashMessages %}
+    {% for message in flashMessages %}
+      <div class="flash-message flash-{{ message.category }}">{{ message.message }}</div>
+    {% endfor %}
+  {% endif %}
     <form action="/api/register" method="POST">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}">
         <div class="form-group">

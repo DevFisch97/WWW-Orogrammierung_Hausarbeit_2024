@@ -21,10 +21,10 @@ export class ProductController {
     return { user, flashMessage, csrfToken, newProducts, usedProducts };
   }
 
-  async getNewProductsData(user, page, flashMessage, csrfToken, filterParams) {
+  async getNewProductsData(user, flashMessage, csrfToken, filterParams = {}) {
   console.log('ProductController: Received filter params:', filterParams);
   const validFilterParams = {};
-  if (filterParams.category && filterParams.category !== '') {
+  if (filterParams.category) {
     validFilterParams.category = filterParams.category;
   }
   if (filterParams.priceMin && !isNaN(parseFloat(filterParams.priceMin))) {
@@ -36,57 +36,42 @@ export class ProductController {
 
   console.log('ProductController: Valid filter params:', validFilterParams);
 
-  const { products, total, totalPages } = await getAllNewProducts(page, 6, validFilterParams);
+  const products = await getAllNewProducts(validFilterParams);
   console.log('ProductController: Products returned:', products.length);
-  console.log('Total products:', total);
-  console.log('Total pages:', totalPages);
   
   return { 
     user, 
     products, 
-    currentPage: page, 
-    totalPages, 
     flashMessage, 
     csrfToken, 
-    filterParams: validFilterParams, 
-    total,
-    hasPreviousPage: page > 1,
-    hasNextPage: page < totalPages
+    filterParams: validFilterParams
   };
 }
 
-async getUsedProductsData(user, flashMessage, csrfToken, filterParams) {
+async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
   console.log('ProductController: Received filter params:', filterParams);
   const validFilterParams = {};
-  if (filterParams.category && typeof filterParams.category !== 'string') {
-    console.warn('Invalid category filter parameter. Ignoring.');
-  } else {
+  if (filterParams.category) {
     validFilterParams.category = filterParams.category;
   }
-  if (filterParams.minPrice && typeof filterParams.minPrice !== 'number' || filterParams.minPrice < 0) {
-    console.warn('Invalid minPrice filter parameter. Ignoring.');
-  } else {
-    validFilterParams.minPrice = filterParams.minPrice;
+  if (filterParams.priceMin && !isNaN(parseFloat(filterParams.priceMin))) {
+    validFilterParams.priceMin = parseFloat(filterParams.priceMin);
   }
-  if (filterParams.maxPrice && typeof filterParams.maxPrice !== 'number' || filterParams.maxPrice < 0) {
-    console.warn('Invalid maxPrice filter parameter. Ignoring.');
-  } else {
-    validFilterParams.maxPrice = filterParams.maxPrice;
+  if (filterParams.priceMax && !isNaN(parseFloat(filterParams.priceMax))) {
+    validFilterParams.priceMax = parseFloat(filterParams.priceMax);
   }
 
   console.log('ProductController: Valid filter params:', validFilterParams);
 
-  const { products, total } = await this.getAllUsedProducts(validFilterParams);
-    console.log('ProductController: Products returned:', products.length);
-    console.log('Total products:', total);
+  const products = await getAllUsedProducts(validFilterParams);
+  console.log('ProductController: Products returned:', products.length);
   
   return { 
     user, 
     products, 
     flashMessage, 
     csrfToken, 
-    filterParams: validFilterParams, 
-    total
+    filterParams: validFilterParams
   };
 }
   
@@ -210,3 +195,4 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams) {
   }
   
 }
+

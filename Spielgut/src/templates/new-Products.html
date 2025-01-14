@@ -8,12 +8,12 @@
       <label for="category">Kategorie:</label>
       <select id="category" name="category" class="form-input">
         <option value="">Alle Kategorien</option>
-        <option value="musikinstrumente" {% if request.query.category == 'musikinstrumente' %}selected{% endif %}>Musikinstrumente</option>
-        <option value="kreatives_spielzeug" {% if request.query.category == 'kreatives_spielzeug' %}selected{% endif %}>Kreatives Spielzeug</option>
-        <option value="bewegungsspielzeug" {% if request.query.category == 'bewegungsspielzeug' %}selected{% endif %}>Bewegungsspielzeug</option>
-        <option value="lernspielzeug" {% if request.query.category == 'lernspielzeug' %}selected{% endif %}>Lernspielzeug</option>
-        <option value="rollenspiel" {% if request.query.category == 'rollenspiel' %}selected{% endif %}>Rollenspiel</option>
-        <option value="konstruktionsspielzeug" {% if request.query.category == 'konstruktionsspielzeug' %}selected{% endif %}>Konstruktionsspielzeug</option>
+        <option value="1" {% if request.query.category == '1' %}selected{% endif %}>Musikinstrumente</option>
+        <option value="2" {% if request.query.category == '2' %}selected{% endif %}>Kreatives Spielzeug</option>
+        <option value="3" {% if request.query.category == '3' %}selected{% endif %}>Bewegungsspielzeug</option>
+        <option value="4" {% if request.query.category == '4' %}selected{% endif %}>Lernspielzeug</option>
+        <option value="5" {% if request.query.category == '5' %}selected{% endif %}>Rollenspiel</option>
+        <option value="6" {% if request.query.category == '6' %}selected{% endif %}>Konstruktionsspielzeug</option>
       </select>
     </div>
     <div class="filter-group">
@@ -52,7 +52,7 @@
 <section class="product-page">
   <div class="product-page-header">
     <div>
-      <h1 class="product-page-title">Alle Produkte</h1>
+      <h1 class="product-page-title">Neue Produkte</h1>
     </div>
     {% if user and user.role == 'admin' %}
     <a href="/create-product" class="btn btn-new-product">
@@ -64,7 +64,6 @@
     </a>
     {% endif %}
   </div>
-  {% if products and products|length > 0 %}
   <div class="product-grid">
     {% for product in products %}
     <a href="/product/{{ product.id }}" class="product-page-card">
@@ -75,8 +74,5 @@
     </a>
     {% endfor %}
   </div>
-{% else %}
-  <p>Keine Produkte gefunden.</p>
-{% endif %}
 </section>
 {% endblock %}
