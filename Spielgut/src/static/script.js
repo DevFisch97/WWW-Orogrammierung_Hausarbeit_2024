@@ -1,234 +1,53 @@
-import { connection } from "./services/db.js";
-
-export async function list() {
-  const db = connection();
-  const products = await db.query(`
-    SELECT p.id, p.name, p.preis, b.bild_pfad
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-  `);
-  return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
-}
-
-export async function get(id) {
-  const db = connection();
-  const [product] = await db.query(`
-    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE p.id = ?
-  `, [id]);
+document.addEventListener('DOMContentLoaded', () => {
+  const slideshows = document.querySelectorAll('.product-slideshow');
   
-  if (!product) throw new Error("Produkt nicht gefunden.");
-  return { 
-    id: product[0], 
-    name: product[1], 
-    preis: product[2], 
-    produkt_verweis: product[3], 
-    show_dia: product[4],
-    bild_pfad: product[5]
-  };
-}
+  slideshows.forEach(slideshow => {
+      const container = slideshow.querySelector('.product-container');
+      const products = container.querySelectorAll('.product-card');
+      let currentIndex = 0;
 
-export async function create(data) {
-  const db = connection();
-  await db.query("INSERT INTO produkte (name, preis, produkt_verweis, show_dia) VALUES (?, ?, ?, ?)", [
-    data.name,
-    data.preis,
-    data.produkt_verweis,
-    data.show_dia,
-  ]);
-}
+      function showProducts() {
+          for (let i = 0; i < products.length; i++) {
+              if (i >= currentIndex && i < currentIndex + 3) {
+                  products[i].style.display = 'block';
+              } else {
+                  products[i].style.display = 'none';
+              }
+          }
+      }
 
-export async function update(id, data) {
-  const db = connection();
-  await db.query("UPDATE produkte SET name = ?, preis = ?, produkt_verweis = ?, show_dia = ? WHERE id = ?", [
-    data.name,
-    data.preis,
-    data.produkt_verweis,
-    data.show_dia,
-    id,
-  ]);
-}
+      function nextSlide() {
+          currentIndex += 3;
+          if (currentIndex >= products.length) {
+              currentIndex = 0;
+          }
+          showProducts();
+      }
 
-export async function getNewProductsDia() {
-  const db = connection();
-  const products = await db.query(`
-    SELECT p.id, p.name, p.preis, b.bild_pfad
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE p.show_dia = 1 
-    ORDER BY p.id DESC 
-    LIMIT 6
-  `);
-  return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
-}
+      function prevSlide() {
+          currentIndex -= 3;
+          if (currentIndex < 0) {
+              currentIndex = Math.max(0, products.length - 3);
+          }
+          showProducts();
+      }
 
-export async function getUsedProductsDia() {
-  const db = connection();
-  const products = await db.query(`
-    SELECT p.id, p.name, p.preis, b.bild_pfad
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE p.show_dia = 0 
-    ORDER BY p.id DESC 
-    LIMIT 6
-  `);
-  return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
-}
+      showProducts();
+      const interval = setInterval(nextSlide, 5000); // Change slides every 5 seconds
 
-export async function getAllNewProducts(page = 1, itemsPerPage = 4) {
-  const db = connection();
-  const offset = (page - 1) * itemsPerPage;
-  const products = await db.query(`
-    SELECT p.id, p.name, p.preis, b.bild_pfad
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE p.show_dia = 1
-    ORDER BY p.id DESC
-    LIMIT ? OFFSET ?
-  `, [itemsPerPage, offset]);
+      // Add event listeners for manual navigation
+      const prevButton = slideshow.parentElement.querySelector('.prev-button');
+      const nextButton = slideshow.parentElement.querySelector('.next-button');
 
-  const [{ total }] = await db.query(`
-    SELECT COUNT(*) as total
-    FROM produkte
-    WHERE show_dia = 1
-  `);
+      prevButton.addEventListener('click', () => {
+          clearInterval(interval);
+          prevSlide();
+      });
 
-  return {
-    products: products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad })),
-    total,
-    page,
-    itemsPerPage,
-    totalPages: Math.ceil(total / itemsPerPage)
-  };
-}
+      nextButton.addEventListener('click', () => {
+          clearInterval(interval);
+          nextSlide();
+      });
+  });
+});
 
-export async function getAllUsedProducts(page = 1, itemsPerPage = 4) {
-  const db = connection();
-  const offset = (page - 1) * itemsPerPage;
-  const products = await db.query(`
-    SELECT p.id, p.name, p.preis, b.bild_pfad
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE p.show_dia = 0
-    ORDER BY p.id DESC
-    LIMIT ? OFFSET ?
-  `, [itemsPerPage, offset]);
-
-  const [{ total }] = await db.query(`
-    SELECT COUNT(*) as total
-    FROM produkte
-    WHERE show_dia = 0
-  `);
-
-  return {
-    products: products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad })),
-    total,
-    page,
-    itemsPerPage,
-    totalPages: Math.ceil(total / itemsPerPage)
-  };
-}
-
-export async function getSingleProduct(id) {
-  const db = connection();
-  const [product] = await db.query(`
-    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE p.id = ?
-  `, [id]);
-  
-  if (!product) throw new Error("Produkt nicht gefunden.");
-  return { 
-    id: product[0], 
-    name: product[1], 
-    preis: product[2], 
-    beschreibung: product[3],
-    show_dia: product[4],
-    bild_pfad: product[5]
-  };
-}
-
-export async function updateProduct(id, data) {
-  const db = connection();
-  await db.query("UPDATE produkte SET name = ?, preis = ?, produkt_verweis = ?, show_dia = ? WHERE id = ?", [
-    data.name,
-    data.preis,
-    data.beschreibung,
-    data.show_dia,
-    id,
-  ]);
-}
-
-export async function deleteProduct(id) {
-  const db = connection();
-  await db.query("DELETE FROM produkte WHERE id = ?", [id]);
-  await db.query("DELETE FROM bilder WHERE produkt_id = ?", [id]);
-}
-
-export async function addToCart(userId, productId, quantity) {
-  const db = connection();
-  const existingItem = await db.query(
-    "SELECT * FROM cart_items WHERE user_id = ? AND product_id = ?",
-    [userId, productId]
-  );
-
-  if (existingItem.length > 0) {
-    await db.query(
-      "UPDATE cart_items SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?",
-      [quantity, userId, productId]
-    );
-  } else {
-    await db.query(
-      "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)",
-      [userId, productId, quantity]
-    );
-  }
-}
-
-export async function updateCartItem(userId, productId, quantity) {
-  const db = connection();
-  await db.query(
-    "UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?",
-    [quantity, userId, productId]
-  );
-}
-
-export async function removeFromCart(userId, productId) {
-  const db = connection();
-  await db.query(
-    "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?",
-    [userId, productId]
-  );
-}
-
-export async function getCartItems(userId) {
-  const db = connection();
-  const items = await db.query(`
-    SELECT ci.product_id, ci.quantity, p.name, p.preis, b.bild_pfad
-    FROM cart_items ci
-    JOIN produkte p ON ci.product_id = p.id
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE ci.user_id = ?
-  `, [userId]);
-  return items.map(([productId, quantity, name, preis, bild_pfad]) => ({
-    productId,
-    quantity,
-    name,
-    preis,
-    bild_pfad
-  }));
-}
-
-export async function getCartTotal(userId) {
-  const db = connection();
-  const result = await db.query(`
-    SELECT SUM(p.preis * ci.quantity) as total
-    FROM cart_items ci
-    JOIN produkte p ON ci.product_id = p.id
-    WHERE ci.user_id = ?
-  `, [userId]);
-  return result[0].total || 0;
-}

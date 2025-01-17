@@ -7,9 +7,12 @@ import {
   updateProduct, 
   deleteProduct,
   createProduct,
-  createImage
+  createImage,
+  searchProducts
 } from "../model.js";
 import { setFlashMessage } from "../controllers/flashmessages_controller.js";
+import { join, dirname } from "https://deno.land/std/path/mod.ts";
+import { connection } from "../services/db.js";
 
 export class ProductController {
   constructor() {
@@ -18,7 +21,21 @@ export class ProductController {
   async getHomePageData(user, flashMessage, csrfToken) {
     const newProducts = await getNewProductsDia();
     const usedProducts = await getUsedProductsDia();
-    return { user, flashMessage, csrfToken, newProducts, usedProducts };
+    const diaShowProducts = await this.getDiaShowProducts();
+    return { user, flashMessage, csrfToken, newProducts, usedProducts, diaShowProducts };
+  }
+
+  async getDiaShowProducts() {
+    const db = connection();
+    const products = await db.query(`
+      SELECT p.id, p.name, p.preis, b.bild_pfad
+      FROM produkte p
+      LEFT JOIN bilder b ON p.id = b.produkt_id
+      WHERE p.show_dia = true
+      ORDER BY RANDOM()
+      LIMIT 10
+    `);
+    return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
   }
 
   async getNewProductsData(user, flashMessage, csrfToken, filterParams = {}) {
@@ -130,10 +147,14 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
     if (!user || user.role !== 'admin') {
       return new Response("Unauthorized", { status: 401 });
     }
-
+  
     let formData;
     try {
-      formData = await request.formData();
+      if (request.parsedFormData) {
+        formData = request.parsedFormData;
+      } else {
+        formData = await request.formData();
+      }
       console.log("Form data received:", Object.fromEntries(formData));
     } catch (error) {
       console.error("Error reading form data:", error);
@@ -144,9 +165,10 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       setFlashMessage(response, "Fehler beim Lesen der Formulardaten. Bitte versuchen Sie es erneut.", "error");
       return response;
     }
-
+  
     return this.processProductCreation(formData, user);
   }
+  
 
   async processProductCreation(formData, user) {
     const productData = {
@@ -156,30 +178,31 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       kategorie_id: parseInt(formData.get('productCategory')),
       show_dia: formData.get('diaShow') === 'on'
     };
-
+  
     const productImage = formData.get('productImage');
-
+  
     console.log("Product data:", productData);
     console.log("Product image:", productImage ? "Image file received" : "No image file");
-
+  
     try {
       console.log("Creating new product...");
       const newProductId = await createProduct(productData);
       console.log("New product created with ID:", newProductId);
       
-      if (productImage && productImage.size > 0) {
+      if (newProductId && productImage && productImage.size > 0) {
         const fileName = `product_${newProductId}_${Date.now()}.jpg`;
-        const imagePath = `/assets/Produktbilder/${fileName}`;
+        const projectRoot = Deno.cwd(); // Holt das aktuelle Arbeitsverzeichnis
+        const imagePath = join(projectRoot, "assets", "Produktbilder", fileName);
         
         console.log("Saving image file...");
         await this.saveImageFile(productImage, imagePath);
         console.log("Image file saved successfully");
-
+  
         console.log("Creating image record in database...");
-        await createImage(newProductId, imagePath);
+        await createImage(newProductId, `/assets/Produktbilder/${fileName}`);
         console.log("Image record created successfully");
       }
-
+  
       const response = new Response("", {
         status: 302,
         headers: { "Location": "/new-products" },
@@ -200,11 +223,39 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
   async saveImageFile(file, path) {
     try {
       const contents = await file.arrayBuffer();
+      const directory = dirname(path);
+      await Deno.mkdir(directory, { recursive: true });
       await Deno.writeFile(path, new Uint8Array(contents));
       console.log(`File saved successfully to ${path}`);
     } catch (error) {
       console.error(`Error saving file to ${path}:`, error);
       throw error;
+    }
+  }
+  
+  async getSearchResults(user, searchQuery, flashMessage, csrfToken) {
+    console.log('ProductController: Received search query:', searchQuery);
+    
+    try {
+      const products = await searchProducts(searchQuery);
+      console.log('ProductController: Search results returned:', products.length);
+      
+      return { 
+        user, 
+        products, 
+        searchQuery, 
+        flashMessage, 
+        csrfToken 
+      };
+    } catch (error) {
+      console.error('Error in search:', error);
+      return { 
+        user, 
+        products: [], 
+        searchQuery, 
+        flashMessage: { type: 'error', message: 'Ein Fehler ist bei der Suche aufgetreten.' }, 
+        csrfToken 
+      };
     }
   }
 }

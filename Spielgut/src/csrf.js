@@ -19,7 +19,7 @@ export async function verifyCSRFToken(token, sessionId) {
   try {
     const payload = await verify(token, secretKey);
     return payload.sessionId === sessionId;
-  } catch (error) {
+  } catch (error) {S
     console.error("CSRF token verification failed:", error);
     return false;
   }
@@ -49,3 +49,4 @@ export async function csrfProtection(request, user) {
   }
   return true;
 }
+

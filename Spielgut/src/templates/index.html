@@ -5,58 +5,54 @@
 
 <section class="products new-products">
     <div class="h1hovern">
-    <h1><a href="/new-products">Neu Produkte</a></h1>
+        <h1><a href="/new-products">Neue Produkte</a></h1>
     </div>
-    <div class="product-slideshow">
+    <div class="product-slideshow" id="new-products-slideshow">
         <div class="product-container">
             {% for product in newProducts %}
-                <div class="product-card">
+            <div class="product-card">
+                <a href="/product/{{ product.id }}">
                     <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-image">
                     <h2 class="product-title">{{ product.name }}</h2>
                     <p class="product-description">{{ product.preis }}€</p>
-                </div>
+                </a>
+            </div>
             {% endfor %}
         </div>
     </div>
     <div class="slideshow-controls">
-        <button class="control-button prev-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
+        <button class="control-button prev-button" data-slideshow="used-products-slideshow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
-        <button class="control-button next-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
+        <button class="control-button next-button" data-slideshow="used-products-slideshow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
     </div>
 </section>
 
 <section class="products used-products">
     <div class="h1hovern">
-    <h1><a href="/used-products">Gebrauchte Produkte</a></h1>
+        <h1><a href="/used-products">Gebrauchte Produkte</a></h1>
     </div>
-    <div class="product-slideshow">
+    <div class="product-slideshow" id="used-products-slideshow">
         <div class="product-container">
             {% for product in usedProducts %}
             <div class="product-card">
-                <img src="{{ product.bild_pfad  }}" alt="{{ product.name }}" class="product-image">
-                <h2 class="product-title">{{ product.name }}</h2>
-                <p class="product-description">{{ product.preis }}€</p>
+                <a href="/product/{{ product.id }}">
+                    <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-image">
+                    <h2 class="product-title">{{ product.name }}</h2>
+                    <p class="product-description">{{ product.preis }}€</p>
+                </a>
             </div>
             {% endfor %}
         </div>
     </div>
     <div class="slideshow-controls">
-        <button class="control-button prev-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
+        <button class="control-button prev-button" data-slideshow="used-products-slideshow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
-        <button class="control-button next-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
+        <button class="control-button next-button" data-slideshow="used-products-slideshow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
     </div>
 </section>
@@ -68,3 +64,4 @@
 </section>
 {% endblock %}
 
+<script src="/static/script.js"></script>

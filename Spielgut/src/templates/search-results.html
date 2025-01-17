@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="product-page">
+  <div class="product-page-header">
+    <h1 class="product-page-title">Suchergebnisse für "{{ searchQuery }}"</h1>
+  </div>
+
+  {% if products|length > 0 %}
+    <div class="product-grid">
+      {% for product in products %}
+        <a href="/product/{{ product.id }}" class="product-page-card">
+          <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-page-image">
+          <h2 class="product-title">{{ product.name }}</h2>
+          <p class="product-description">{{ product.preis }}€</p>
+          <p class="product-category">{{ product.kategorie_name }}</p>
+        </a>
+      {% endfor %}
+    </div>
+    
+  {% else %}
+    <p>Keine Produkte gefunden für "{{ searchQuery }}".</p>
+  {% endif %}
+</section>
+{% endblock %}

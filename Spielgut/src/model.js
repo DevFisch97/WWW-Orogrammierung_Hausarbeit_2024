@@ -273,3 +273,27 @@ export async function createImage(productId, imagePath) {
   );
 }
 
+// New function for search functionality
+export async function searchProducts(searchQuery) {
+  const db = connection();
+  const query = `
+    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad, k.name as kategorie_name, p.kategorie_id
+    FROM produkte p
+    LEFT JOIN bilder b ON p.id = b.produkt_id
+    LEFT JOIN kategorie k ON p.kategorie_id = k.id
+    WHERE p.name LIKE ? OR p.produkt_verweis LIKE ?
+    ORDER BY p.id DESC
+  `;
+  const queryParams = [`%${searchQuery}%`, `%${searchQuery}%`];
+
+  console.log('Search Query:', query);
+  console.log('Search Params:', queryParams);
+
+  const products = await db.query(query, queryParams);
+
+  console.log('Search Results:', products);
+
+  return products.map(([id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id]) => 
+    ({ id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id }));
+}
+

@@ -142,20 +142,30 @@ export class Router {
                     break;
                     case "/create-product":
                         if (!user || user.role !== 'admin') {
-                          response = new Response("", {
+                            response = new Response("", {
                             status: 302,
                             headers: { "Location": "/login" },
-                          });
+                            });
                         } else if (request.method === "GET") {
-                          response = await this.render("create-product.html", { user, flashMessage, csrfToken });
+                            response = await this.render("create-product.html", { user, flashMessage, csrfToken });
                         } else if (request.method === "POST") {
                             console.log("Router: About to call ProductController.handleCreateProduct");
                             console.log("Router: Request method:", request.method);
                             console.log("Router: Request headers:", Object.fromEntries(request.headers));
+                            
+                            // Move CSRF check here
+                            if (!await csrfProtection(request, user)) {
+                              return new Response("Invalid CSRF token", { status: 403 });
+                            }
+                            
                             response = await this.productController.handleCreateProduct(request, user);
                         }
                         break;
-                        
+                case "/search":
+                    const searchQuery = searchParams.get('q');
+                    pageData = await this.productController.getSearchResults(user, searchQuery, flashMessage, csrfToken);
+                    response = await this.render("search-results.html", { ...pageData, user, flashMessage, csrfToken });
+                    break;
                 default:
                     if (path.match(/^\/product\/\d+$/)) {
                         const productId = parseInt(path.split('/')[2]);
