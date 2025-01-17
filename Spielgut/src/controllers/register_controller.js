@@ -1,4 +1,5 @@
 import { registerUser } from "../services/user_manager.js";
+import { setFlashMessage } from "./flashmessages_controller.js";
 
 export class RegisterController {
   constructor(render) {
@@ -18,27 +19,45 @@ export class RegisterController {
 
     console.log("Registration attempt:", { username, email, straße, hausnummer, stadt, plz });
 
+    // Überprüfen Sie, ob alle erforderlichen Felder ausgefüllt sind
+    if (!username || !email || !password || !passwordRepeat || !straße || !hausnummer || !stadt || !plz) {
+        console.log("Missing required fields");
+        const response = new Response("", {
+            status: 302,
+            headers: { "Location": "/register" },
+        });
+        setFlashMessage(response, "Bitte füllen Sie alle Felder aus.", "error");
+        return response;
+    }
+
     if (password !== passwordRepeat) {
-      console.log("Password mismatch");
-      return new Response(await this.render("register.html", { error: "Passwörter stimmen nicht überein" }), {
-        status: 400,
-        headers: { "content-type": "text/html" },
-      });
+        console.log("Password mismatch");
+        const response = new Response("", {
+            status: 302,
+            headers: { "Location": "/register" },
+        });
+        setFlashMessage(response, "Passwörter stimmen nicht überein", "error");
+        return response;
     }
 
     try {
-      const userId = await registerUser(username, email, password, straße, hausnummer, stadt, plz);
-      console.log("User registered successfully:", userId);
-      return new Response("", {
-        status: 302,
-        headers: { "Location": "/login" },
-      });
+        const userId = await registerUser(username, email, password, straße, hausnummer, stadt, plz);
+        console.log("User registered successfully:", userId);
+        const response = new Response("", {
+            status: 302,
+            headers: { "Location": "/login" },
+        });
+        setFlashMessage(response, "Registrierung erfolgreich. Bitte melden Sie sich an.", "success");
+        return response;
     } catch (error) {
-      console.error("Registration error:", error);
-      return new Response(await this.render("register.html", { error: "Registrierung fehlgeschlagen: " + error.message }), {
-        status: 400,
-        headers: { "content-type": "text/html" },
-      });
+        console.error("Registration error:", error);
+        const response = new Response("", {
+            status: 302,
+            headers: { "Location": "/register" },
+        });
+        setFlashMessage(response, "Registrierung fehlgeschlagen: " + error.message, "error");
+        return response;
     }
-  }
 }
+}
+

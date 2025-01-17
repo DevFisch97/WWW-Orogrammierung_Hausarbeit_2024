@@ -8,42 +8,42 @@
       <div class="flash-message flash-{{ message.category }}">{{ message.message }}</div>
     {% endfor %}
   {% endif %}
-    <form action="/api/register" method="POST">
-        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-        <div class="form-group">
-            <label for="username">Benutzername</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-group">
-            <label for="email">E-Mail</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Passwort</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div class="form-group">
-            <label for="password-repeat">Passwort wiederholen</label>
-            <input type="password" id="password-repeat" name="password-repeat" required>
-        </div>
-        <div class="form-group">
-            <label for="straße">Straße</label>
-            <input type="text" id="straße" name="straße" required>
-        </div>
-        <div class="form-group">
-            <label for="hausnummer">Hausnummer</label>
-            <input type="text" id="hausnummer" name="hausnummer" required>
-        </div>
-        <div class="form-group">
-            <label for="stadt">Stadt</label>
-            <input type="text" id="stadt" name="stadt" required>
-        </div>
-        <div class="form-group">
-            <label for="plz">PLZ</label>
-            <input type="text" id="plz" name="plz" required>
-        </div>
-        <button type="submit" class="submit-button">Registrieren</button>
-    </form>
+  <form action="/api/register" method="POST">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+    <div class="form-group">
+        <label for="username">Benutzername</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+        <label for="email">E-Mail</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+        <label for="password">Passwort</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <div class="form-group">
+        <label for="password-repeat">Passwort wiederholen</label>
+        <input type="password" id="password-repeat" name="password-repeat" required>
+    </div>
+    <div class="form-group">
+        <label for="straße">Straße</label>
+        <input type="text" id="straße" name="straße" required>
+    </div>
+    <div class="form-group">
+        <label for="hausnummer">Hausnummer</label>
+        <input type="text" id="hausnummer" name="hausnummer" required>
+    </div>
+    <div class="form-group">
+        <label for="stadt">Stadt</label>
+        <input type="text" id="stadt" name="stadt" required>
+    </div>
+    <div class="form-group">
+        <label for="plz">PLZ</label>
+        <input type="text" id="plz" name="plz" required>
+    </div>
+    <button type="submit" class="submit-button">Registrieren</button>
+</form>
 </section>
 {% endblock %}
 

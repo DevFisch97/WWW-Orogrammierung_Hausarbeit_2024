@@ -112,6 +112,11 @@ export class Router {
                         response = await this.registerController.handleRegister(request);
                     }
                     break;
+                case "/api/register":
+                    if (request.method === "POST") {
+                        response = await this.registerController.handleRegister(request);
+                    }
+                    break;
                 case "/api/logout":
                     response = await this.loginController.handleLogout(request);
                     break;
@@ -135,15 +140,18 @@ export class Router {
                         response = await this.cartController.handleRemoveFromCart(request, user);
                     }
                     break;
-                 case "/create-product":
-                    if (!user || user.role !== 'admin') {
-                        response = new Response("", {
-                        status: 302,
-                        headers: { "Location": "/login" },
-                            });
+                    case "/create-product":
+                        if (!user || user.role !== 'admin') {
+                          response = new Response("", {
+                            status: 302,
+                            headers: { "Location": "/login" },
+                          });
                         } else if (request.method === "GET") {
-                            response = await this.render("create-product.html", { user, flashMessage, csrfToken });
+                          response = await this.render("create-product.html", { user, flashMessage, csrfToken });
                         } else if (request.method === "POST") {
+                            console.log("Router: About to call ProductController.handleCreateProduct");
+                            console.log("Router: Request method:", request.method);
+                            console.log("Router: Request headers:", Object.fromEntries(request.headers));
                             response = await this.productController.handleCreateProduct(request, user);
                         }
                         break;

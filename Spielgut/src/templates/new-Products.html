@@ -51,19 +51,19 @@
 
 <section class="product-page">
   <div class="product-page-header">
-    <div>
-      <h1 class="product-page-title">Neue Produkte</h1>
-    </div>
-    {% if user and user.role == 'admin' %}
-    <a href="/create-product" class="btn btn-new-product">
+    <h1 class="product-page-title">Neue Produkte</h1>
+  </div>
+  {% if user and user.role == 'admin' %}
+  <div class="new-product-button-container">
+    <a href="/create-product" class="btn btn-primary btn-new-product">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="new-product-icon">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
       </svg>
       Neues Produkt
     </a>
-    {% endif %}
   </div>
+  {% endif %}
   <div class="product-grid">
     {% for product in products %}
     <a href="/product/{{ product.id }}" class="product-page-card">
@@ -76,3 +76,4 @@
   </div>
 </section>
 {% endblock %}
+

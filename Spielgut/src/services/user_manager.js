@@ -8,6 +8,12 @@ export async function registerUser(username, email, password, straße, hausnumme
   console.log("Starting user registration process");
 
   try {
+    // Überprüfen Sie, ob der Benutzername oder die E-Mail bereits existiert
+    const existingUser = db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]);
+    if (existingUser.length > 0) {
+      throw new Error("Benutzername oder E-Mail existiert bereits");
+    }
+
     db.query('BEGIN TRANSACTION');
     
     console.log("Inserting user into database");
@@ -119,3 +125,4 @@ export async function getUserRole(userId) {
     return null;
   }
 }
+

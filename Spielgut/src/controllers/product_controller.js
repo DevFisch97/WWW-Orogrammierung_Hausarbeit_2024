@@ -130,10 +130,11 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
     if (!user || user.role !== 'admin') {
       return new Response("Unauthorized", { status: 401 });
     }
-  
+
     let formData;
     try {
       formData = await request.formData();
+      console.log("Form data received:", Object.fromEntries(formData));
     } catch (error) {
       console.error("Error reading form data:", error);
       const response = new Response("", {
@@ -143,30 +144,42 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       setFlashMessage(response, "Fehler beim Lesen der Formulardaten. Bitte versuchen Sie es erneut.", "error");
       return response;
     }
-  
+
+    return this.processProductCreation(formData, user);
+  }
+
+  async processProductCreation(formData, user) {
     const productData = {
       name: formData.get('productName'),
       beschreibung: formData.get('productDescription'),
       preis: parseFloat(formData.get('productPrice')),
-      kategorie_id: formData.get('productCategory'),
+      kategorie_id: parseInt(formData.get('productCategory')),
       show_dia: formData.get('diaShow') === 'on'
     };
-  
+
     const productImage = formData.get('productImage');
-  
+
+    console.log("Product data:", productData);
+    console.log("Product image:", productImage ? "Image file received" : "No image file");
+
     try {
+      console.log("Creating new product...");
       const newProductId = await createProduct(productData);
+      console.log("New product created with ID:", newProductId);
       
       if (productImage && productImage.size > 0) {
         const fileName = `product_${newProductId}_${Date.now()}.jpg`;
         const imagePath = `/assets/Produktbilder/${fileName}`;
         
-        // Implement image saving logic here
+        console.log("Saving image file...");
         await this.saveImageFile(productImage, imagePath);
-  
+        console.log("Image file saved successfully");
+
+        console.log("Creating image record in database...");
         await createImage(newProductId, imagePath);
+        console.log("Image record created successfully");
       }
-  
+
       const response = new Response("", {
         status: 302,
         headers: { "Location": "/new-products" },
@@ -179,20 +192,20 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
         status: 302,
         headers: { "Location": "/create-product" },
       });
-      setFlashMessage(response, "Fehler beim Erstellen des Produkts. Bitte versuchen Sie es erneut.", "error");
+      setFlashMessage(response, `Fehler beim Erstellen des Produkts: ${error.message}`, "error");
       return response;
     }
   }
   
   async saveImageFile(file, path) {
-    // Implement file saving logic here
-    // This is a placeholder implementation
-    console.log(`Saving file to ${path}`);
-    // In a real implementation, you would write the file to the server's file system
-    // For example:
-    // const contents = await file.arrayBuffer();
-    // await Deno.writeFile(path, new Uint8Array(contents));
+    try {
+      const contents = await file.arrayBuffer();
+      await Deno.writeFile(path, new Uint8Array(contents));
+      console.log(`File saved successfully to ${path}`);
+    } catch (error) {
+      console.error(`Error saving file to ${path}:`, error);
+      throw error;
+    }
   }
-  
 }
 
