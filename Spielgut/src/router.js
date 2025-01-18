@@ -8,6 +8,7 @@ import { getUserFromSession, getAndClearFlashMessage, setFlashMessage, clearFlas
 import { csrfProtection, generateCSRFToken} from "./csrf.js";
 import { createDebug } from "./services/debug.js";
 import { UserManagementController } from "./controllers/user_managment_controller.js";
+import { getRequestBody } from "./services/requestBodyHelper.js";
 
 const log = createDebug('spielgut:router');
 
@@ -47,16 +48,8 @@ export class Router {
 
             if (request.method === "POST") {
                 log("Router: Anfrage mit POST-Methode empfangen");
-                // Klonen Sie die Anfrage, um den Body zu erhalten, ohne ihn zu konsumieren
-                const clonedRequest = request.clone();
-                const contentType = request.headers.get("content-type");
-                if (contentType && contentType.includes("application/x-www-form-urlencoded")) {
-                    const formData = await clonedRequest.formData();
-                    log("Router: FormData extrahiert");
-                } else if (contentType && contentType.includes("application/json")) {
-                    const jsonData = await clonedRequest.json();
-                    log("Router: JSON-Daten extrahiert");
-                }
+                const body = await getRequestBody(request);
+                log("Router: Body extrahiert:", body);
             }
 
             // Check CSRF token for POST, PUT, DELETE requests
@@ -174,9 +167,7 @@ export class Router {
                         response = await this.render("user-managment.html", { ...pageData, user });
                     } else if (request.method === "POST") {
                         const action = searchParams.get('action');
-                        if (action === 'create') {
-                            response = await this.userManagementController.handleCreateUser(request, user);
-                        } else if (action === 'update') {
+                           if (action === 'update') {
                             response = await this.userManagementController.handleUpdateUser(request, user);
                         } else if (action === 'delete') {
                             response = await this.userManagementController.handleDeleteUser(request, user);

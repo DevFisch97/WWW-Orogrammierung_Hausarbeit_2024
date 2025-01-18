@@ -3,31 +3,6 @@
 {% block content %}
 <section class="user-management">
     <h1>Benutzerverwaltung</h1>
-    
-    <h2>Benutzer erstellen</h2>
-    <form action="/user-management?action=create" method="POST">
-        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-        <div class="form-group">
-            <label for="username">Benutzername</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-group">
-            <label for="email">E-Mail</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Passwort</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div class="form-group">
-            <label for="role">Rolle</label>
-            <select id="role" name="role" required>
-                <option value="user">Benutzer</option>
-                <option value="admin">Administrator</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Benutzer erstellen</button>
-    </form>
 
     <h2>Benutzerliste</h2>
     <table class="user-table">

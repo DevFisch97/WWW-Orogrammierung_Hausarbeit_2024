@@ -3,6 +3,7 @@ import { setFlashMessage } from "./flashmessages_controller.js";
 import { createDebug } from "../services/debug.js";
 
 
+
 const log = createDebug('spielgut:register_controller');
 
 export class RegisterController {
@@ -11,15 +12,16 @@ export class RegisterController {
   }
 
   async handleRegister(request) {
-    const formData = await request.formData();
-    const username = formData.get("username");
-    const email = formData.get("email");
-    const password = formData.get("password");
-    const passwordRepeat = formData.get("password-repeat");
-    const straße = formData.get("straße");
-    const hausnummer = formData.get("hausnummer");
-    const stadt = formData.get("stadt");
-    const plz = formData.get("plz");
+    const formData = await getRequestBody(request);
+    log("Registration attempt:", formData);
+    const username = formData.username;
+    const email = formData.email;
+    const password = formData.password;
+    const passwordRepeat = formData["password-repeat"];
+    const straße = formData.straße;
+    const hausnummer = formData.hausnummer;
+    const stadt = formData.stadt;
+    const plz = formData.plz;
 
     log("Registration attempt:", { username, email, straße, hausnummer, stadt, plz });
 

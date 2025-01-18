@@ -14,6 +14,7 @@ import { setFlashMessage } from "../controllers/flashmessages_controller.js";
 import { join, dirname } from "https://deno.land/std/path/mod.ts";
 import { connection } from "../services/db.js";
 import { createDebug } from "../services/debug.js";
+import { getRequestBody } from "../services/requestBodyHelper.js";
 
 const log = createDebug('spielgut:product_controller');
 
@@ -203,14 +204,12 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       return new Response("Unauthorized", { status: 401 });
     }
   
-    let formData;
     try {
-      if (request.parsedFormData) {
-        formData = request.parsedFormData;
-      } else {
-        formData = await request.formData();
-      }
-      log("Form data received:", Object.fromEntries(formData));
+      const formData = await getRequestBody(request);
+      log("Form data received:", formData);
+
+      return this.processProductCreation(formData, user);
+
     } catch (error) {
       error("Error reading form data:", error);
       const response = new Response("", {
@@ -220,8 +219,6 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       setFlashMessage(response, "Fehler beim Lesen der Formulardaten. Bitte versuchen Sie es erneut.", "error");
       return response;
     }
-  
-    return this.processProductCreation(formData, user);
   }
   
 

@@ -1,5 +1,6 @@
 import { create, verify } from "https://deno.land/x/djwt@v2.8/mod.ts";
 import { createDebug } from "./services/debug.js";
+import { getRequestBody } from "./services/requestBodyHelper.js";
 
 const log = createDebug('spielgut:csrf');
 
@@ -22,7 +23,7 @@ export async function verifyCSRFToken(token, sessionId) {
   try {
     const payload = await verify(token, secretKey);
     return payload.sessionId === sessionId;
-  } catch (error) {S
+  } catch (error) {
     console.error("CSRF token verification failed:", error);
     return false;
   }
@@ -30,25 +31,22 @@ export async function verifyCSRFToken(token, sessionId) {
 
 export async function csrfProtection(request, user) {
   if (["POST", "PUT", "DELETE"].includes(request.method) && user) {
-    let formData;
+    let body;
     try {
-      formData = await request.formData();
+      body = await getRequestBody(request);
     } catch (error) {
-      console.error("Error parsing form data:", error);
+      console.error("Fehler beim Parsen der Anfragedaten:", error);
       return false;
     }
     
-    const token = formData.get("_csrf");
-    log("Received CSRF token:", token);
-    log("Expected CSRF token:", csrfTokens.get(user.sessionId));
+    const token = body._csrf;
+    log("Empfangener CSRF-Token:", token);
+    log("Erwarteter CSRF-Token:", csrfTokens.get(user.sessionId));
     
     if (!token || !await verifyCSRFToken(token, user.sessionId)) {
-      log("CSRF token validation failed");
+      log("CSRF-Token-Validierung fehlgeschlagen");
       return false;
     }
-    
-    // Store formData for later use
-    request.parsedFormData = formData;
   }
   return true;
 }

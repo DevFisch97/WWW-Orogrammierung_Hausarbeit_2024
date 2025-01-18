@@ -6,6 +6,7 @@ import { sessions, csrfTokens } from "../data/sessionStore.js";
 import { createDebug } from "../services/debug.js";
 import { connection } from "../services/db.js";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import { getRequestBody } from "../services/requestBodyHelper.js";
 
 const log = createDebug('spielgut:login_controller');
 
@@ -16,10 +17,10 @@ export class LoginController {
 
   async handleLogin(request) {
     try {
-      const formData = await request.formData();
-      log("handleLogin consum");
-      const email = formData.get("email");
-      const password = formData.get("password");
+      const formData = await getRequestBody(request);
+      log("handleLogin formData:", formData);
+      const email = formData.email;
+      const password = formData.password;
 
       log("Login-Versuch für E-Mail:", email);
 
@@ -117,16 +118,16 @@ export class LoginController {
 
   async handleAccountUpdate(request, user) {
     try {
-      const formData = await request.formData();
-      log("handleAccountUpdate consum");
-      const username = formData.get('username');
-      const email = formData.get('email');
-      const street = formData.get('street');
-      const houseNumber = formData.get('house_number');
-      const city = formData.get('city');
-      const zipCode = formData.get('zip_code');
-      const newPassword = formData.get('new_password');
-      const confirmPassword = formData.get('confirm_password');
+      const formData = await getRequestBody(request);
+      log("handleAccountUpdate formData:", formData);
+      const username = formData.username;
+      const email = formData.email;
+      const street = formData.street;
+      const houseNumber = formData.house_number;
+      const city = formData.city;
+      const zipCode = formData.zip_code;
+      const newPassword = formData.new_password;
+      const confirmPassword = formData.confirm_password;
 
       log("Received form data:", { username, email, street, houseNumber, city, zipCode });
 

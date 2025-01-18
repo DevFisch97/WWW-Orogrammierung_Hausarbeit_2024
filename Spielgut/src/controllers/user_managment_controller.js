@@ -1,8 +1,9 @@
 import { createDebug } from "../services/debug.js";
 import { connection } from "../services/db.js";
 import { setFlashMessage } from "./flashmessages_controller.js";
+import { getRequestBody } from "../services/requestBodyHelper.js";
 
-const log = createDebug('spielgut:user_management_controller');
+const log = createDebug('spielgut:umc');
 
 export class UserManagementController {
   constructor() {
@@ -14,10 +15,15 @@ export class UserManagementController {
       const users = await this.db.query(`
         SELECT u.id, u.username, u.email, r.name as role
         FROM users u
-        JOIN roles r ON u.role_id = r.id
+        LEFT JOIN roles r ON u.role_id = r.id
         ORDER BY u.id
       `);
-      return users.map(([id, username, email, role]) => ({ id, username, email, role }));
+      return users.map(([id, username, email, role]) => ({
+        id,
+        username,
+        email,
+        role: role || 'Keine Rolle zugewiesen'
+      }));
     } catch (error) {
       log("Error fetching user list:", error);
       throw error;
@@ -38,52 +44,19 @@ export class UserManagementController {
     return { users, flashMessage, csrfToken };
   }
 
-  async handleCreateUser(request, adminUser) {
-    if (!adminUser || adminUser.role !== 'admin') {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
-    const formData = await request.formData();
-    const username = formData.get('username');
-    const email = formData.get('email');
-    const password = formData.get('password');
-    const role = formData.get('role');
-
-    try {
-      await this.db.query(`
-        INSERT INTO users (username, email, password, role_id)
-        VALUES (?, ?, ?, (SELECT id FROM roles WHERE name = ?))
-      `, [username, email, password, role]);
-
-      const response = new Response("", {
-        status: 302,
-        headers: { "Location": "/user-management" },
-      });
-      setFlashMessage(response, "Benutzer erfolgreich erstellt.", "success");
-      return response;
-    } catch (error) {
-      log("Error creating user:", error);
-      const response = new Response("", {
-        status: 302,
-        headers: { "Location": "/user-management" },
-      });
-      setFlashMessage(response, "Fehler beim Erstellen des Benutzers.", "error");
-      return response;
-    }
-  }
 
   async handleUpdateUser(request, adminUser) {
     if (!adminUser || adminUser.role !== 'admin') {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const formData = await request.formData();
-    const userId = formData.get('userId');
-    const username = formData.get('username');
-    const email = formData.get('email');
-    const role = formData.get('role');
-
     try {
+      const formData = await getRequestBody(request);
+      const userId = formData.userId;
+      const username = formData.username;
+      const email = formData.email;
+      const role = formData.role;
+
       await this.db.query(`
         UPDATE users
         SET username = ?, email = ?, role_id = (SELECT id FROM roles WHERE name = ?)
@@ -112,11 +85,23 @@ export class UserManagementController {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const formData = await request.formData();
-    const userId = formData.get('userId');
-
     try {
+      const formData = await getRequestBody(request);
+      const userId = formData.userId;
+
+      // Starten einer Transaktion
+      await this.db.query("BEGIN TRANSACTION");
+
+      // Löschen aller abhängigen Datensätze
+      await this.db.query("DELETE FROM cart_items WHERE user_id = ?", [userId]);
+      await this.db.query("DELETE FROM adress WHERE user_id = ?", [userId]);
+      // Fügen Sie hier weitere DELETE-Anweisungen für andere abhängige Tabellen hinzu
+
+      // Löschen des Benutzers
       await this.db.query("DELETE FROM users WHERE id = ?", [userId]);
+
+      // Commit der Transaktion
+      await this.db.query("COMMIT");
 
       const response = new Response("", {
         status: 302,
@@ -125,6 +110,9 @@ export class UserManagementController {
       setFlashMessage(response, "Benutzer erfolgreich gelöscht.", "success");
       return response;
     } catch (error) {
+      // Rollback bei einem Fehler
+      await this.db.query("ROLLBACK");
+
       log("Error deleting user:", error);
       const response = new Response("", {
         status: 302,
