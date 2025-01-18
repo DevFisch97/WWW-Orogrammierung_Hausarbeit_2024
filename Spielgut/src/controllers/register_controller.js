@@ -1,5 +1,9 @@
 import { registerUser } from "../services/user_manager.js";
 import { setFlashMessage } from "./flashmessages_controller.js";
+import { createDebug } from "../services/debug.js";
+
+
+const log = createDebug('spielgut:register_controller');
 
 export class RegisterController {
   constructor(render) {
@@ -17,11 +21,11 @@ export class RegisterController {
     const stadt = formData.get("stadt");
     const plz = formData.get("plz");
 
-    console.log("Registration attempt:", { username, email, straße, hausnummer, stadt, plz });
+    log("Registration attempt:", { username, email, straße, hausnummer, stadt, plz });
 
     // Überprüfen Sie, ob alle erforderlichen Felder ausgefüllt sind
     if (!username || !email || !password || !passwordRepeat || !straße || !hausnummer || !stadt || !plz) {
-        console.log("Missing required fields");
+        log("Missing required fields");
         const response = new Response("", {
             status: 302,
             headers: { "Location": "/register" },
@@ -31,7 +35,7 @@ export class RegisterController {
     }
 
     if (password !== passwordRepeat) {
-        console.log("Password mismatch");
+        log("Password mismatch");
         const response = new Response("", {
             status: 302,
             headers: { "Location": "/register" },
@@ -42,7 +46,7 @@ export class RegisterController {
 
     try {
         const userId = await registerUser(username, email, password, straße, hausnummer, stadt, plz);
-        console.log("User registered successfully:", userId);
+        log("User registered successfully:", userId);
         const response = new Response("", {
             status: 302,
             headers: { "Location": "/login" },
@@ -50,7 +54,7 @@ export class RegisterController {
         setFlashMessage(response, "Registrierung erfolgreich. Bitte melden Sie sich an.", "success");
         return response;
     } catch (error) {
-        console.error("Registration error:", error);
+        log("Registration error:", error);
         const response = new Response("", {
             status: 302,
             headers: { "Location": "/register" },

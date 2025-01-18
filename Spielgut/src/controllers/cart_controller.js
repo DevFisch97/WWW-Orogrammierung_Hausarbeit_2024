@@ -1,5 +1,6 @@
 import { addToCart, updateCartItem, removeFromCart, getCartItems, getCartTotal } from "../model.js";
 
+
 export class CartController {
   constructor(render) {
     this.render = render;

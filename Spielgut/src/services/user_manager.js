@@ -1,50 +1,54 @@
 import { connection } from "./db.js";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import { createDebug } from "./debug.js";
+
+
+const log = createDebug('spielgut:user_manager');
 
 export async function registerUser(username, email, password, straße, hausnummer, stadt, plz) {
   const db = connection();
   const hashedPassword = await bcrypt.hash(password);
   
-  console.log("Starting user registration process");
+  log("Starting user registration process");
 
   try {
     // Überprüfen Sie, ob der Benutzername oder die E-Mail bereits existiert
-    const existingUser = db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]);
+    const existingUser = await db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]); // Use await here
     if (existingUser.length > 0) {
       throw new Error("Benutzername oder E-Mail existiert bereits");
     }
 
-    db.query('BEGIN TRANSACTION');
+    await db.query('BEGIN TRANSACTION'); // Use await here
     
-    console.log("Inserting user into database");
-    const userResult = db.query(
+    log("Inserting user into database");
+    const userResult = await db.query( // Use await here
       'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, 2)',
       [username, email, hashedPassword]
     );
-    const userId = userResult.lastInsertId;
-    console.log("User inserted, ID:", userId);
+    const userId = db.lastInsertRowId; // Use lastInsertRowId instead of lastInsertId
+    log("User inserted, ID:", userId);
     
-    console.log("Inserting address into database");
-    db.query(
+    log("Inserting address into database");
+    await db.query( // Use await here
       'INSERT INTO adress (user_id, str, hausnummer, stadt, plz) VALUES (?, ?, ?, ?, ?)',
       [userId, straße, hausnummer, stadt, plz]
     );
-    console.log("Address inserted");
+    log("Address inserted");
     
-    db.query('COMMIT');
-    console.log("Transaction committed");
+    await db.query('COMMIT'); // Use await here
+    log("Transaction committed");
     
     return userId;
   } catch (error) {
-    console.error("Error during registration:", error);
-    console.error("Error details:", error.message);
-    console.error("Error stack:", error.stack);
+    log("Error during registration:", error);
+    log("Error details:", error.message);
+    log("Error stack:", error.stack);
     try {
-      db.query('ROLLBACK');
-      console.log("Transaction rolled back");
+      await db.query('ROLLBACK'); // Use await here
+      log("Transaction rolled back");
     } catch (rollbackError) {
-      console.error("Error during rollback:", rollbackError);
-      console.error("Rollback error details:", rollbackError.message);
+      log("Error during rollback:", rollbackError);
+      log("Rollback error details:", rollbackError.message);
     }
     throw error;
   }
@@ -53,35 +57,35 @@ export async function registerUser(username, email, password, straße, hausnumme
 export async function loginUser(email, password) {
   const db = connection();
   
-  console.log('Attempting to fetch user:', email);
+  log('Attempting to fetch user:', email);
   
   try {
     const result = db.query('SELECT * FROM users WHERE email = ?', [email]);
     const user = result[0]; 
     
-    console.log('Database query result:', user);
+    log('Database query result:', user);
     
     if (!user) {
-      console.log('User not found:', email);
+      log('User not found:', email);
       return null;
     }
     
     const storedPassword = user[3];
     
     if (!storedPassword) {
-      console.error('Hashed password is missing for user:', email);
+      log('Hashed password is missing for user:', email);
       return null;
     }
     
-    console.log('Stored hashed password:', storedPassword);
-    console.log('Provided password:', password);
+    log('Stored hashed password:', storedPassword);
+    log('Provided password:', password);
 
     try {
       const match = await bcrypt.compare(password, storedPassword);
-      console.log('Password match result:', match);
+      log('Password match result:', match);
 
       if (match) {
-        console.log('Password match for user:', email);
+        log('Password match for user:', email);
         const userRole = await getUserRole(user[0]);
         const userData = {
           id: user[0],
@@ -89,40 +93,41 @@ export async function loginUser(email, password) {
           email: user[2],
           role: userRole
         };
-        console.log('User data:', userData);
+        log('User data:', userData);
         return userData;
       }
     } catch (error) {
-      console.error('Error comparing passwords:', error);
+      log('Error comparing passwords:', error);
     }
   } catch (dbError) {
-    console.error('Database error:', dbError);
+    log('Database error:', dbError);
   }
   
-  console.log('Invalid password for user:', email);
+  log('Invalid password for user:', email);
   return null;
 }
 
 export async function getUserRole(userId) {
   const db = connection();
-  console.log('Fetching role for user ID:', userId);
+  log('Fetching role for user ID:', userId);
   try {
     const result = db.query(
       'SELECT roles.name FROM users JOIN roles ON users.role_id = roles.id WHERE users.id = ?',
       [userId]
     );
-    console.log('Role query result:', result);
+    log('Role query result:', result);
     if (result && result.length > 0) {
       const roleName = result[0][0];  // Access the first element of the first row
-      console.log('User role:', roleName);
+      log('User role:', roleName);
       return roleName;
     } else {
-      console.log('No role found for user');
+      log('No role found for user');
       return null;
     }
   } catch (error) {
-    console.error('Error fetching user role:', error);
+    log('Error fetching user role:', error);
     return null;
   }
 }
+
 

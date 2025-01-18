@@ -2,13 +2,16 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { render } from "./services/render.js";
 import { initConnection } from "./services/db.js";
 import { Router } from "./router.js";
+import { createDebug } from "./services/debug.js";
+
+const log = createDebug('spielgut:app');
 
 // Initialize the database connection
 try {
   initConnection("./src/data/user_managment.db");
-  console.log("Database initialized successfully.");
+  log("Database initialized successfully.");
 } catch (error) {
-  console.error("Failed to initialize database:", error);
+  error("Failed to initialize database:", error);
   Deno.exit(1);
 }
 
@@ -27,5 +30,5 @@ const handler = async (request) => {
 };
 
 const port = 8000;
-console.log(`HTTP webserver running. Access it at: http://localhost:${port}/`);
+log(`HTTP webserver running. Access it at: http://localhost:${port}/`);
 await serve(handler, { port });

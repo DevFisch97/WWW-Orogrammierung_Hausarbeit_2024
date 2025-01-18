@@ -1,4 +1,7 @@
 import { contentType } from "https://deno.land/std@0.177.0/media_types/mod.ts";
+import { createDebug } from "../services/debug.js";
+
+const log = createDebug('spielgut:staticFile_controller');
 
 export class StaticFileController {
   async serveStaticFile(path) {
@@ -12,7 +15,7 @@ export class StaticFileController {
         headers: { "content-type": mimeType },
       });
     } catch (error) {
-      console.error(`Error serving static file: ${filePath}`, error);
+      error(`Error serving static file: ${filePath}`, error);
       return new Response("File not found", { status: 404 });
     }
   }

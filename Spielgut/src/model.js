@@ -1,4 +1,7 @@
 import { connection } from "./services/db.js";
+import { createDebug } from "./services/debug.js";
+
+const log = createDebug('spielgut:model');
 
 export async function list() {
   const db = connection();
@@ -101,12 +104,12 @@ export async function getAllNewProducts(filterParams = {}) {
 
   query += ` ORDER BY p.id DESC`;
 
-  console.log('SQL Query:', query);
-  console.log('Query Params:', queryParams);
+  log('SQL Query:', query);
+  log('Query Params:', queryParams);
 
   const products = await db.query(query, queryParams);
 
-  console.log('Query Results:', products);
+  log('Query Results:', products);
 
   return products.map(([id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id]) => 
     ({ id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id }));
@@ -138,12 +141,12 @@ export async function getAllUsedProducts(filterParams = {}) {
 
   query += ` ORDER BY p.id DESC`;
 
-  console.log('SQL Query:', query);
-  console.log('Query Params:', queryParams);
+  log('SQL Query:', query);
+  log('Query Params:', queryParams);
 
   const products = await db.query(query, queryParams);
 
-  console.log('Query Results:', products);
+  log('Query Results:', products);
 
   return products.map(([id, name, preis, bild_pfad, kategorie_name, kategorie_id]) => 
     ({ id, name, preis, bild_pfad, kategorie_name, kategorie_id }));
@@ -151,7 +154,7 @@ export async function getAllUsedProducts(filterParams = {}) {
 
 export async function getSingleProduct(id) {
   const db = connection();
-  console.log(`Fetching product with id: ${id}`);
+  log(`Fetching product with id: ${id}`);
   const products = await db.query(`
     SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad
     FROM produkte p
@@ -159,7 +162,7 @@ export async function getSingleProduct(id) {
     WHERE p.id = ?
   `, [id]);
   
-  console.log(`Query result:`, products);
+  log(`Query result:`, products);
   
   if (products.length === 0) throw new Error("Produkt nicht gefunden.");
   
@@ -176,19 +179,54 @@ export async function getSingleProduct(id) {
 
 export async function updateProduct(id, data) {
   const db = connection();
-  await db.query("UPDATE produkte SET name = ?, preis = ?, produkt_verweis = ?, show_dia = ? WHERE id = ?", [
-    data.name,
-    data.preis,
-    data.beschreibung,
-    data.show_dia,
-    id,
-  ]);
+  let query = "UPDATE produkte SET name = ?, preis = ?, produkt_verweis = ?, show_dia = ?";
+  let params = [data.name, data.preis, data.beschreibung, data.show_dia];
+
+  if (data.bild_pfad !== undefined) {
+    query += ", bild_pfad = ?";
+    params.push(data.bild_pfad);
+  }
+
+  query += " WHERE id = ?";
+  params.push(id);
+
+  log("Executing SQL query:", query);
+  log("Query parameters:", params);
+
+  await db.query(query, params);
+  log("Product updated successfully");
 }
+
+export async function deleteImage(productId) {
+  const db = connection();
+  log("Deleting image for product:", productId);
+  await db.query("UPDATE produkte SET bild_pfad = NULL WHERE id = ?", [productId]);
+  log("Image deleted successfully");
+}
+
+
 
 export async function deleteProduct(id) {
   const db = connection();
-  await db.query("DELETE FROM produkte WHERE id = ?", [id]);
-  await db.query("DELETE FROM bilder WHERE produkt_id = ?", [id]);
+  try {
+    // Start a transaction
+    await db.query("BEGIN TRANSACTION");
+
+    // Delete related records first
+    await db.query("DELETE FROM bilder WHERE produkt_id = ?", [id]);
+    await db.query("DELETE FROM cart_items WHERE product_id = ?", [id]);
+    // Add any other tables that reference the product here
+
+    // Finally, delete the product
+    await db.query("DELETE FROM produkte WHERE id = ?", [id]);
+
+    // Commit the transaction
+    await db.query("COMMIT");
+  } catch (error) {
+    // If any error occurs, rollback the changes
+    await db.query("ROLLBACK");
+    throw error;
+  }
 }
 
 export async function addToCart(userId, productId, quantity) {
@@ -286,14 +324,15 @@ export async function searchProducts(searchQuery) {
   `;
   const queryParams = [`%${searchQuery}%`, `%${searchQuery}%`];
 
-  console.log('Search Query:', query);
-  console.log('Search Params:', queryParams);
+  log('Search Query:', query);
+  log('Search Params:', queryParams);
 
   const products = await db.query(query, queryParams);
 
-  console.log('Search Results:', products);
+  log('Search Results:', products);
 
   return products.map(([id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id]) => 
     ({ id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id }));
 }
+
 

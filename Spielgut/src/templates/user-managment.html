@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="user-management">
+    <h1>Benutzerverwaltung</h1>
+    
+    <h2>Benutzer erstellen</h2>
+    <form action="/user-management?action=create" method="POST">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+        <div class="form-group">
+            <label for="username">Benutzername</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">E-Mail</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Passwort</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="role">Rolle</label>
+            <select id="role" name="role" required>
+                <option value="user">Benutzer</option>
+                <option value="admin">Administrator</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Benutzer erstellen</button>
+    </form>
+
+    <h2>Benutzerliste</h2>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Benutzername</th>
+                <th>E-Mail</th>
+                <th>Rolle</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role }}</td>
+                <td>
+                    <button class="btn btn-edit" onclick="editUser('{{ user.id }}', '{{ user.username }}', '{{ user.email }}', '{{ user.role }}')">Bearbeiten</button>
+                    <form action="/user-management?action=delete" method="POST" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                        <input type="hidden" name="userId" value="{{ user.id }}">
+                        <button type="submit" class="btn btn-delete" onclick="return confirm('Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?')">Löschen</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="editUserModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Benutzer bearbeiten</h2>
+            <form action="/user-management?action=update" method="POST">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                <input type="hidden" id="editUserId" name="userId">
+                <div class="form-group">
+                    <label for="editUsername">Benutzername</label>
+                    <input type="text" id="editUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">E-Mail</label>
+                    <input type="email" id="editEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRole">Rolle</label>
+                    <select id="editRole" name="role" required>
+                        <option value="user">Benutzer</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Aktualisieren</button>
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Abbrechen</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+function editUser(id, username, email, role) {
+    document.getElementById('editUserId').value = id;
+    document.getElementById('editUsername').value = username;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editRole').value = role;
+    document.getElementById('editUserModal').style.display = 'block';
+}
+
+function closeEditModal() {
+    document.getElementById('editUserModal').style.display = 'none';
+}
+</script>
+{% endblock %}
+

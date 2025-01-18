@@ -1,4 +1,7 @@
 import { create, verify } from "https://deno.land/x/djwt@v2.8/mod.ts";
+import { createDebug } from "./services/debug.js";
+
+const log = createDebug('spielgut:csrf');
 
 const secretKey = await crypto.subtle.generateKey(
   { name: "HMAC", hash: "SHA-256" },
@@ -36,11 +39,11 @@ export async function csrfProtection(request, user) {
     }
     
     const token = formData.get("_csrf");
-    console.log("Received CSRF token:", token);
-    console.log("Expected CSRF token:", csrfTokens.get(user.sessionId));
+    log("Received CSRF token:", token);
+    log("Expected CSRF token:", csrfTokens.get(user.sessionId));
     
     if (!token || !await verifyCSRFToken(token, user.sessionId)) {
-      console.log("CSRF token validation failed");
+      log("CSRF token validation failed");
       return false;
     }
     

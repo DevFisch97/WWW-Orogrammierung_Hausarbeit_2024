@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Mein Konto</h1>
+    <div class="account-container">
+        <div class="account-info">
+            <h2>Aktuelle Kontoinformationen</h2>
+            <p><strong>Benutzername:</strong> {{ user.username | default('Nicht angegeben') }}</p>
+            <p><strong>E-Mail:</strong> {{ user.email | default('Nicht angegeben') }}</p>
+            <p><strong>Straße:</strong> {{ user.street | default('Nicht angegeben') }}</p>
+            <p><strong>Hausnummer:</strong> {{ user.house_number | default('Nicht angegeben') }}</p>
+            <p><strong>Stadt:</strong> {{ user.city | default('Nicht angegeben') }}</p>
+            <p><strong>PLZ:</strong> {{ user.zip_code | default('Nicht angegeben') }}</p>
+        </div>
+        <h2>Kontoinformationen bearbeiten</h2>
+        <form class="account-form" action="/account" method="POST">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <div class="form-group">
+                <label for="username">Benutzername</label>
+                <input type="text" id="username" name="username" class="form-input" value="{{ user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-Mail</label>
+                <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" required>
+            </div>
+            <div class="form-group">
+                <label for="street">Straße</label>
+                <input type="text" id="street" name="street" class="form-input" value="{{ user.street }}" required>
+            </div>
+            <div class="form-group">
+                <label for="house_number">Hausnummer</label>
+                <input type="text" id="house_number" name="house_number" class="form-input" value="{{ user.house_number }}" required>
+            </div>
+            <div class="form-group">
+                <label for="city">Stadt</label>
+                <input type="text" id="city" name="city" class="form-input" value="{{ user.city }}" required>
+            </div>
+            <div class="form-group">
+                <label for="zip_code">PLZ</label>
+                <input type="text" id="zip_code" name="zip_code" class="form-input" value="{{ user.zip_code }}" required>
+            </div>
+            <div class="form-group">
+                <label for="new_password">Neues Passwort (optional)</label>
+                <input type="password" id="new_password" name="new_password" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Passwort bestätigen</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input">
+            </div>
+            <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

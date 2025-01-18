@@ -1,5 +1,9 @@
 import { setCookie, getCookies } from "https://deno.land/std@0.177.0/http/cookie.ts";
 import { sessions } from "../data/sessionStore.js";
+import { createDebug } from "../services/debug.js";
+
+const log = createDebug('spielgut:flashmessages_controller');
+
 
 export function getUserFromSession(request) {
   const cookies = getCookies(request.headers);
@@ -18,13 +22,13 @@ export function setFlashMessage(response, message, type = 'info') {
     try {
       flashMessages = JSON.parse(decodeURIComponent(cookies.flashMessage));
     } catch (error) {
-      console.error("Error parsing flash message:", error);
+      error("Error parsing flash message:", error);
     }
   }
   
   flashMessages[type] = message;
-  console.log("Setze Flash-Nachricht:", { type, message });
-  console.log("Aktuelle Flash-Nachrichten:", flashMessages);
+  log("Setze Flash-Nachricht:", { type, message });
+  log("Aktuelle Flash-Nachrichten:", flashMessages);
   
   const encodedFlashMessages = encodeURIComponent(JSON.stringify(flashMessages));
   
@@ -34,7 +38,7 @@ export function setFlashMessage(response, message, type = 'info') {
     path: "/",
     maxAge: 60, // 1 minute
   });
-  console.log("Flash-Nachricht-Cookie gesetzt:", encodedFlashMessages);
+  log("Flash-Nachricht-Cookie gesetzt:", encodedFlashMessages);
 }
 
 export function getAndClearFlashMessage(request) {
@@ -43,10 +47,10 @@ export function getAndClearFlashMessage(request) {
   if (flashMessage) {
     try {
       const decodedMessages = JSON.parse(decodeURIComponent(flashMessage));
-      console.log("Abgerufene Flash-Nachrichten:", decodedMessages);
+      log("Abgerufene Flash-Nachrichten:", decodedMessages);
       return decodedMessages;
     } catch (error) {
-      console.error("Error parsing flash message:", error);
+      error("Error parsing flash message:", error);
     }
   }
   return {};
@@ -59,6 +63,6 @@ export function clearFlashMessageCookie(response) {
     path: "/",
     maxAge: 0,
   });
-  console.log("Flash-Nachricht-Cookie gelöscht");
+  log("Flash-Nachricht-Cookie gelöscht");
 }
 

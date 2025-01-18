@@ -13,6 +13,9 @@ import {
 import { setFlashMessage } from "../controllers/flashmessages_controller.js";
 import { join, dirname } from "https://deno.land/std/path/mod.ts";
 import { connection } from "../services/db.js";
+import { createDebug } from "../services/debug.js";
+
+const log = createDebug('spielgut:product_controller');
 
 export class ProductController {
   constructor() {
@@ -39,7 +42,7 @@ export class ProductController {
   }
 
   async getNewProductsData(user, flashMessage, csrfToken, filterParams = {}) {
-  console.log('ProductController: Received filter params:', filterParams);
+  log('ProductController: Received filter params:', filterParams);
   const validFilterParams = {};
   if (filterParams.category) {
     validFilterParams.category = filterParams.category;
@@ -51,10 +54,10 @@ export class ProductController {
     validFilterParams.priceMax = parseFloat(filterParams.priceMax);
   }
 
-  console.log('ProductController: Valid filter params:', validFilterParams);
+  log('ProductController: Valid filter params:', validFilterParams);
 
   const products = await getAllNewProducts(validFilterParams);
-  console.log('ProductController: Products returned:', products.length);
+  log('ProductController: Products returned:', products.length);
   
   return { 
     user, 
@@ -66,7 +69,7 @@ export class ProductController {
 }
 
 async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
-  console.log('ProductController: Received filter params:', filterParams);
+  log('ProductController: Received filter params:', filterParams);
   const validFilterParams = {};
   if (filterParams.category) {
     validFilterParams.category = filterParams.category;
@@ -78,10 +81,10 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
     validFilterParams.priceMax = parseFloat(filterParams.priceMax);
   }
 
-  console.log('ProductController: Valid filter params:', validFilterParams);
+  log('ProductController: Valid filter params:', validFilterParams);
 
   const products = await getAllUsedProducts(validFilterParams);
-  console.log('ProductController: Products returned:', products.length);
+  log('ProductController: Products returned:', products.length);
   
   return { 
     user, 
@@ -98,7 +101,7 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       const product = await getSingleProduct(productId);
       return { user, product, quantity: parseInt(quantity) || 1, addToCartSuccess, flashMessage, csrfToken };
     } catch (error) {
-      console.error(`Error fetching product details: ${error.message}`);
+      error(`Error fetching product details: ${error.message}`);
       return { user, error: "Produkt nicht gefunden", flashMessage, csrfToken };
     }
   }
@@ -115,20 +118,72 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
     if (!user || user.role !== 'admin') {
       return new Response("Unauthorized", { status: 401 });
     }
+
+    log("Received form data:", Object.fromEntries(formData));
+
     const updatedData = {
       name: formData.get('name'),
       preis: parseFloat(formData.get('preis')),
       beschreibung: formData.get('beschreibung'),
       show_dia: formData.get('show_dia') === 'on'
     };
-    await updateProduct(productId, updatedData);
-    const response = new Response("", {
-      status: 302,
-      headers: { "Location": `/product/${productId}` },
-    });
-    setFlashMessage(response, "Produkt erfolgreich aktualisiert.", "success");
-    return response;
+
+    const deleteExistingImage = formData.get('delete_image') === 'on';
+    const newImage = formData.get('new_image');
+
+    log("Delete existing image:", deleteExistingImage);
+    log("New image received:", newImage ? "Yes" : "No");
+
+    try {
+      if (deleteExistingImage) {
+        log("Deleting existing image for product:", productId);
+        await deleteImage(productId);
+        updatedData.bild_pfad = null;
+      }
+
+      if (newImage && newImage.size > 0) {
+        const fileName = `product_${productId}_${Date.now()}.jpg`;
+        const projectRoot = Deno.cwd();
+        const imagePath = join(projectRoot, "assets", "Produktbilder", fileName);
+        
+        log("Saving new image to:", imagePath);
+        await this.saveImageFile(newImage, imagePath);
+        updatedData.bild_pfad = `/assets/Produktbilder/${fileName}`;
+      }
+
+      log("Updating product with data:", updatedData);
+      await updateProduct(productId, updatedData);
+
+      const response = new Response("", {
+        status: 302,
+        headers: { "Location": `/product/${productId}` },
+      });
+      setFlashMessage(response, "Produkt erfolgreich aktualisiert.", "success");
+      return response;
+    } catch (error) {
+      error("Error updating product:", error);
+      const response = new Response("", {
+        status: 302,
+        headers: { "Location": `/product/${productId}/edit` },
+      });
+      setFlashMessage(response, `Fehler beim Aktualisieren des Produkts: ${error.message}`, "error");
+      return response;
+    }
   }
+
+  async saveImageFile(file, path) {
+    try {
+      const contents = await file.arrayBuffer();
+      const directory = dirname(path);
+      await Deno.mkdir(directory, { recursive: true });
+      await Deno.writeFile(path, new Uint8Array(contents));
+      log(`File saved successfully to ${path}`);
+    } catch (error) {
+      error(`Error saving file to ${path}:`, error);
+      throw error;
+    }
+  }
+
 
   async handleProductDelete(user, productId) {
     if (!user || user.role !== 'admin') {
@@ -155,9 +210,9 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       } else {
         formData = await request.formData();
       }
-      console.log("Form data received:", Object.fromEntries(formData));
+      log("Form data received:", Object.fromEntries(formData));
     } catch (error) {
-      console.error("Error reading form data:", error);
+      error("Error reading form data:", error);
       const response = new Response("", {
         status: 302,
         headers: { "Location": "/create-product" },
@@ -181,26 +236,26 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
   
     const productImage = formData.get('productImage');
   
-    console.log("Product data:", productData);
-    console.log("Product image:", productImage ? "Image file received" : "No image file");
+    log("Product data:", productData);
+    log("Product image:", productImage ? "Image file received" : "No image file");
   
     try {
-      console.log("Creating new product...");
+      log("Creating new product...");
       const newProductId = await createProduct(productData);
-      console.log("New product created with ID:", newProductId);
+      log("New product created with ID:", newProductId);
       
       if (newProductId && productImage && productImage.size > 0) {
         const fileName = `product_${newProductId}_${Date.now()}.jpg`;
         const projectRoot = Deno.cwd(); // Holt das aktuelle Arbeitsverzeichnis
         const imagePath = join(projectRoot, "assets", "Produktbilder", fileName);
         
-        console.log("Saving image file...");
+        log("Saving image file...");
         await this.saveImageFile(productImage, imagePath);
-        console.log("Image file saved successfully");
+        log("Image file saved successfully");
   
-        console.log("Creating image record in database...");
+        log("Creating image record in database...");
         await createImage(newProductId, `/assets/Produktbilder/${fileName}`);
-        console.log("Image record created successfully");
+        log("Image record created successfully");
       }
   
       const response = new Response("", {
@@ -210,7 +265,7 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       setFlashMessage(response, "Produkt erfolgreich erstellt.", "success");
       return response;
     } catch (error) {
-      console.error("Error creating product:", error);
+      error("Error creating product:", error);
       const response = new Response("", {
         status: 302,
         headers: { "Location": "/create-product" },
@@ -226,19 +281,19 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       const directory = dirname(path);
       await Deno.mkdir(directory, { recursive: true });
       await Deno.writeFile(path, new Uint8Array(contents));
-      console.log(`File saved successfully to ${path}`);
+      log(`File saved successfully to ${path}`);
     } catch (error) {
-      console.error(`Error saving file to ${path}:`, error);
+      error(`Error saving file to ${path}:`, error);
       throw error;
     }
   }
   
   async getSearchResults(user, searchQuery, flashMessage, csrfToken) {
-    console.log('ProductController: Received search query:', searchQuery);
+    log('ProductController: Received search query:', searchQuery);
     
     try {
       const products = await searchProducts(searchQuery);
-      console.log('ProductController: Search results returned:', products.length);
+      log('ProductController: Search results returned:', products.length);
       
       return { 
         user, 
@@ -248,7 +303,7 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
         csrfToken 
       };
     } catch (error) {
-      console.error('Error in search:', error);
+      error('Error in search:', error);
       return { 
         user, 
         products: [], 
