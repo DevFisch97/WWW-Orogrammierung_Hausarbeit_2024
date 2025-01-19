@@ -1,6 +1,7 @@
 import { registerUser } from "../services/user_manager.js";
 import { setFlashMessage } from "./flashmessages_controller.js";
 import { createDebug } from "../services/debug.js";
+import { getRequestBody } from "../services/requestBodyHelper.js";
 
 
 

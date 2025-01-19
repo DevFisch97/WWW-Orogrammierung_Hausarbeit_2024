@@ -4,13 +4,14 @@ import { getRequestBody } from "../services/requestBodyHelper.js";
 import { setFlashMessage } from "./flashmessages_controller.js";
 import { formatDate } from "../services/dateHelper.js";
 
-const log = createDebug('spielgut:message_controller');
+const log = createDebug('spielgut:mc');
 
-const ADMIN_USER_ID = 1; // Hier tragen Sie die ID des Administrators ein, der die Kontaktformular-Nachrichten erhalten soll
+
 
 export class MessageController {
   constructor() {
     this.db = connection();
+    this.db.query('PRAGMA foreign_keys = ON;');
   }
 
   async createMessage(request, sender) {
@@ -209,9 +210,12 @@ export class MessageController {
 
       const fullMessage = `Von: ${name}\nE-Mail: ${email}\n\n${message}`;
 
+      const ADMIN_USER_ID = 5;
+      const UNAUTHENTICATED_USER_ID = 11;
+
       const [result] = await this.db.query(
         'INSERT INTO messages (sender_id, recipient_id, subject, message) VALUES (?, ?, ?, ?)',
-        [null, ADMIN_USER_ID, subject, fullMessage]
+        [UNAUTHENTICATED_USER_ID, ADMIN_USER_ID, subject, fullMessage]
       );
 
       log("Contact message created:", result);
@@ -224,6 +228,7 @@ export class MessageController {
       return response;
     } catch (error) {
       log("Error creating contact message:", error);
+      console.error("Detailed error:", error);
       const response = new Response("", {
         status: 302,
         headers: { "Location": "/contact" },
