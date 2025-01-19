@@ -296,10 +296,12 @@ export async function getCartTotal(userId) {
 
 export async function createProduct(data) {
   const db = connection();
+  log("Creating new product with data:", data);
   const result = await db.query(
     "INSERT INTO produkte (name, preis, produkt_verweis, show_dia, kategorie_id) VALUES (?, ?, ?, ?, ?)",
     [data.name, data.preis, data.beschreibung, data.show_dia, data.kategorie_id]
   );
+  log("New product created with ID:", result.insertId);
   return result.insertId;
 }
 
@@ -334,5 +336,4 @@ export async function searchProducts(searchQuery) {
   return products.map(([id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id]) => 
     ({ id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id }));
 }
-
 

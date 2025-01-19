@@ -203,7 +203,7 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
     if (!user || user.role !== 'admin') {
       return new Response("Unauthorized", { status: 401 });
     }
-  
+
     try {
       const formData = await getRequestBody(request);
       log("Form data received:", formData);
@@ -220,18 +220,17 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       return response;
     }
   }
-  
 
   async processProductCreation(formData, user) {
     const productData = {
-      name: formData.get('productName'),
-      beschreibung: formData.get('productDescription'),
-      preis: parseFloat(formData.get('productPrice')),
-      kategorie_id: parseInt(formData.get('productCategory')),
-      show_dia: formData.get('diaShow') === 'on'
+      name: formData.productName,
+      beschreibung: formData.productDescription,
+      preis: parseFloat(formData.productPrice),
+      kategorie_id: parseInt(formData.productCategory),
+      show_dia: formData.diaShow === 'on'
     };
-  
-    const productImage = formData.get('productImage');
+
+    const productImage = formData.productImage;
   
     log("Product data:", productData);
     log("Product image:", productImage ? "Image file received" : "No image file");
@@ -243,18 +242,18 @@ async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
       
       if (newProductId && productImage && productImage.size > 0) {
         const fileName = `product_${newProductId}_${Date.now()}.jpg`;
-        const projectRoot = Deno.cwd(); // Holt das aktuelle Arbeitsverzeichnis
+        const projectRoot = Deno.cwd();
         const imagePath = join(projectRoot, "assets", "Produktbilder", fileName);
         
         log("Saving image file...");
         await this.saveImageFile(productImage, imagePath);
         log("Image file saved successfully");
-  
+
         log("Creating image record in database...");
         await createImage(newProductId, `/assets/Produktbilder/${fileName}`);
         log("Image record created successfully");
       }
-  
+
       const response = new Response("", {
         status: 302,
         headers: { "Location": "/new-products" },
