@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<!-- search and filter funktion bleibt unverändert -->
 
 <section class="products new-products">
     <div class="h1hovern">
@@ -21,10 +20,10 @@
         </div>
     </div>
     <div class="slideshow-controls">
-        <button class="control-button prev-button" data-slideshow="used-products-slideshow">
+        <button class="control-button prev-button" data-slideshow="new-products-slideshow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
-        <button class="control-button next-button" data-slideshow="used-products-slideshow">
+        <button class="control-button next-button" data-slideshow="new-products-slideshow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
     </div>
@@ -38,10 +37,11 @@
         <div class="product-container">
             {% for product in usedProducts %}
             <div class="product-card">
-                <a href="/product/{{ product.id }}">
+                <a href="/used-product/{{ product.id }}">
                     <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-image">
                     <h2 class="product-title">{{ product.name }}</h2>
                     <p class="product-description">{{ product.preis }}€</p>
+                    <p class="product-condition">{{ product.zustand }}</p>
                 </a>
             </div>
             {% endfor %}
@@ -60,8 +60,7 @@
 <section class="sell-used">
     <h2>Verkaufen Sie Ihre gebrauchten Spielzeuge</h2>
     <p>Bei Spielgut haben Sie die Möglichkeit, Ihre gebrauchten Holzspielzeuge zu verkaufen. Geben Sie Ihren Spielsachen ein zweites Leben und unterstützen Sie andere Familien mit qualitativ hochwertigen Produkten zu günstigen Preisen.</p>
-    <a href="/used-products" class="button">Jetzt verkaufen</a>
+    <a href="/create-used-product" class="button">Jetzt verkaufen</a>
 </section>
 {% endblock %}
 
-<script src="/static/script.js"></script>

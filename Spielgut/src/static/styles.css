@@ -200,7 +200,7 @@ footer {
 .product-image {
   max-width: 100%;
   height: auto;
-  max-height: 400px; /* Adjust this value to make images smaller */
+  max-height: 400px; 
   object-fit: contain;
   transition: transform 0.3s ease;
 }
@@ -1396,7 +1396,7 @@ textarea.form-input {
   }
 
   .img_logo {
-      width: 80px; /* Kleinere Größe für mobile-Ansicht */
+      width: 80px; 
   }
   
 
@@ -1459,7 +1459,7 @@ textarea.form-input {
 
 @media screen and (max-width: 1024px) {
   .product-grid {
-      grid-template-columns: repeat(2, 1fr); /* 2 Spalten für Tablet */
+      grid-template-columns: repeat(2, 1fr); 
   }
 
   .title {
@@ -1471,11 +1471,11 @@ textarea.form-input {
   }
 
   .img_logo {
-      width: 60px; /* Kleinere Größe für mobile-Ansicht */
+      width: 60px; 
   }
 }
 
-/* Update the pagination styles */
+
 .pagination {
 display: flex;
 justify-content: center;
@@ -1766,7 +1766,7 @@ margin-bottom: 2rem;
     margin-bottom: 0.25rem;
   }
 }
-/* Neue Styles für das Erstellen einer neuen Nachricht */
+/* für das Erstellen einer neuen Nachricht */
 .new-message {
   max-width: 800px;
   margin: 2rem auto;
@@ -1823,7 +1823,7 @@ textarea.form-input {
   }
 }
 
-/* Styles für das Antwortformular */
+/* das Antwortformular */
 .reply-form {
     margin-top: 2rem;
     background-color: #f9f9f9;
@@ -1862,4 +1862,208 @@ textarea.form-input {
 
 .back-to-messages {
     margin-top: 1rem;
+}
+
+/* Used Products */
+.used-product-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.used-product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.used-product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.used-product-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.used-product-price {
+  font-weight: bold;
+  color: #ff7300;
+}
+
+.used-product-condition {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.used-product-seller {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/*  Used Product Details Page */
+.used-product-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .used-product-details {
+    flex-direction: row;
+  }
+}
+
+.used-product-details-image {
+  flex: 1;
+}
+
+.used-product-details-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.used-product-details-info {
+  flex: 1;
+}
+
+.used-product-details-title {
+  font-size: 1.5rem;
+  color: #ff7300;
+  margin-bottom: 1rem;
+}
+
+.used-product-details-price {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #ff7300;
+  margin-bottom: 1rem;
+}
+
+.used-product-details-condition,
+.used-product-details-seller {
+  margin-bottom: 0.5rem;
+}
+
+.used-product-details-description {
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+/* Create/Edit Used Product Form */
+.create-used-product-form,
+.edit-used-product-form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.create-used-product-form h2,
+.edit-used-product-form h2 {
+  color: #ff7300;
+  margin-bottom: 1.5rem;
+}
+
+.form-group-used-product {
+  margin-bottom: 1.5rem;
+}
+
+.form-group-used-product label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.form-group-used-product input,
+.form-group-used-product textarea,
+.form-group-used-product select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group-used-product textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+/*  used product aktionen */
+.btn-contact-seller,
+.btn-edit-used-product,
+.btn-delete-used-product {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+.btn-contact-seller {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-edit-used-product {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn-delete-used-product {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-contact-seller:hover,
+.btn-edit-used-product:hover,
+.btn-delete-used-product:hover {
+  opacity: 0.9;
+}
+
+
+.condition-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.condition-new {
+  background-color: #4caf50;
+  color: white;
+}
+.condition-very-good {
+  background-color: #8bc34a;
+  color: white;
+}
+.condition-good {
+  background-color: #ffc107;
+  color: black;
+}
+.condition-acceptable {
+  background-color: #ff9800;
+  color: white;
+}
+.condition-used {
+  background-color: #ff5722;
+  color: white;
 }

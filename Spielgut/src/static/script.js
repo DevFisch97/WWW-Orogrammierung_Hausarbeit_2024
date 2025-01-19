@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       showProducts();
-      const interval = setInterval(nextSlide, 5000); // Change slides every 5 seconds
+      const interval = setInterval(nextSlide, 5000); 
 
-      // Add event listeners for manual navigation
+      
       const prevButton = slideshow.parentElement.querySelector('.prev-button');
       const nextButton = slideshow.parentElement.querySelector('.next-button');
 

@@ -43,7 +43,6 @@ class ShoppingCart {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          // Update the UI without reloading the page
           this.updateCartUI(data);
         } else {
           alert('Fehler beim Aktualisieren des Warenkorbs');
@@ -68,7 +67,6 @@ class ShoppingCart {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            // Remove the item from the UI without reloading the page
             this.removeCartItem(data.productId);
           } else {
             alert('Fehler beim Entfernen des Artikels aus dem Warenkorb');
@@ -82,7 +80,6 @@ class ShoppingCart {
     }
   
     updateCartUI(data) {
-      // Update quantity and total price
       const cartItem = document.querySelector(`.cart-item[data-product-id="${data.productId}"]`);
       if (cartItem) {
         const quantityInput = cartItem.querySelector('.quantity-input');
@@ -90,7 +87,6 @@ class ShoppingCart {
         quantityInput.value = data.quantity;
         itemTotal.textContent = `${data.itemTotal.toFixed(2)}€`;
       }
-      // Update cart total
       const cartTotal = document.querySelector('.cart-total');
       if (cartTotal) {
         cartTotal.textContent = `Gesamtsumme: ${data.cartTotal.toFixed(2)}€`;
@@ -102,7 +98,6 @@ class ShoppingCart {
       if (cartItem) {
         cartItem.remove();
       }
-      // Update cart total
       const cartTotal = document.querySelector('.cart-total');
       if (cartTotal) {
         const total = parseFloat(cartTotal.textContent.split(':')[1].trim().replace('€', ''));

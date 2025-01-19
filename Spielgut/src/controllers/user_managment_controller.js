@@ -89,18 +89,16 @@ export class UserManagementController {
       const formData = await getRequestBody(request);
       const userId = formData.userId;
 
-      // Starten einer Transaktion
+      
       await this.db.query("BEGIN TRANSACTION");
 
-      // Löschen aller abhängigen Datensätze
+      
       await this.db.query("DELETE FROM cart_items WHERE user_id = ?", [userId]);
       await this.db.query("DELETE FROM adress WHERE user_id = ?", [userId]);
-      // Fügen Sie hier weitere DELETE-Anweisungen für andere abhängige Tabellen hinzu
-
-      // Löschen des Benutzers
+     
       await this.db.query("DELETE FROM users WHERE id = ?", [userId]);
 
-      // Commit der Transaktion
+      
       await this.db.query("COMMIT");
 
       const response = new Response("", {
@@ -110,7 +108,7 @@ export class UserManagementController {
       setFlashMessage(response, "Benutzer erfolgreich gelöscht.", "success");
       return response;
     } catch (error) {
-      // Rollback bei einem Fehler
+      
       await this.db.query("ROLLBACK");
 
       log("Error deleting user:", error);

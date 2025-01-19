@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="product-edit">
+<h1>Gebrauchtes Produkt bearbeiten</h1>
+<form action="/used-product/{{ product.id }}/edit" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+  <div class="form-group">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" value="{{ product.name }}" required>
+  </div>
+  <div class="form-group">
+    <label for="produkt_verweis">Beschreibung:</label>
+    <textarea id="produkt_verweis" name="produkt_verweis" required>{{ product.produkt_verweis }}</textarea>
+  </div>
+  <div class="form-group">
+    <label for="preis">Preis (€):</label>
+    <input type="number" id="preis" name="preis" value="{{ product.preis }}" step="0.01" required>
+  </div>
+  <div class="form-group">
+    <label for="zustand">Zustand:</label>
+    <select id="zustand" name="zustand" required>
+      {% for zustand in zustände %}
+        <option value="{{ zustand.id }}" {% if zustand.id == product.zustand_id %}selected{% endif %}>
+          {{ zustand.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="kategorie_id">Kategorie:</label>
+    <select id="kategorie_id" name="kategorie_id" required>
+      {% for kategorie in kategorien %}
+        <option value="{{ kategorie.id }}" {% if kategorie.id == product.kategorie_id %}selected{% endif %}>
+          {{ kategorie.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="bild">Aktuelles Bild:</label>
+    {% if product.bild_pfad %}
+      <img src="{{ product.bild_pfad }}" alt="Aktuelles Produktbild" class="current-image" style="max-width: 200px; max-height: 200px;">
+      <div>
+        <label>
+          <input type="checkbox" name="delete_image"> Bild löschen
+        </label>
+      </div>
+    {% else %}
+      <p>Kein Bild vorhanden</p>
+    {% endif %}
+  </div>
+  <div class="form-group">
+    <label for="new_image">Neues Bild hochladen:</label>
+    <input type="file" id="new_image" name="new_image" accept="image/*">
+  </div>
+  <button type="submit" class="save-button">Änderungen speichern</button>
+</form>
+</section>
+{% endblock %}
+

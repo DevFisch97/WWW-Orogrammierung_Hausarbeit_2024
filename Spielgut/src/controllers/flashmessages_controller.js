@@ -36,7 +36,7 @@ export function setFlashMessage(response, message, type = 'info') {
     name: "flashMessage",
     value: encodedFlashMessages,
     path: "/",
-    maxAge: 60, // 1 minute
+    maxAge: 60, 
   });
   log("Flash-Nachricht-Cookie gesetzt:", encodedFlashMessages);
 }

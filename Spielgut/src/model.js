@@ -3,6 +3,7 @@ import { createDebug } from "./services/debug.js";
 
 const log = createDebug('spielgut:model');
 
+//Produkte laden
 export async function list() {
   const db = connection();
   const products = await db.query(`
@@ -16,7 +17,7 @@ export async function list() {
 export async function get(id) {
   const db = connection();
   const [product] = await db.query(`
-    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad
+    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, p.kategorie_id, b.bild_pfad
     FROM produkte p
     LEFT JOIN bilder b ON p.id = b.produkt_id
     WHERE p.id = ?
@@ -29,29 +30,9 @@ export async function get(id) {
     preis: product[2], 
     produkt_verweis: product[3], 
     show_dia: product[4],
-    bild_pfad: product[5]
+    kategorie_id: product[5],
+    bild_pfad: product[6]
   };
-}
-
-export async function create(data) {
-  const db = connection();
-  await db.query("INSERT INTO produkte (name, preis, produkt_verweis, show_dia) VALUES (?, ?, ?, ?)", [
-    data.name,
-    data.preis,
-    data.produkt_verweis,
-    data.show_dia,
-  ]);
-}
-
-export async function update(id, data) {
-  const db = connection();
-  await db.query("UPDATE produkte SET name = ?, preis = ?, produkt_verweis = ?, show_dia = ? WHERE id = ?", [
-    data.name,
-    data.preis,
-    data.produkt_verweis,
-    data.show_dia,
-    id,
-  ]);
 }
 
 export async function getNewProductsDia() {
@@ -67,15 +48,78 @@ export async function getNewProductsDia() {
 }
 
 export async function getUsedProductsDia() {
-  const db = connection();
+  const db = connection()
   const products = await db.query(`
-    SELECT p.id, p.name, p.preis, b.bild_pfad
+    SELECT gp.id, gp.name, gp.preis, b.bild_pfad
+    FROM gebrauchte_produkte gp
+    LEFT JOIN bilder b ON gp.id = b.produkt_id
+    WHERE gp.show_dia = 1 
+    ORDER BY gp.id DESC 
+    LIMIT 6
+  `)
+  return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }))
+}
+
+export async function getSingleProduct(id) {
+  const db = connection();
+  console.log(`Fetching product with id: ${id}`);
+  const products = await db.query(`
+    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, p.kategorie_id, b.bild_pfad
     FROM produkte p
     LEFT JOIN bilder b ON p.id = b.produkt_id
-    ORDER BY p.id ASC 
-    LIMIT 6
-  `);
-  return products.map(([id, name, preis, bild_pfad]) => ({ id, name, preis, bild_pfad }));
+    WHERE p.id = ?
+  `, [id]);
+  
+  console.log(`Query result:`, products);
+  
+  if (products.length === 0) throw new Error("Produkt nicht gefunden.");
+  
+  const product = products[0];
+  return { 
+    id: product[0], 
+    name: product[1], 
+    preis: product[2], 
+    produkt_verweis: product[3],
+    show_dia: product[4],
+    kategorie_id: product[5],
+    bild_pfad: product[6]
+  };
+}
+
+export async function getSingleUsedProduct(id) {
+  const db = connection()
+  console.log(`Fetching used product with id: ${id}`)
+  const products = await db.query(
+    `
+    SELECT gp.id, gp.name, gp.preis, gp.produkt_verweis, b.bild_pfad, k.name as kategorie_name, z.name as zustand, u.username as verkäufer_name, gp.kategorie_id, gp.zustand_id, gp.verkäufer_id
+    FROM gebrauchte_produkte gp
+    LEFT JOIN bilder b ON gp.id = b.produkt_id AND b.is_used = 1
+    LEFT JOIN kategorie k ON gp.kategorie_id = k.id
+    LEFT JOIN zustand z ON gp.zustand_id = z.id
+    LEFT JOIN users u ON gp.verkäufer_id = u.id
+    WHERE gp.id = ?
+  `,
+    [id],
+  )
+
+  console.log(`Query result:`, products)
+
+  if (products.length === 0) throw new Error("Gebrauchtes Produkt nicht gefunden.")
+
+  const product = products[0]
+  return {
+    id: product[0],
+    name: product[1],
+    preis: product[2],
+    produkt_verweis: product[3],
+    bild_pfad: product[4],
+    kategorie_name: product[5],
+    zustand: product[6],
+    verkäufer_name: product[7],
+    kategorie_id: product[8],
+    zustand_id: product[9],
+    verkäufer_id: product[10],
+  }
 }
 
 export async function getAllNewProducts(filterParams = {}) {
@@ -115,120 +159,276 @@ export async function getAllNewProducts(filterParams = {}) {
     ({ id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id }));
 }
 
-export async function getAllUsedProducts(filterParams = {}) {
-  const db = connection();
+export async function getAllUsedProducts(filters = {}) {
+  const db = connection()
+
   let query = `
-    SELECT p.id, p.name, p.preis, b.bild_pfad, k.name as kategorie_name, p.kategorie_id
-    FROM produkte p
-    INNER JOIN kategorie k ON p.kategorie_id = k.id
-    LEFT JOIN bilder b ON p.id = b.produkt_id
+    SELECT gp.id, gp.name, gp.preis, z.name as zustand, u.username as seller, b.bild_pfad, gp.show_dia
+    FROM gebrauchte_produkte gp
+    LEFT JOIN bilder b ON gp.id = b.produkt_id
+    LEFT JOIN users u ON gp.verkäufer_id = u.id
+    LEFT JOIN zustand z ON gp.zustand_id = z.id
+    LEFT JOIN kategorie k ON gp.kategorie_id = k.id
     WHERE 1=1
-  `;
-  let queryParams = [];
+  `
 
-  if (filterParams.category) {
-    query += ` AND p.kategorie_id = ?`;
-    queryParams.push(filterParams.category);
-  }
-  if (filterParams.priceMin) {
-    query += ` AND p.preis >= ?`;
-    queryParams.push(filterParams.priceMin);
-  }
-  if (filterParams.priceMax) {
-    query += ` AND p.preis <= ?`;
-    queryParams.push(filterParams.priceMax);
+  const queryParams = []
+
+  if (filters.category) {
+    query += " AND gp.kategorie_id = ?"
+    queryParams.push(filters.category)
   }
 
-  query += ` ORDER BY p.id DESC`;
+  if (filters.priceMin) {
+    query += " AND gp.preis >= ?"
+    queryParams.push(filters.priceMin)
+  }
 
-  log('SQL Query:', query);
-  log('Query Params:', queryParams);
+  if (filters.priceMax) {
+    query += " AND gp.preis <= ?"
+    queryParams.push(filters.priceMax)
+  }
 
-  const products = await db.query(query, queryParams);
+  if (filters.condition) {
+    query += " AND gp.zustand_id = ?"
+    queryParams.push(filters.condition)
+  }
 
-  log('Query Results:', products);
+  query += ` ORDER BY gp.id DESC`
 
-  return products.map(([id, name, preis, bild_pfad, kategorie_name, kategorie_id]) => 
-    ({ id, name, preis, bild_pfad, kategorie_name, kategorie_id }));
+  const products = await db.query(query, queryParams)
+
+  return products.map(([id, name, preis, zustand, seller, bild_pfad, show_dia]) => ({
+    id,
+    name,
+    preis,
+    zustand,
+    seller,
+    bild_pfad,
+    show_dia,
+  }))
 }
 
-export async function getSingleProduct(id) {
-  const db = connection();
-  log(`Fetching product with id: ${id}`);
-  const products = await db.query(`
-    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE p.id = ?
-  `, [id]);
-  
-  log(`Query result:`, products);
-  
-  if (products.length === 0) throw new Error("Produkt nicht gefunden.");
-  
-  const product = products[0];
-  return { 
-    id: product[0], 
-    name: product[1], 
-    preis: product[2], 
-    beschreibung: product[3],
-    show_dia: product[4],
-    bild_pfad: product[5]
-  };
+// Produkte bearbeiten
+
+export async function createProduct(data) {
+  const db = connection()
+  log("Creating new product with data:", data)
+  try {
+    log("Executing INSERT query...")
+    const result = await db.query(
+      "INSERT INTO produkte (name, preis, produkt_verweis, show_dia, kategorie_id) VALUES (?, ?, ?, ?, ?)",
+      [data.name, data.preis, data.produkt_verweis, data.show_dia, data.kategorie_id],
+    )
+    log("INSERT query executed. Result:", result)
+
+    log("Executing SELECT query to get last insert ID...")
+    const [newProductId] = await db.query("SELECT last_insert_rowid() as id")
+    log("SELECT query executed. Result:", newProductId)
+
+    if (newProductId && newProductId[0]) {
+      const id = newProductId[0]
+      log("New product created with ID:", id)
+      return id
+    } else {
+      log("Failed to retrieve the new product ID. newProductId:", newProductId)
+      throw new Error("Failed to retrieve the new product ID")
+    }
+  } catch (error) {
+    log("Error in createProduct:", error)
+    throw error
+  }
 }
 
 export async function updateProduct(id, data) {
   const db = connection();
-  let query = "UPDATE produkte SET name = ?, preis = ?, produkt_verweis = ?, show_dia = ?";
-  let params = [data.name, data.preis, data.beschreibung, data.show_dia];
-
-  if (data.bild_pfad !== undefined) {
-    query += ", bild_pfad = ?";
-    params.push(data.bild_pfad);
-  }
-
-  query += " WHERE id = ?";
-  params.push(id);
-
-  log("Executing SQL query:", query);
-  log("Query parameters:", params);
-
-  await db.query(query, params);
+  log("Updating product with data:", data);
+  await db.query(
+    "UPDATE produkte SET name = ?, preis = ?, produkt_verweis = ?, show_dia = ?, kategorie_id = ? WHERE id = ?",
+    [data.name, data.preis, data.produkt_verweis, data.show_dia, data.kategorie_id, id]
+  );
   log("Product updated successfully");
 }
-
-export async function deleteImage(productId) {
-  const db = connection();
-  log("Deleting image for product:", productId);
-  await db.query("UPDATE produkte SET bild_pfad = NULL WHERE id = ?", [productId]);
-  log("Image deleted successfully");
-}
-
-
 
 export async function deleteProduct(id) {
   const db = connection();
   try {
-    // Start a transaction
     await db.query("BEGIN TRANSACTION");
 
-    // Delete related records first
     await db.query("DELETE FROM bilder WHERE produkt_id = ?", [id]);
     await db.query("DELETE FROM cart_items WHERE product_id = ?", [id]);
-    // Add any other tables that reference the product here
-
-    // Finally, delete the product
     await db.query("DELETE FROM produkte WHERE id = ?", [id]);
 
-    // Commit the transaction
     await db.query("COMMIT");
   } catch (error) {
-    // If any error occurs, rollback the changes
     await db.query("ROLLBACK");
     throw error;
   }
 }
 
+export async function createUsedProduct(data) {
+  const db = connection()
+  const result = await db.query(
+    "INSERT INTO gebrauchte_produkte (name, preis, beschreibung, zustand, kategorie_id, seller_id, show_dia) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [data.name, data.preis, data.beschreibung, data.zustand, data.kategorie_id, data.seller_id, data.show_dia],
+  )
+  return result.insertId
+}
+
+export async function updateUsedProduct(id, data) {
+  const db = connection()
+  await db.query(
+    "UPDATE gebrauchte_produkte SET name = ?, preis = ?, beschreibung = ?, zustand = ?, kategorie_id = ?, show_dia = ? WHERE id = ?",
+    [data.name, data.preis, data.beschreibung, data.zustand, data.kategorie_id, data.show_dia, id],
+  )
+}
+
+export async function deleteUsedProduct(id) {
+  const db = connection()
+  await db.query("DELETE FROM gebrauchte_produkte WHERE id = ?", [id])
+  await db.query("DELETE FROM bilder WHERE produkt_id = ?", [id])
+}
+
+// Suchfunktion Produkte
+export async function searchProducts(searchQuery) {
+  const db = connection();
+  const query = `
+    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad, k.name as kategorie_name, p.kategorie_id
+    FROM produkte p
+    LEFT JOIN bilder b ON p.id = b.produkt_id
+    LEFT JOIN kategorie k ON p.kategorie_id = k.id
+    WHERE p.name LIKE ? OR p.produkt_verweis LIKE ?
+    ORDER BY p.id DESC
+  `;
+  const queryParams = [`%${searchQuery}%`, `%${searchQuery}%`];
+
+  log('Search Query:', query);
+  log('Search Params:', queryParams);
+
+  const products = await db.query(query, queryParams);
+
+  log('Search Results:', products);
+
+  return products.map(([id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id]) => 
+    ({ id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id }));
+}
+
+export async function searchUsedProducts(searchQuery) {
+  const db = connection()
+  const query = `
+    SELECT gp.id, gp.name, gp.preis, gp.produkt_verweis, b.bild_pfad, k.name as kategorie_name, z.name as zustand, u.username as verkäufer_name, gp.kategorie_id, gp.zustand_id, gp.verkäufer_id
+    FROM gebrauchte_produkte gp
+    LEFT JOIN bilder b ON gp.id = b.produkt_id AND b.is_used = 1
+    LEFT JOIN kategorie k ON gp.kategorie_id = k.id
+    LEFT JOIN zustand z ON gp.zustand_id = z.id
+    LEFT JOIN users u ON gp.verkäufer_id = u.id
+    WHERE gp.name LIKE ? OR gp.produkt_verweis LIKE ?
+    ORDER BY gp.id DESC
+  `
+  const queryParams = [`%${searchQuery}%`, `%${searchQuery}%`]
+
+  log("Search Query:", query)
+  log("Search Params:", queryParams)
+
+  const products = await db.query(query, queryParams)
+
+  log("Search Results:", products)
+
+  return products.map(
+    ([
+      id,
+      name,
+      preis,
+      produkt_verweis,
+      bild_pfad,
+      kategorie_name,
+      zustand,
+      verkäufer_name,
+      kategorie_id,
+      zustand_id,
+      verkäufer_id,
+    ]) => ({
+      id,
+      name,
+      preis,
+      produkt_verweis,
+      bild_pfad,
+      kategorie_name,
+      zustand,
+      verkäufer_name,
+      kategorie_id,
+      zustand_id,
+      verkäufer_id,
+    }),
+  )
+}
+
+//Images bearbeiten
+export async function createImage(productId, imagePath, isUsed = false) {
+  const db = connection()
+  log("Creating image record for product ID:", productId)
+  await db.query("INSERT INTO bilder (produkt_id, bild_pfad, is_used) VALUES (?, ?, ?)", [
+    productId,
+    imagePath,
+    isUsed ? 1 : 0,
+  ])
+  log("Image record created successfully")
+}
+
+export async function updateImage(productId, imagePath, isUsed = false) {
+  const db = connection()
+  const existingImage = await db.query("SELECT * FROM bilder WHERE produkt_id = ? AND is_used = ?", [
+    productId,
+    isUsed ? 1 : 0,
+  ])
+
+  if (existingImage.length > 0) {
+    await db.query("UPDATE bilder SET bild_pfad = ? WHERE produkt_id = ? AND is_used = ?", [
+      imagePath,
+      productId,
+      isUsed ? 1 : 0,
+    ])
+  } else {
+    await createImage(productId, imagePath, isUsed)
+  }
+}
+
+export async function deleteImage(productId, isUsed = false) {
+  const db = connection()
+  await db.query("DELETE FROM bilder WHERE produkt_id = ? AND is_used = ?", [productId, isUsed ? 1 : 0])
+}
+
+//Warenkorb laden
+export async function getCartItems(userId) {
+  const db = connection();
+  const items = await db.query(`
+    SELECT ci.product_id, ci.quantity, p.name, p.preis, b.bild_pfad
+    FROM cart_items ci
+    JOIN produkte p ON ci.product_id = p.id
+    LEFT JOIN bilder b ON p.id = b.produkt_id
+    WHERE ci.user_id = ?
+  `, [userId]);
+  return items.map(([productId, quantity, name, preis, bild_pfad]) => ({
+    productId,
+    quantity,
+    name,
+    preis,
+    bild_pfad
+  }));
+}
+
+export async function getCartTotal(userId) {
+  const db = connection();
+  const result = await db.query(`
+    SELECT SUM(p.preis * ci.quantity) as total
+    FROM cart_items ci
+    JOIN produkte p ON ci.product_id = p.id
+    WHERE ci.user_id = ?
+  `, [userId]);
+  return result[0].total || 0;
+}
+
+//Warenkorb bearbeiten 
 export async function addToCart(userId, productId, quantity) {
   const db = connection();
   const existingItem = await db.query(
@@ -265,75 +465,4 @@ export async function removeFromCart(userId, productId) {
   );
 }
 
-export async function getCartItems(userId) {
-  const db = connection();
-  const items = await db.query(`
-    SELECT ci.product_id, ci.quantity, p.name, p.preis, b.bild_pfad
-    FROM cart_items ci
-    JOIN produkte p ON ci.product_id = p.id
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    WHERE ci.user_id = ?
-  `, [userId]);
-  return items.map(([productId, quantity, name, preis, bild_pfad]) => ({
-    productId,
-    quantity,
-    name,
-    preis,
-    bild_pfad
-  }));
-}
-
-export async function getCartTotal(userId) {
-  const db = connection();
-  const result = await db.query(`
-    SELECT SUM(p.preis * ci.quantity) as total
-    FROM cart_items ci
-    JOIN produkte p ON ci.product_id = p.id
-    WHERE ci.user_id = ?
-  `, [userId]);
-  return result[0].total || 0;
-}
-
-export async function createProduct(data) {
-  const db = connection();
-  log("Creating new product with data:", data);
-  const result = await db.query(
-    "INSERT INTO produkte (name, preis, produkt_verweis, show_dia, kategorie_id) VALUES (?, ?, ?, ?, ?)",
-    [data.name, data.preis, data.beschreibung, data.show_dia, data.kategorie_id]
-  );
-  log("New product created with ID:", result.insertId);
-  return result.insertId;
-}
-
-export async function createImage(productId, imagePath) {
-  const db = connection();
-  await db.query(
-    "INSERT INTO bilder (produkt_id, bild_pfad) VALUES (?, ?)",
-    [productId, imagePath]
-  );
-}
-
-// New function for search functionality
-export async function searchProducts(searchQuery) {
-  const db = connection();
-  const query = `
-    SELECT p.id, p.name, p.preis, p.produkt_verweis, p.show_dia, b.bild_pfad, k.name as kategorie_name, p.kategorie_id
-    FROM produkte p
-    LEFT JOIN bilder b ON p.id = b.produkt_id
-    LEFT JOIN kategorie k ON p.kategorie_id = k.id
-    WHERE p.name LIKE ? OR p.produkt_verweis LIKE ?
-    ORDER BY p.id DESC
-  `;
-  const queryParams = [`%${searchQuery}%`, `%${searchQuery}%`];
-
-  log('Search Query:', query);
-  log('Search Params:', queryParams);
-
-  const products = await db.query(query, queryParams);
-
-  log('Search Results:', products);
-
-  return products.map(([id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id]) => 
-    ({ id, name, preis, produkt_verweis, show_dia, bild_pfad, kategorie_name, kategorie_id }));
-}
 

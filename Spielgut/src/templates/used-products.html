@@ -1,48 +1,32 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<!-- filter-Funktion -->
 <form action="/used-products" method="get" class="filter-form">
   <div class="filter-row">
     <div class="filter-group">
       <label for="category">Kategorie:</label>
       <select id="category" name="category" class="form-input">
         <option value="">Alle Kategorien</option>
-        <option value="1" {% if request.query.category == '1' %}selected{% endif %}>Musikinstrumente</option>
-        <option value="2" {% if request.query.category == '2' %}selected{% endif %}>Kreatives Spielzeug</option>
-        <option value="3" {% if request.query.category == '3' %}selected{% endif %}>Bewegungsspielzeug</option>
-        <option value="4" {% if request.query.category == '4' %}selected{% endif %}>Lernspielzeug</option>
-        <option value="5" {% if request.query.category == '5' %}selected{% endif %}>Rollenspiel</option>
-        <option value="6" {% if request.query.category == '6' %}selected{% endif %}>Konstruktionsspielzeug</option>
+        {% for kategorie in kategorien %}
+          <option value="{{ kategorie.id }}" {% if request.query.category == kategorie.id %}selected{% endif %}>{{ kategorie.name }}</option>
+        {% endfor %}
       </select>
     </div>
     <div class="filter-group">
       <label for="priceMin">Preis von:</label>
-      <select id="priceMin" name="priceMin" class="form-input">
-        <option value="">Beliebig</option>
-        <option value="5" {% if request.query.priceMin == '5' %}selected{% endif %}>5€</option>
-        <option value="10" {% if request.query.priceMin == '10' %}selected{% endif %}>10€</option>
-        <option value="15" {% if request.query.priceMin == '15' %}selected{% endif %}>15€</option>
-        <option value="20" {% if request.query.priceMin == '20' %}selected{% endif %}>20€</option>
-        <option value="25" {% if request.query.priceMin == '25' %}selected{% endif %}>25€</option>
-        <option value="30" {% if request.query.priceMin == '30' %}selected{% endif %}>30€</option>
-        <option value="35" {% if request.query.priceMin == '35' %}selected{% endif %}>35€</option>
-        <option value="40" {% if request.query.priceMin == '40' %}selected{% endif %}>40€</option>
-        <option value="45" {% if request.query.priceMin == '45' %}selected{% endif %}>45€</option>
-        <option value="50" {% if request.query.priceMin == '50' %}selected{% endif %}>50€</option>
-        <option value="55" {% if request.query.priceMin == '55' %}selected{% endif %}>55€</option>
-      </select>
+      <input type="number" id="priceMin" name="priceMin" class="form-input" value="{{ request.query.priceMin }}" min="0" step="0.01">
     </div>
     <div class="filter-group">
       <label for="priceMax">Preis bis:</label>
-      <select id="priceMax" name="priceMax" class="form-input">
-        <option value="">Beliebig</option>
-        <option value="10" {% if request.query.priceMax == '10' %}selected{% endif %}>Unter 10€</option>
-        <option value="20" {% if request.query.priceMax == '20' %}selected{% endif %}>Unter 20€</option>
-        <option value="30" {% if request.query.priceMax == '30' %}selected{% endif %}>Unter 30€</option>
-        <option value="40" {% if request.query.priceMax == '40' %}selected{% endif %}>Unter 40€</option>
-        <option value="50" {% if request.query.priceMax == '50' %}selected{% endif %}>Unter 50€</option>
-        <option value="60" {% if request.query.priceMax == '60' %}selected{% endif %}>Unter 60€</option>
+      <input type="number" id="priceMax" name="priceMax" class="form-input" value="{{ request.query.priceMax }}" min="0" step="0.01">
+    </div>
+    <div class="filter-group">
+      <label for="condition">Zustand:</label>
+      <select id="condition" name="condition" class="form-input">
+        <option value="">Alle Zustände</option>
+        {% for zustand in zustände %}
+          <option value="{{ zustand.id }}" {% if request.query.condition == zustand.id %}selected{% endif %}>{{ zustand.name }}</option>
+        {% endfor %}
       </select>
     </div>
     <button type="submit" class="btn btn-primary">Filter anwenden</button>
@@ -55,13 +39,15 @@
   </div>
   <div class="product-grid">
     {% for product in products %}
-    <a href="/product/{{ product.id }}" class="product-page-card">
+    <a href="/used-product/{{ product.id }}" class="product-page-card">
       <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-page-image">
       <h2 class="product-title">{{ product.name }}</h2>
       <p class="product-description">{{ product.preis }}€</p>
       <p class="product-category">{{ product.kategorie_name }}</p>
+      <p class="product-condition">{{ product.zustand }}</p>
     </a>
     {% endfor %}
   </div>
+</section>
 {% endblock %}
 

@@ -26,7 +26,6 @@ export class RegisterController {
 
     log("Registration attempt:", { username, email, straße, hausnummer, stadt, plz });
 
-    // Überprüfen Sie, ob alle erforderlichen Felder ausgefüllt sind
     if (!username || !email || !password || !passwordRepeat || !straße || !hausnummer || !stadt || !plz) {
         log("Missing required fields");
         const response = new Response("", {

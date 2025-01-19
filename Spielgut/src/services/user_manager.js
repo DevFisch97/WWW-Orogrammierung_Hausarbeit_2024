@@ -12,30 +12,29 @@ export async function registerUser(username, email, password, straße, hausnumme
   log("Starting user registration process");
 
   try {
-    // Überprüfen Sie, ob der Benutzername oder die E-Mail bereits existiert
-    const existingUser = await db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]); // Use await here
+    const existingUser = await db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]); 
     if (existingUser.length > 0) {
       throw new Error("Benutzername oder E-Mail existiert bereits");
     }
 
-    await db.query('BEGIN TRANSACTION'); // Use await here
+    await db.query('BEGIN TRANSACTION'); 
     
     log("Inserting user into database");
-    const userResult = await db.query( // Use await here
+    const userResult = await db.query( 
       'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, 2)',
       [username, email, hashedPassword]
     );
-    const userId = db.lastInsertRowId; // Use lastInsertRowId instead of lastInsertId
+    const userId = db.lastInsertRowId; 
     log("User inserted, ID:", userId);
     
     log("Inserting address into database");
-    await db.query( // Use await here
+    await db.query( 
       'INSERT INTO adress (user_id, str, hausnummer, stadt, plz) VALUES (?, ?, ?, ?, ?)',
       [userId, straße, hausnummer, stadt, plz]
     );
     log("Address inserted");
     
-    await db.query('COMMIT'); // Use await here
+    await db.query('COMMIT'); 
     log("Transaction committed");
     
     return userId;
@@ -44,7 +43,7 @@ export async function registerUser(username, email, password, straße, hausnumme
     log("Error details:", error.message);
     log("Error stack:", error.stack);
     try {
-      await db.query('ROLLBACK'); // Use await here
+      await db.query('ROLLBACK'); 
       log("Transaction rolled back");
     } catch (rollbackError) {
       log("Error during rollback:", rollbackError);

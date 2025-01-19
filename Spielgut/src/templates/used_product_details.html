@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="product-details">
+    <div class="product-image">
+        <img src="{{ product.bild_pfad }}" alt="{{ product.name }}">
+    </div>
+    <div class="product-info">
+        <h1>{{ product.name }}</h1>
+        <p class="price">{{ product.preis }}€</p>
+        <p class="seller">Verkäufer: {{ product.verkäufer_name }}</p>
+        <p class="condition">Zustand: {{ product.zustand }}</p>
+        <p class="category">Kategorie: {{ product.kategorie_name }}</p>
+        <p class="description">{{ product.produkt_verweis }}</p>
+        
+        {% if user and user.id == product.verkäufer_id %}
+            <a href="/used-product/{{ product.id }}/edit" class="btn btn-primary">Produkt bearbeiten</a>
+            <form action="/used-product/{{ product.id }}/delete" method="POST" style="display: inline;">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                <button type="submit" class="btn btn-danger">Produkt löschen</button>
+            </form>
+        {% elif user %}
+            <a href="/messages/new?recipient={{ product.verkäufer_id }}" class="btn btn-primary">Verkäufer kontaktieren</a>
+        {% else %}
+            <a href="/login" class="btn btn-primary">Anmelden, um Verkäufer zu kontaktieren</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

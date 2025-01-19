@@ -11,7 +11,6 @@ export function initConnection(PATH) {
     _db = new DB(PATH);
     log("Datenbankverbindung hergestellt.");
     
-    // Test the connection
     const testQuery = _db.query("SELECT 1");
     log("Test query result:", testQuery);
     

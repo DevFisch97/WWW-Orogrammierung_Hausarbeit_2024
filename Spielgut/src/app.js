@@ -6,7 +6,7 @@ import { createDebug } from "./services/debug.js";
 
 const log = createDebug('spielgut:app');
 
-// Initialize the database connection
+// Inizialisiert Verbindung zur Dtaenbank
 try {
   initConnection("./src/data/user_managment.db");
   log("Database initialized successfully.");

@@ -8,7 +8,7 @@
   </div>
   <div class="product-info">
     <h1 class="product-title">{{ product.name }}</h1>
-    <p class="product-description">{{ product.beschreibung }}</p>
+    <p class="product-description">{{ product.produkt_verweis }}</p>
     <p class="product-price">{{ product.preis }}€</p>
     <div class="quantity-selector">
       <form method="GET" action="/product/{{ product.id }}" style="display: inline;">
