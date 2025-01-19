@@ -1,27 +1,35 @@
+{% extends "layout.html" %}
+
 {% block content %}
-        <section class="message-list">
-            <h1>Kundennachrichten Übersicht</h1>
-            <div class="message-item unread">
-                <div class="message-header">
-                    <span class="message-title">Frage zum Holzauto</span>
-                    <span class="message-date">15.03.2024</span>
+<div class="container">
+    <section class="message-list">
+        <h1 class="page-title">Meine Nachrichten</h1>
+        {% if messages.length > 0 %}
+            {% for message in messages %}
+                <div class="message-item{% if message.sender_id == user.id %} sent{% else %} received{% endif %}">
+                    <a href="/messages/{{ message.id }}" class="message-link">
+                        <div class="message-header">
+                            <span class="message-title">{{ message.subject }}</span>
+                            <span class="message-date">{{ message.created_at }}</span>
+                        </div>
+                        <div class="message-preview">
+                            {% if message.sender_id == user.id %}
+                                An: {{ message.recipient_name }}
+                            {% else %}
+                                Von: {{ message.sender_name }}
+                            {% endif %}
+                        </div>
+                        <div class="message-preview">{{ message.message | truncate(100) }}</div>
+                    </a>
                 </div>
-                <p class="message-preview">Hallo, ich interessiere mich für das gebrauchte Holzauto. Ist es noch verfügbar?</p>
-            </div>
-            <div class="message-item">
-                <div class="message-header">
-                    <span class="message-title">Zustand des Steckpuzzles</span>
-                    <span class="message-date">14.03.2024</span>
-                </div>
-                <p class="message-preview">Guten Tag, können Sie mir mehr Informationen zum Zustand des gebrauchten Steckpuzzles geben?</p>
-            </div>
-            <div class="message-item">
-                <div class="message-header">
-                    <span class="message-title">Versandkosten für Holzpferd</span>
-                    <span class="message-date">13.03.2024</span>
-                </div>
-                <p class="message-preview">Hallo, ich möchte gerne wissen, wie hoch die Versandkosten für das Holzpferd sind.</p>
-            </div>
-        </section>
-    <script src="script.js"></script>
-    {% endblock %}
+            {% endfor %}
+        {% else %}
+            <p class="no-messages">Sie haben noch keine Nachrichten.</p>
+        {% endif %}
+        <div class="new-message-button-container">
+            <a href="/messages/new" class="btn btn-primary">Neue Nachricht</a>
+        </div>
+    </section>
+</div>
+{% endblock %}
+

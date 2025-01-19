@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <section class="new-message">
+        <h1 class="page-title">Neue Nachricht verfassen</h1>
+        <form action="/messages" method="POST" class="message-form">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <div class="form-group">
+                <label for="recipient">Empfänger:</label>
+                <select name="recipient" id="recipient" class="form-input" required>
+                    <option value="">Bitte wählen Sie einen Empfänger</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="subject">Betreff:</label>
+                <input type="text" name="subject" id="subject" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Nachricht:</label>
+                <textarea name="message" id="message" class="form-input" rows="10" required></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Nachricht senden</button>
+                <a href="/messages" class="btn btn-secondary">Abbrechen</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

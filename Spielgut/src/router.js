@@ -8,6 +8,7 @@ import { getUserFromSession, getAndClearFlashMessage, setFlashMessage, clearFlas
 import { csrfProtection, generateCSRFToken} from "./csrf.js";
 import { createDebug } from "./services/debug.js";
 import { UserManagementController } from "./controllers/user_managment_controller.js";
+import { MessageController } from "./controllers/message_controller.js";
 import { getRequestBody } from "./services/requestBodyHelper.js";
 
 const log = createDebug('spielgut:router');
@@ -22,6 +23,7 @@ export class Router {
       this.staticFileController = new StaticFileController();
       this.assetFileController = new AssetFileController();
       this.userManagementController = new UserManagementController();
+      this.messageController = new MessageController();
     }
 
     async route(request) {
@@ -41,7 +43,7 @@ export class Router {
             }
 
             const user = getUserFromSession(request);
-            const csrfToken = user ? await generateCSRFToken(user.sessionId) : null;
+            const csrfToken = await generateCSRFToken(user ? user.sessionId : 'anonymous');
             let flashMessage = getAndClearFlashMessage(request);
 
             log("Router: Abgerufene Flash-Nachrichten:", flashMessage);
@@ -87,7 +89,12 @@ export class Router {
                     response = await this.render("about.html", { user, flashMessage, csrfToken });
                     break;
                 case "/contact":
-                    response = await this.render("contact.html", { user, flashMessage, csrfToken });
+                    if (request.method === "GET") {
+                        pageData = { user, flashMessage, csrfToken };
+                    response = await this.render("contact.html", pageData);
+                    } else if (request.method === "POST") {
+                        response = await this.messageController.createContactMessage(request);
+                    }
                     break;
                 case "/login":
                     if (user) {
@@ -120,6 +127,32 @@ export class Router {
                         response = await this.render("register.html", { user, flashMessage, csrfToken });
                     } else if (request.method === "POST") {
                         response = await this.registerController.handleRegister(request);
+                    }
+                    break;
+                case "/messages":
+                    if (request.method === "GET") {
+                        pageData = await this.messageController.renderMessageList(user, flashMessage, csrfToken);
+                        response = await this.render("message-overview.html", pageData);
+                    } else if (request.method === "POST") {
+                        response = await this.messageController.createMessage(request, user);
+                    }
+                    break;
+                case "/messages/new":
+                    if (request.method === "GET") {
+                        pageData = await this.messageController.renderNewMessageForm(user, flashMessage, csrfToken);
+                        response = await this.render("new-message.html", pageData);
+                    }
+                    break;
+                case (path.match(/^\/messages\/\d+$/) || {}).input:
+                    const messageId = parseInt(path.split('/')[2]);
+                    pageData = await this.messageController.renderMessageDetail(user, messageId, flashMessage, csrfToken);
+                    response = await this.render("message-detail.html", pageData);
+                    break;
+    
+                case (path.match(/^\/messages\/\d+\/reply$/) || {}).input:
+                    if (request.method === "POST") {
+                        const messageId = parseInt(path.split('/')[2]);
+                        response = await this.messageController.replyToMessage(request, user, messageId);
                     }
                     break;
                 case "/api/logout":

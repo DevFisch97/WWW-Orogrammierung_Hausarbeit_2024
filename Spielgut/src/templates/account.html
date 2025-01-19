@@ -13,6 +13,10 @@
             <p><strong>Stadt:</strong> {{ user.city | default('Nicht angegeben') }}</p>
             <p><strong>PLZ:</strong> {{ user.zip_code | default('Nicht angegeben') }}</p>
         </div>
+    </div>
+    <div class="message-button-container">
+      <a href="/messages" class="btn btn-primary">Meine Nachrichten</a>
+    </div>
         <h2>Kontoinformationen bearbeiten</h2>
         <form class="account-form" action="/account" method="POST">
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">

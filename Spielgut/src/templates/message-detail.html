@@ -1,25 +1,47 @@
+{% extends "layout.html" %}
+
 {% block content %}
-        <section class="message-detail">
-            <h1>Kundennachricht Details</h1>
-            <div class="message-content">
-                <div class="message-header">
-                    <span class="message-title">Frage zum Holzauto</span>
-                    <span class="message-date">15.03.2024, 14:30 Uhr</span>
-                </div>
-                <div class="message-body">
-                    <p>Hallo,</p>
-                    <p>ich interessiere mich für das gebrauchte Holzauto. Ist es noch verfügbar? Wenn ja, können Sie mir bitte mehr Informationen zum Zustand geben? Hat es Gebrauchsspuren oder Beschädigungen?</p>
-                    <p>Vielen Dank im Voraus!</p>
-                    <p>Mit freundlichen Grüßen,<br>Max Mustermann</p>
-                </div>
+<div class="container">
+    <section class="message-detail">
+        <h1 class="page-title">Nachrichtendetails</h1>
+        <div class="message-content">
+            <div class="message-header">
+                <h2 class="message-subject">{{ message.subject }}</h2>
+                <p class="message-meta">
+                    {% if message.sender_id %}
+                        <span>Von: {{ message.sender_name }}</span>
+                    {% else %}
+                        <span>Von: Kontaktformular</span>
+                    {% endif %}
+                    <span>An: {{ message.recipient_name }}</span>
+                    <span>Datum: {{ message.created_at }}</span>
+                </p>
             </div>
-            <div class="reply-form">
-                <h2>Antworten</h2>
-                <form action="/send-reply" method="POST">
-                    <textarea name="reply" placeholder="Ihre Antwort hier eingeben..." required></textarea>
-                    <button type="submit" class="submit-button">Antwort senden</button>
-                </form>
+            <div class="message-body">
+                {{ message.message }}
             </div>
-        </section>
-    <script src="script.js"></script>
-    {% endblock %}
+        </div>
+        
+        {% if message.sender_id %}
+        <div class="reply-form">
+            <h2>Antworten</h2>
+            <form action="/messages/{{ message.id }}/reply" method="POST">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                <div class="form-group">
+                    <label for="reply-message">Ihre Antwort:</label>
+                    <textarea id="reply-message" name="message" class="form-input" rows="5" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Antwort senden</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+        
+        <div class="back-to-messages">
+            <a href="/messages" class="btn btn-secondary">Zurück zur Nachrichtenübersicht</a>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
