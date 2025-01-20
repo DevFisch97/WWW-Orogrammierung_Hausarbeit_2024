@@ -1,0 +1,294 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1> Dokumentation </h1>
+<section class="privacy-content">
+
+    <h2>Erstell von:</h2>
+    <h3>Khoder Ibrahim - khib4586 - 730282</h3>
+    <h3>Jonas Neitzel - jone5105 - 730006</h3>
+
+    <h2>Vorstellung des fiktiven Unternehmens: Spielgut</h2>
+    <p>Spielgut ist ein fiktives Unternehmen, das sich auf die Herstellung und den Verkauf von wiederverwendbaren Spielzeugen spezialisiert hat. Unsere Produktpalette umfasst hochwertiges Spielzeug aus Holz und Kuscheltiere aus ökologisch angebauter Baumwolle. Unser Ziel ist es, durch die Verwendung nachhaltiger Materialien einen positiven Beitrag zur Umwelt zu leisten und gleichzeitig die Lebensdauer unserer Produkte zu maximieren.
+        Die Webseite dient als zentrale Plattform, um unsere Produkte detailliert vorzustellen und den Kaufprozess zu ermöglichen. Kunden finden umfassende Informationen zu jedem Produkt, einschließlich der verwendeten Materialien, der Herstellung und der Vorteile für die Nutzer. Produkte können direkt über die Webseite gekauft werden.
+        Ein besonderes Feature der Website ist die Möglichkeit für Kunden, ihre gebrauchten Spielgut-Produkte wieder zum Verkauf anzubieten. Auf diese Weise verlängern wir gemeinsam die Lebensdauer unserer Produkte und fördern einen nachhaltigen Umgang mit Spielzeug.
+    </p>
+
+    <h2>Ziele der Anwendung</h2>
+    <p>
+        Das Hauptziel unserer Anwendung ist es, eine Plattform zu schaffen, auf der wir unsere Produkte präsentieren und verkaufen können. Gleichzeitig wollen wir die Nachhaltigkeit fördern, indem wir unseren Kunden die Möglichkeit bieten, gebrauchte Produkte wiederzuverkaufen.
+    </p>
+
+    <h3>Funktionen der Anwendung:</h3>
+    <ul>
+        <li><h4>Produktpräsentation:</h4> Kunden können Produkte ansehen und detaillierte Beschreibungen zu den Materialien und Herstellungsmethoden erhalten.</li>
+        <li><h4>Onlineshop-Funktion:</h4> Kunden können Produkte in den Einkaufswagen hinzufügen und löschen, eine direkte Verkaufsabwicklung gibt es nicht. (noch nicht)</li>
+        <li><h4>Kontoerstellung:</h4> Kunden können sich ein eigenes Konto erstellen, um ihre Bestellungen zu verwalten und gebrauchte Spielzeuge zum Verkauf anzubieten.</li>
+        <li><h4>Resell-Feature:</h4> Kunden können gebrauchte Spielzeuge mit Bild und Beschreibung online stellen und einen Preis vorschlagen. Käufer und Verkäufer können über eine Nachrichtenfunktion kommunizieren.</li>
+        <li><h4>Such- und Filterfunktion:</h4> Kunden können gezielt nach bestimmten Produkten suchen oder nach Preis und anderen Kriterien filtern.</li>
+        <li><h4>Kommunikation:</h4> Kunden können sich untereinander austauschen und Preise verhandeln.</li>
+        <li><h4>Über uns-Seite:</h4> Diese Seite bietet Einblicke in das Unternehmen Spielgut</li>
+        <li><h4>Kundenformular:</h4> Ein Formular für Feedback, Anfragen und Fragen steht zur Verfügung.</li>
+        
+    </ul>
+    
+    <p>Durch diese Funktionen wollen wir sowohl die Kauf- als auch die Verkaufserfahrung für unsere Kunden so angenehm und nachhaltig wie möglich gestalten.</p>
+
+    <h2>Sicherheit und Maßnahmen</h2>
+    <p>Die Sicherheit der Kundendaten hat bei Spielgut höchste Priorität, da durch die Veröffentlichung von Namen, Adressen oder E-Mail-Adressen der Kunden und Verkäufer verschiedene Gefahren entstehen können. Zu den potenziellen Risiken gehören Betrug, Identitätsdiebstahl oder Phishing, bei dem persönliche Daten von Dritten missbraucht werden könnten. Hacker könnten versuchen, durch Manipulation von Datenbankabfragen an vertrauliche Informationen zu gelangen, die nicht offengelegt werden sollen. Sie könnten auch Daten wie Produktpreise oder Nutzerinformationen in der Datenbank ändern.
+        Mitbewerber könnten versuchen, Geschäftsgeheimnisse wie Verkaufszahlen, Lieferanten oder Strategien auszuspionieren. Angreifer könnten Benutzerkonten übernehmen und im Namen der Nutzer unerwünschte Aktionen durchführen, wie den Kauf eines Produkts. Zudem besteht die Gefahr, dass Bots die Webseite mit gefälschten Registrierungen oder Bewertungen überfluten.
+    </p>
+
+    <h2>Maßnahmen zur Datensicherheit:</h2>
+    <ul>
+        <li><h3>Datenverschlüsselung:</h3>Alle sensiblen Daten werden in unserer Datenbank verschlüsselt gespeichert. Dies schützt die Informationen vor unbefugtem Zugriff und gewährleistet, dass sie selbst im Falle eines Datenlecks nicht lesbar sind.</li>
+        <li><h3>CSRF-Token:</h3> Für alle Formulare auf der Webseite nutzen wir CSRF-Token. Diese Maßnahme verhindert, dass Angreifer schädliche Anfragen in den Kontext eines authentifizierten Benutzers einschleusen, was den Missbrauch von Benutzerkonten erschwert.</li>
+        <li><h3>Zugriffskontrollen:</h3> Um unautorisierten Zugriff auf administrative Bereiche zu verhindern, haben wir Zugriffskontrollen implementiert. Nur befugte Mitarbeiter mit den entsprechenden Berechtigungen können sensible Daten und Verwaltungsfunktionen einsehen und nutzen.</li>
+    </ul>
+
+    <p>Diese Sicherheitsmaßnahmen sind darauf ausgelegt, die Integrität der Webseite zu schützen und die Daten unserer Kunden und Verkäufer zu sichern.</p>
+    
+    <h2>Kernfunktion und Inhaltsstruktur:</h2>
+    <p>Die Webseite bietet eine vielfältige Palette an Funktionen und Inhaltstypen, um den Bedürfnissen von Kunden und Administratoren gerecht zu werden. Im Zentrum stehen die Produktseiten, die sowohl neue als auch gebrauchte Spielzeuge mit detaillierten Ansichten präsentieren. Benutzer haben die Möglichkeit, ein Konto zu erstellen, sich anzumelden und ihr Profil individuell zu verwalten. Ein integrierter Warenkorb sorgt für einen unkomplizierten Bestellprozess der ausgewählten Produkte. Wir haben statistische Seiten wie “Über uns” oder die Kontaktseite , die Kunden über das Unternehmen informieren. Die Admins haben eine besondere Funktion, das Verwalten und Bearbeiten von Produkten und Konten. Die gezielte Produktsuche wird unterstützt durch eine Suchfunktion oder eine Filteroption. Außerdem haben unsere Kunden die Möglichkeit, sich mit unserem Team in Verbindung zu setzen, mit dem Kunden Nachrichtensystem oder auch Nachrichten untereinander auszutauschen. </p>
+    
+    <h3>Die Datenbank:</h3>
+    <img src="assets\doku\datenbankstruktur.png" alt="Datenbankstruktur">
+
+    <h2>Technische Architektur:</h2>
+    <p>Unsere Anwendung ist in mehrere Teile aufgeteilt. Fangen wir an mit dem Frontend. Das Frontend ist die Benutzeroberfläche, mit der die Nutzer direkt interagieren. Die wurden bei unserer Webseite mit Javascript, HTML, CSS entwickelt. Unsere HTML-Dateien strukturieren die Seiten. Die CSS ist für das hübsch machen der Seite und Javascript für bestimmte Funktionen wie das Hinzufügen von Produkten zum Warenkorb. Als nächstes haben wir uns um das Backend gekümmert. Das Backend ist für die Logik der Anwendung und führt sowas wie Datenbankabfragen durch und liefert den Inhalt dem Frontend, welches dann auf der Webseite zu sehen ist. Für die Datenbank haben wir MYSQL benutzt. Da sind Funktionen mit drin wie: Login, Registrierung, Passwortverwaltung, Produkt löschen, Produkt hinzufügen, Produkt aktualisieren, Erstellung von Einträgen für gebrauchte Produkte. Die Datenbank speichert so alle relevanten Informationen wie Benutzerdaten, Produkt Information, Bestellhistorie, Bewertungen. Wir haben für die Architektur die Model-View-Controller genutzt, die die Aufgabe die Daten und Geschäftslogik zu verarbeiten. Es stellt die Verbindung zur Datenbank her und verarbeitet Benutzereingaben. </p>
+    
+    <h2>Seitenübersicht</h2>
+    <h3>Hauptseite:</h3>
+    <ul>
+        <li>`/`: Startseite </li>
+        <li>`/new-products`: Neue Produkte </li>
+        <li>`/used-products`: Gebrauchte Produkte</li>
+        <li>`/about`: Über uns Seite</li>
+        <li>`/contact`: Kontaktseite</li> 
+    </ul>
+
+    <p>Diese Hauptseiten bieten einen klaren und einfachen Zugang zu den wichtigsten Bereichen der Website. Die Trennung von neuen und gebrauchten Produkten ermöglicht es den Benutzern, gezielt nach ihren Präferenzen zu suchen. Die "Über uns" und Kontaktseiten schaffen Vertrauen und ermöglichen eine einfache Kommunikation mit dem Unternehmen.</p>
+
+    <h3>Benutzerverwaltung:</h3>
+    <ul>
+        <li>`/account`: Benutzerkonto-Verwaltung </li>
+        <li>`/login`: Anmeldeseite </li>
+        <li>`/register`: Registrierungsseite</li>
+        <li>`/api/logout`: Ausloggen</li>
+    </ul>
+
+    <p>Diese Struktur bietet eine klare Trennung zwischen öffentlichen und privaten Bereichen der Webseite. Authentifizierung ist ein wichtiger Bestandteil für personalisierte Funktionen und den Schutz von Benutzerdaten.</p>
+
+    <h3>Einkaufsfunktionen:</h3>
+    <ul>
+        <li>`/shopping_cart`: Warenkorb </li>
+        <li>`/api/cart/add`: Hinzufügen von Produkten in den Warenkorb </li>
+        <li>`/api/cart/update`: Bei Veränderung, wird der Warenkorb geupdatet</li>
+        <li>`/api/cart/remove`: Entfernen von Produkten im Warenkorb </li>
+    </ul>
+
+    <p>Diese Struktur sorgt für ein einfaches und angenehmes Einkaufserlebnis. Die API-Endpunkte für den Warenkorb ermöglichen, dass Änderungen sofort sichtbar sind, ohne die Seite komplett neu zu laden. Das macht die Nutzung bequemer.</p>
+
+    <h3>Produktverwaltung:</h3>
+    <ul>
+        <li>`/create-product`: Produkt erstellen, nur für Administratoren </li>
+        <li>`/create-used-product`: gebraucht Produkt Anzeige erstellen  </li>
+    </ul>
+
+    <p>Die Trennung zwischen neuen und gebrauchten Produkten sorgt dafür, dass beide Arten unterschiedlich behandelt werden können. Nur Administratoren können über `/create-product` neue Produkte erstellen. Gebrauchte Produkte können über `/create-used-product` auch von normalen Benutzern hinzugefügt werden, um den Wiederverkauf zu unterstützen.</p>
+
+    <h3>Suche und Kommunikation:</h3>
+    <ul>
+        <li>`/messages`: Nachrichtenübersicht</li>
+        <li>`/messages/new`: Neue Nachricht</li>
+        <li>`/search`: Suche</li>
+    </ul>
+
+    <p>Ein eingebautes Nachrichtensystem erleichtert die Kommunikation zwischen Nutzern ,zum Beispiel beim Verkauf gebrauchter Produkte, und mit dem Kundenservice. Die Suchfunktion hilft dabei, Produkte und Informationen auf der gesamten Website schnell zu finden.</p>
+
+    <h3>Administration:</h3>
+    <ul>
+        <li>`/user-management`: Benutzerverwaltung, nur für Administratoren</li>
+    </ul>
+
+    <p>Ein eigener Bereich für die Benutzerverwaltung hilft Administratoren, Benutzerkonten einfach zu verwalten, ohne die Hauptfunktionen der Website zu stören.</p>
+
+    <h3>Rechtlich notwendige Seiten:</h3>
+    <ul>
+        <li>`/impressum`: Geschäftskontakt</li>
+        <li>`/datenschutzerklaerung`: Datenschutz</li>
+    </ul>
+
+    <p>Die Aufteilung der rechtlich notwendigen Seiten in separate URLs dient sowohl der Erfüllung gesetzlicher Vorgaben als auch der Benutzerfreundlichkeit.</p>
+
+    <h2>Aufgaben des Server/Client:</h2>
+    
+    <p>Der Server übernimmt in unserer Anwendung mehrere wichtige Aufgaben. Er ist für die Datenbankverwaltung verantwortlich, was bedeutet, dass er alle Datenbankoperationen wie das Lesen, Schreiben und Aktualisieren von Daten durchführt. Zudem kümmert sich der Server um die Authentifizierung, indem er Benutzeranmeldungen überprüft und sicherstellt, dass nur autorisierte Benutzer Zugriff auf bestimmte Ressourcen erhalten. Die Sitzungsverwaltung wird ebenfalls vom Server übernommen, um den Zustand der Benutzerinteraktionen über mehrere Anfragen hinweg zu verfolgen.
+        Auf der anderen Seite ist der Client hauptsächlich für die Darstellung der Benutzeroberfläche zuständig. Er rendert die vom Server erhaltenen Daten in eine benutzerfreundliche Form und ermöglicht die Interaktion mit der Anwendung. Zusätzlich führt der Client einfache Formularvalidierungen durch, um die Benutzereingaben vor dem Absenden an den Server auf offensichtliche Fehler zu überprüfen.
+        Diese Aufteilung der Aufgaben zwischen Server und Client wurde aus mehreren Gründen gewählt. Erstens erhöht sie die Sicherheit der Anwendung, da sensible Operationen wie Datenbankzugriffe und Authentifizierung auf dem Server stattfinden, wo sie besser vor unbefugtem Zugriff geschützt werden können. Zweitens trägt diese Aufteilung dazu bei, die Serverlast zu reduzieren, indem bestimmte Aufgaben wie die Formularvalidierung auf den Client verlagert werden. Dies verbessert die Skalierbarkeit der Anwendung und ermöglicht eine schnellere Reaktion auf Benutzereingaben. Schließlich fördert diese Struktur eine klare Trennung der Verantwortlichkeiten, was die Wartung und Weiterentwicklung der Anwendung erleichtert.
+        </p>
+    
+    <h2>Javascript:</h2>
+
+    <p>Javascript haben wir für das Produkt Slideshow auf der Startseite genutzt, um die Produkte dynamisch anzuzeigen und durch sie zu navigieren, mit den Buttons zusammen. Das zweite, wofür wir Javascript im Frontend nutzen ist, die Bildvorschau beim Produkt anlegen, dies haben wir gewählt, um eine Vorschau des hochgeladenen Bildes anzuzeigen, ohne die Seite neu zu laden. Javascript wird bei der Benutzerverwaltung genutzt für die Bearbeitung von Benutzerdaten in einem Dialogfenster. In der Layout.html nutzen wir Javascript für allgemeine Interaktivität und für responsive Design-Elemente. 
+        Die Webseite folgt dem Prinzip des Progressive Enhancement, indem grundlegende Funktionen wie Produktanzeige und Kontaktformulare auch ohne JavaScript nutzbar sind, während JavaScript die Benutzerfreundlichkeit durch dynamische Inhalte und Formularvalidierung verbessert, wobei durchgehend HTML verwendet wird, um die Zugänglichkeit für alle Nutzer zu optimieren.
+        </p>
+
+    <h2>Progressive Enhancement:</h2>
+    
+    <p>Unsere Webseite basiert auf dem Prinzip der Progressive Enhancement. Das Kontaktformular und Produktanzeige wurde so gestaltet, dass sie auch ohne Javascript nutzbar ist. Wir haben uns für das Serverseitige entschieden, da jeder User unterschiedliche Browser Einstellungen hat und wir für jeden erreichbar sein wollen. Javascript wird gezielt eingesetzt, um die Benutzererfahrung zu verbessern durch dynamische Inhalte und clientseitige Formularvalidierung, ohne die Basisfunktionalität zu beeinträchtigen. Semantisches HTML wurde durchgängig verwendet, um die Barrierefreiheit zu optimieren. Die serverseitige Validierung ist zusätzlich eine Sicherheitsmaßnahme dafür, dass Daten auch korrekt verarbeitet werden, wenn JavaScript im Browser deaktiviert ist. </p>
+
+        <h2>Tagebuch:</h2>
+        <h4>08.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Brainstorming </li>
+            <li>Gründung der Website Idee</li>
+            <li>Erstellung des Exposés</li>
+        </ul>
+        <h4>11.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Aufbau der Seite in CSS und HTML</li>
+        </ul>
+        <h4>16.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Weiterarbeiten an der Seite in CSS, HTML</li>
+        </ul>
+        <h4>20.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Weiterarbeiten an der Seite in CSS, HTML (Login and Cart Seite)</li>
+        </ul>
+        <h4>22.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Templates erstellt</li>
+            <li>App.js und Render.js erstellt</li>
+        </ul>
+        <h4>24.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Registrieren von Nutzern</li>
+        </ul>
+        <h4>27.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Registrieren und Login Funktion erstellt</li>
+        </ul>
+        <h4>28.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Login und Registrieren opitimiert</li>
+        </ul>
+        <h4>29.11.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Datenbankanbindung für Produkte</li>
+            <li>Login Register, serverseitig</li>
+        </ul>
+        <h4>03.12.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Registrierung, Bildanzeige gefixt </li>
+        </ul>
+        <h4>10.12.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Controller fertig machen</li>
+            <li>Warenkorb</li>
+            <li>Filter, Suchfunktion templating</li>
+        </ul>
+        <h4>11.12.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Warenkorb reibungslos vorbereitet</li>
+            <li>Flash-Nachrichten: Anmeldung, Abmeldung, Warenkorb hinzugefügt und Registriert</li>
+            <li>Fehlermeldung Seiten: 403, 404, 500</li>
+        </ul>
+        <h4>17.12.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>CSFR-Token</li>
+        </ul>
+        <h4>27.12.2024 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Suchfunktion</li>
+            <li>Filterfunktion</li>
+            <li>CSFR-Tokens</li>
+            <li>Doku</li>
+        </ul>
+        <h4>09.01.2025 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Eigener Router als Modul</li>
+            <li>Bugs gefixt</li>
+        </ul>
+        <h4>13.01.2025 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Filterfunktion Kategorien</li>
+        </ul>
+        <h4>17.01.2025 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Suchfunktion</li>
+            <li>Produkt Create FUNKTION</li>
+            <li>Bugg Fixes</li>
+        </ul>
+        <h4>18.01.2025 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Logging der Zugriffe</li>
+            <li>Nutzung des Debug-Moduls statt console.log()</li>
+            <li>Eigenes Nutzer_innenprofil kann bearbeitet werden</li>
+            <li>Nutzer_innen-Verwaltung</li>
+            <li>Doku</li>
+        </ul>
+        <h4>19.01.2025 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Messages</li>
+            <li>used_products</li>
+            <li>Bugg fixes </li>
+            <li>Doku</li>
+        </ul>
+        <h4>20.01.2025 - Jonas Neitzel, Khoder Ibrahim</h4>
+        <ul>
+            <li>Bugg fixes</li>
+            <li>Doku</li>
+        </ul>
+
+
+        <h3>Umsetzung:</h3>
+        <p>Wir haben die einzelnen Anforderungspunkte klar aufgeteilt und gleichzeitig in Live-Sitzungen am Projekt gearbeitet. Dadurch konnten wir Missverständnisse vermeiden und sicherstellen, dass wir stets auf dem gleichen Stand waren. Diese Herangehensweise hat sich als sehr effektiv erwiesen und die Zusammenarbeit war dadurch harmonischer und produktiver . Dank der direkten  Kommunikation konnten Probleme schnell gelöst und Fortschritte erzielt werden.</p>
+
+
+    
+        <h2>Kolophon/Inspiration:</h2>
+        <h3>Spielgut</h3>
+        <h3>Khoder Ibrahim 730282, Jonas Neitzel 730006</h3>
+
+            <h3>Texte</h3>
+            <p>Unsere Texte auf der Webseite haben wir ausschließlich mit ChatGPT generiert.</p>
+
+            <h3>Bilder</h3>
+            <ul>
+                <li>Die Produktbilder haben wir mit Microsoft Designer – Beeindruckende Designs im Handumdrehen generiert.</li>
+                <li>Das Logo wurde mit der Webseite Logo Maker | Create Your Free Logo | Design.comDesign.com erstellt.</li>
+                <li>Die Png´s für einige Icons haben wir uns https://www.flaticon.com/free-icon/filter_9702724?term=filter&page=1&position=20&origin=tag&related_id=9702724 geholt.</li>
+            </ul>
+
+
+        
+            <h3>Inspiration</h3>
+            <p>Unsere Texte auf der Webseite haben wir ausschließlich mit ChatGPT generiert.</p>
+            <ul>
+                <li>H&M | Fashion für Frauen, Männer & Kinder | H&M DE</li>
+                <li>LIVE FAST DIE YOUNG – Authentic Streetwear by LFDY</li>
+                <li>Spielzeug & Spielwaren einfach online bestellen | MÜLLER</li>
+            </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+            <li><a href="https://docs.deno.com/runtime/fundamentals/web_dev/">Web development</a></li>
+            <li><a href="https://www.tutorialspoint.com/sqlite/sqlite_commands.htm?utm_source=chatgpt.com">SQLite - Commands</a></li>
+            <li><a href="https://www.geeksforgeeks.org/how-to-upload-image-in-html">geeksforgeeks.org - how-to-upload-image-in-html</a></li>
+            <li><a href="https://mozilla.github.io/nunjucks/getting-started.html">Nunjucks Tutorial - Getting Started</a></li>
+            <li><a href="https://www.youtube.com/watch?v=uRUCYAs0hmY">Gulp and Nunjucks 02 - Getting started with Nunjucks Templates</a></li>
+            <li><a href="https://www.youtube.com/watch?v=Dux5y8mVIMY">Javascript Debugging - Full Course</a></li>
+            <li><a href="https://chatgpt.com/">ChatGPT</a></li>
+            <li><a href="https://www.sqlitetutorial.net/sqlite-where/">SQLite WHERE - Filter Rows in a Result Set</a></li>
+            <li><a href="https://developer.mozilla.org">https://developer.mozilla.org</a></li>
+            <li><a href="https://www.w3schools.com/">IW3Schools Online Web Tutorials</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURI">decodeURI() - JavaScript | MDN</a></li>
+            <li><a href="https://stackoverflow.com">https://stackoverflow.com</a></li>
+        </ul>
+        <h3>Code</h3>
+        <p>Die requestBodyHelper.js und  debug.js haben wir uns auch generieren lassen von <a href="https://chatgpt.com/">ChatGPT</a>.</p>
+
+</section> 
+{% endblock %}

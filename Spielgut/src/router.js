@@ -136,6 +136,9 @@ export class Router {
           case "/datenschutz":
             response = await this.render("datenschutzerklaerung.html", { user, flashMessage, csrfToken })
             break
+          case "/dokumentation":
+            response = await this.render("dokumentation.html", { user, flashMessage, csrfToken })
+             break
         case "/register":
           if (request.method === "GET") {
             response = await this.render("register.html", { user, flashMessage, csrfToken })
