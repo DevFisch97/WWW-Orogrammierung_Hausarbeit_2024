@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { render } from "./services/render.js";
-import { initConnection } from "./services/db.js";
-import { Router } from "./router.js";
-import { createDebug } from "./services/debug.js";
+import { render } from "./src/services/render.js";
+import { initConnection } from "./src/services/db.js";
+import { Router } from "./src/router.js";
+import { createDebug } from "./src/services/debug.js";
 
 const log = createDebug('spielgut:app');
 
