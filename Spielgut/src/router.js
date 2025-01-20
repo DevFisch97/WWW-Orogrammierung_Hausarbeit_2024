@@ -129,6 +129,13 @@ export class Router {
             response = await this.loginController.handleAccountUpdate(request, user)
           }
           break
+          case "/impressum":
+            response = await this.render("impressum.html", { user, flashMessage, csrfToken })
+            break
+  
+          case "/datenschutz":
+            response = await this.render("datenschutzerklaerung.html", { user, flashMessage, csrfToken })
+            break
         case "/register":
           if (request.method === "GET") {
             response = await this.render("register.html", { user, flashMessage, csrfToken })
@@ -229,18 +236,19 @@ export class Router {
             response = await this.productController.handleProductUpdate(request, user, editProductId)
           }
           break
-        case "/create-used-product":
-          if (!user) {
-            response = new Response("", {
-              status: 302,
-              headers: { Location: "/login" },
-            })
-          } else if (request.method === "GET") {
-            response = await this.render("create-used-product.html", { user, flashMessage, csrfToken })
-          } else if (request.method === "POST") {
-            response = await this.productController.handleCreateUsedProduct(request, user)
-          }
-          break
+          case "/create-used-product":
+            if (!user) {
+              response = new Response("", {
+                status: 302,
+                headers: { Location: "/login" },
+              })
+            } else if (request.method === "GET") {
+              const pageData = await this.productController.getUsedProductsData(user, flashMessage, csrfToken)
+              response = await this.render("create-used-product.html", pageData)
+            } else if (request.method === "POST") {
+              response = await this.productController.handleCreateUsedProduct(request, user)
+            }
+            break
         case (path.match(/^\/used-product\/\d+\/edit$/) || {}).input:
           if (request.method === "GET") {
             const editProductId = Number.parseInt(path.split("/")[2])

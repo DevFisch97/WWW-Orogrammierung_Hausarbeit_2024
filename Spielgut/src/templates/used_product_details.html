@@ -1,29 +1,31 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="product-details">
-    <div class="product-image">
-        <img src="{{ product.bild_pfad }}" alt="{{ product.name }}">
-    </div>
-    <div class="product-info">
-        <h1>{{ product.name }}</h1>
-        <p class="price">{{ product.preis }}€</p>
-        <p class="seller">Verkäufer: {{ product.verkäufer_name }}</p>
-        <p class="condition">Zustand: {{ product.zustand }}</p>
-        <p class="category">Kategorie: {{ product.kategorie_name }}</p>
-        <p class="description">{{ product.produkt_verweis }}</p>
-        
-        {% if user and user.id == product.verkäufer_id %}
-            <a href="/used-product/{{ product.id }}/edit" class="btn btn-primary">Produkt bearbeiten</a>
-            <form action="/used-product/{{ product.id }}/delete" method="POST" style="display: inline;">
-                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-                <button type="submit" class="btn btn-danger">Produkt löschen</button>
-            </form>
-        {% elif user %}
-            <a href="/messages/new?recipient={{ product.verkäufer_id }}" class="btn btn-primary">Verkäufer kontaktieren</a>
-        {% else %}
-            <a href="/login" class="btn btn-primary">Anmelden, um Verkäufer zu kontaktieren</a>
-        {% endif %}
-    </div>
-</div>
+<section class="product-detail">
+  <div class="product-image-container">
+    <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-detail-image">
+  </div>
+  <div class="product-info">
+    <h1 class="product-title">{{ product.name }}</h1>
+    <p class="product-description">{{ product.produkt_verweis }}</p>
+    <p class="product-price">{{ product.preis }}€</p>
+    <p class="product-category">Kategorie: {{ product.kategorie_name }}</p>
+    <p class="product-condition">Zustand: <span class="condition-badge condition-{{ product.zustand|lower }}">{{ product.zustand }}</span></p>
+    <p class="product-seller">Verkäufer: {{ product.verkäufer_name }}</p>
+    
+    {% if user and user.id == product.verkäufer_id %}
+      <div class="admin-actions">
+        <a href="/used-product/{{ product.id }}/edit" class="btn btn-edit">Produkt bearbeiten</a>
+        <form action="/used-product/{{ product.id }}/delete" method="POST" onsubmit="return confirm('Sind Sie sicher, dass Sie dieses Produkt löschen möchten?');">
+          <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+          <button type="submit" class="btn btn-delete">Produkt löschen</button>
+        </form>
+      </div>
+    {% elif user %}
+      <a href="/messages/new?recipient={{ product.verkäufer_id }}" class="btn btn-contact-seller">Verkäufer kontaktieren</a>
+    {% else %}
+      <a href="/login" class="btn btn-primary">Anmelden, um Verkäufer zu kontaktieren</a>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

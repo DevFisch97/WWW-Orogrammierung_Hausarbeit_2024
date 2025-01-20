@@ -7,12 +7,9 @@
       <label for="category">Kategorie:</label>
       <select id="category" name="category" class="form-input">
         <option value="">Alle Kategorien</option>
-        <option value="1" {% if request.query.category == '1' %}selected{% endif %}>Musikinstrumente</option>
-        <option value="2" {% if request.query.category == '2' %}selected{% endif %}>Kreatives Spielzeug</option>
-        <option value="3" {% if request.query.category == '3' %}selected{% endif %}>Bewegungsspielzeug</option>
-        <option value="4" {% if request.query.category == '4' %}selected{% endif %}>Lernspielzeug</option>
-        <option value="5" {% if request.query.category == '5' %}selected{% endif %}>Rollenspiel</option>
-        <option value="6" {% if request.query.category == '6' %}selected{% endif %}>Konstruktionsspielzeug</option>
+        {% for kategorie in kategorien %}
+          <option value="{{ kategorie.id }}" {% if request.query.category == kategorie.id %}selected{% endif %}>{{ kategorie.name }}</option>
+        {% endfor %}
       </select>
     </div>
     <div class="filter-group">

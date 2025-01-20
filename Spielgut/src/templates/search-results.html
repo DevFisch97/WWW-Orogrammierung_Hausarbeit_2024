@@ -6,20 +6,43 @@
     <h1 class="product-page-title">Suchergebnisse für "{{ searchQuery }}"</h1>
   </div>
 
-  {% if products|length > 0 %}
+  <h2 class="product-section-title">Neue Produkte</h2>
+  {% if newProducts|length > 0 %}
     <div class="product-grid">
-      {% for product in products %}
+      {% for product in newProducts %}
         <a href="/product/{{ product.id }}" class="product-page-card">
-          <img src="{{ product.bild_pfad }}" alt="{{ product.name }}" class="product-page-image">
-          <h2 class="product-title">{{ product.name }}</h2>
+          <img src="{{ product.bild_pfad if product.bild_pfad else '/placeholder.svg' }}" alt="{{ product.name }}" class="product-page-image">
+          <h3 class="product-title">{{ product.name }}</h3>
           <p class="product-description">{{ product.preis }}€</p>
           <p class="product-category">{{ product.kategorie_name }}</p>
         </a>
       {% endfor %}
     </div>
-    
   {% else %}
+    <p>Keine neuen Produkte gefunden für "{{ searchQuery }}".</p>
+  {% endif %}
+
+  <h2 class="product-section-title">Gebrauchte Produkte</h2>
+  {% if usedProducts|length > 0 %}
+    <div class="product-grid">
+      {% for product in usedProducts %}
+        <a href="/used-product/{{ product.id }}" class="product-page-card">
+          <img src="{{ product.bild_pfad if product.bild_pfad else '/placeholder.svg' }}" alt="{{ product.name }}" class="product-page-image">
+          <h3 class="product-title">{{ product.name }}</h3>
+          <p class="product-description">{{ product.preis }}€</p>
+          <p class="product-category">{{ product.kategorie_name }}</p>
+          <p class="product-condition">Zustand: {{ product.zustand }}</p>
+          <p class="product-seller">Verkäufer: {{ product.verkäufer_name }}</p>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Keine gebrauchten Produkte gefunden für "{{ searchQuery }}".</p>
+  {% endif %}
+
+  {% if newProducts|length == 0 and usedProducts|length == 0 %}
     <p>Keine Produkte gefunden für "{{ searchQuery }}".</p>
   {% endif %}
 </section>
 {% endblock %}
+

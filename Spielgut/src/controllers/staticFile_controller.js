@@ -15,7 +15,7 @@ export class StaticFileController {
         headers: { "content-type": mimeType },
       });
     } catch (error) {
-      error(`Error serving static file: ${filePath}`, error);
+      console.error(`Error serving static file: ${filePath}`, error);
       return new Response("File not found", { status: 404 });
     }
   }

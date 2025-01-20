@@ -18,15 +18,15 @@
     <input type="number" id="preis" name="preis" value="{{ product.preis }}" step="0.01" required>
   </div>
   <div class="form-group">
-    <label for="zustand">Zustand:</label>
-    <select id="zustand" name="zustand" required>
-      {% for zustand in zustände %}
-        <option value="{{ zustand.id }}" {% if zustand.id == product.zustand_id %}selected{% endif %}>
-          {{ zustand.name }}
-        </option>
-      {% endfor %}
-    </select>
-  </div>
+  <label for="zustand_id">Zustand:</label>
+  <select id="zustand_id" name="zustand_id" required>
+    {% for zustand in zustände %}
+      <option value="{{ zustand.id }}" {% if zustand.id == product.zustand_id %}selected{% endif %}>
+        {{ zustand.name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
   <div class="form-group">
     <label for="kategorie_id">Kategorie:</label>
     <select id="kategorie_id" name="kategorie_id" required>

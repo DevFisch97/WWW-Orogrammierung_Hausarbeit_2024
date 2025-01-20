@@ -50,9 +50,9 @@ export async function getNewProductsDia() {
 export async function getUsedProductsDia() {
   const db = connection()
   const products = await db.query(`
-    SELECT gp.id, gp.name, gp.preis, b.bild_pfad
+    SELECT gp.id, gp.name, gp.preis, bg.bild_pfad
     FROM gebrauchte_produkte gp
-    LEFT JOIN bilder b ON gp.id = b.produkt_id
+    LEFT JOIN bilder_gebraucht bg ON gp.id = bg.gebrauchte_produkte_id
     WHERE gp.show_dia = 1 
     ORDER BY gp.id DESC 
     LIMIT 6
@@ -91,9 +91,9 @@ export async function getSingleUsedProduct(id) {
   console.log(`Fetching used product with id: ${id}`)
   const products = await db.query(
     `
-    SELECT gp.id, gp.name, gp.preis, gp.produkt_verweis, b.bild_pfad, k.name as kategorie_name, z.name as zustand, u.username as verkäufer_name, gp.kategorie_id, gp.zustand_id, gp.verkäufer_id
+    SELECT gp.id, gp.name, gp.preis, gp.produkt_verweis, bg.bild_pfad, k.name as kategorie_name, z.name as zustand, u.username as verkäufer_name, gp.kategorie_id, gp.zustand_id, gp.verkäufer_id
     FROM gebrauchte_produkte gp
-    LEFT JOIN bilder b ON gp.id = b.produkt_id AND b.is_used = 1
+    LEFT JOIN bilder_gebraucht bg ON gp.id = bg.gebrauchte_produkte_id
     LEFT JOIN kategorie k ON gp.kategorie_id = k.id
     LEFT JOIN zustand z ON gp.zustand_id = z.id
     LEFT JOIN users u ON gp.verkäufer_id = u.id
@@ -163,9 +163,9 @@ export async function getAllUsedProducts(filters = {}) {
   const db = connection()
 
   let query = `
-    SELECT gp.id, gp.name, gp.preis, z.name as zustand, u.username as seller, b.bild_pfad, gp.show_dia
+    SELECT gp.id, gp.name, gp.preis, z.name as zustand, u.username as seller, bg.bild_pfad, gp.show_dia
     FROM gebrauchte_produkte gp
-    LEFT JOIN bilder b ON gp.id = b.produkt_id
+    LEFT JOIN bilder_gebraucht bg ON gp.id = bg.gebrauchte_produkte_id
     LEFT JOIN users u ON gp.verkäufer_id = u.id
     LEFT JOIN zustand z ON gp.zustand_id = z.id
     LEFT JOIN kategorie k ON gp.kategorie_id = k.id
@@ -268,26 +268,68 @@ export async function deleteProduct(id) {
 
 export async function createUsedProduct(data) {
   const db = connection()
-  const result = await db.query(
-    "INSERT INTO gebrauchte_produkte (name, preis, beschreibung, zustand, kategorie_id, seller_id, show_dia) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [data.name, data.preis, data.beschreibung, data.zustand, data.kategorie_id, data.seller_id, data.show_dia],
-  )
-  return result.insertId
+  log("Creating new used product with data:", data)
+  try {
+    log("Executing INSERT query...")
+    const result = await db.query(
+      "INSERT INTO gebrauchte_produkte (name, preis, produkt_verweis, show_dia, kategorie_id, zustand_id, verkäufer_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [
+        data.name,
+        data.preis,
+        data.produkt_verweis,
+        data.show_dia,
+        data.kategorie_id,
+        data.zustand_id,
+        data.verkäufer_id,
+      ],
+    )
+    log("INSERT query executed. Result:", result)
+
+    log("Executing SELECT query to get last insert ID...")
+    const [newProductId] = await db.query("SELECT last_insert_rowid() as id")
+    log("SELECT query executed. Result:", newProductId)
+
+    if (newProductId && newProductId[0]) {
+      const id = newProductId[0]
+      log("New used product created with ID:", id)
+      return id
+    } else {
+      log("Failed to retrieve the new used product ID. newProductId:", newProductId)
+      throw new Error("Failed to retrieve the new used product ID")
+    }
+  } catch (error) {
+    log("Error in createUsedProduct:", error)
+    throw error
+  }
 }
 
 export async function updateUsedProduct(id, data) {
   const db = connection()
+  log("Updating used product with data:", data)
   await db.query(
-    "UPDATE gebrauchte_produkte SET name = ?, preis = ?, beschreibung = ?, zustand = ?, kategorie_id = ?, show_dia = ? WHERE id = ?",
-    [data.name, data.preis, data.beschreibung, data.zustand, data.kategorie_id, data.show_dia, id],
+    "UPDATE gebrauchte_produkte SET name = ?, preis = ?, produkt_verweis = ?, zustand_id = ?, kategorie_id = ?, show_dia = ? WHERE id = ?",
+    [data.name, data.preis, data.produkt_verweis, data.zustand_id, data.kategorie_id, data.show_dia, id],
   )
+  log("Used product updated successfully")
 }
 
 export async function deleteUsedProduct(id) {
   const db = connection()
-  await db.query("DELETE FROM gebrauchte_produkte WHERE id = ?", [id])
-  await db.query("DELETE FROM bilder WHERE produkt_id = ?", [id])
+
+  try {
+    await db.query("BEGIN TRANSACTION");
+    
+    await db.query("DELETE FROM bilder_gebraucht WHERE gebrauchte_produkte_id = ?", [id])
+    await db.query("DELETE FROM cart_items WHERE product_id = ?", [id]);
+    await db.query("DELETE FROM gebrauchte_produkte WHERE id = ?", [id])
+
+    await db.query("COMMIT");
+} catch (error) {
+    await db.query("ROLLBACK");
+  throw error;
 }
+}
+
 
 // Suchfunktion Produkte
 export async function searchProducts(searchQuery) {
@@ -318,7 +360,7 @@ export async function searchUsedProducts(searchQuery) {
   const query = `
     SELECT gp.id, gp.name, gp.preis, gp.produkt_verweis, b.bild_pfad, k.name as kategorie_name, z.name as zustand, u.username as verkäufer_name, gp.kategorie_id, gp.zustand_id, gp.verkäufer_id
     FROM gebrauchte_produkte gp
-    LEFT JOIN bilder b ON gp.id = b.produkt_id AND b.is_used = 1
+    LEFT JOIN bilder b ON gp.id = b.produkt_id
     LEFT JOIN kategorie k ON gp.kategorie_id = k.id
     LEFT JOIN zustand z ON gp.zustand_id = z.id
     LEFT JOIN users u ON gp.verkäufer_id = u.id
@@ -367,23 +409,32 @@ export async function searchUsedProducts(searchQuery) {
 export async function createImage(productId, imagePath, isUsed = false) {
   const db = connection()
   log("Creating image record for product ID:", productId)
-  await db.query("INSERT INTO bilder (produkt_id, bild_pfad, is_used) VALUES (?, ?, ?)", [
+  await db.query("INSERT INTO bilder (produkt_id, bild_pfad) VALUES (?, ?)", [
     productId,
     imagePath,
-    isUsed ? 1 : 0,
   ])
   log("Image record created successfully")
 }
 
+export async function createUsedProductImage(productId, imagePath) {
+  const db = connection()
+  log("Creating image record for used product ID:", productId)
+  await db.query("INSERT INTO bilder_gebraucht (gebrauchte_produkte_id, bild_pfad) VALUES (?, ?)", [
+    productId,
+    imagePath,
+  ])
+  log("Image record created successfully for used product")
+}
+
 export async function updateImage(productId, imagePath, isUsed = false) {
   const db = connection()
-  const existingImage = await db.query("SELECT * FROM bilder WHERE produkt_id = ? AND is_used = ?", [
+  const existingImage = await db.query("SELECT * FROM bilder WHERE produkt_id = ?", [
     productId,
     isUsed ? 1 : 0,
   ])
 
   if (existingImage.length > 0) {
-    await db.query("UPDATE bilder SET bild_pfad = ? WHERE produkt_id = ? AND is_used = ?", [
+    await db.query("UPDATE bilder SET bild_pfad = ? WHERE produkt_id = ?", [
       imagePath,
       productId,
       isUsed ? 1 : 0,
@@ -393,9 +444,25 @@ export async function updateImage(productId, imagePath, isUsed = false) {
   }
 }
 
+export async function updateUsedProductImage(productId, imagePath) {
+  const db = connection()
+  const existingImage = await db.query("SELECT * FROM bilder_gebraucht WHERE gebrauchte_produkte_id = ?", [productId])
+
+  if (existingImage.length > 0) {
+    await db.query("UPDATE bilder_gebraucht SET bild_pfad = ? WHERE gebrauchte_produkte_id = ?", [imagePath, productId])
+  } else {
+    await createUsedProductImage(productId, imagePath)
+  }
+}
+
 export async function deleteImage(productId, isUsed = false) {
   const db = connection()
-  await db.query("DELETE FROM bilder WHERE produkt_id = ? AND is_used = ?", [productId, isUsed ? 1 : 0])
+  await db.query("DELETE FROM bilder WHERE produkt_id = ?", [productId])
+}
+
+export async function deleteUsedProductImage(productId) {
+  const db = connection()
+  await db.query("DELETE FROM bilder_gebraucht WHERE gebrauchte_produkte_id = ?", [productId])
 }
 
 //Warenkorb laden
@@ -423,9 +490,10 @@ export async function getCartTotal(userId) {
     SELECT SUM(p.preis * ci.quantity) as total
     FROM cart_items ci
     JOIN produkte p ON ci.product_id = p.id
-    WHERE ci.user_id = ?
-  `, [userId]);
-  return result[0].total || 0;
+    WHERE ci.user_id = ?`,
+    [userId]);
+  log(result);
+  return result|| 0;
 }
 
 //Warenkorb bearbeiten 

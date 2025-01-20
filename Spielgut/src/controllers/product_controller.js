@@ -4,11 +4,17 @@ import {
   getAllNewProducts,
   getAllUsedProducts,
   getSingleProduct,
+  getSingleUsedProduct,
+  createProduct,
+  createImage,
+  createUsedProductImage,
   updateProduct,
   deleteProduct,
   createUsedProduct,
   updateUsedProduct,
   deleteUsedProduct,
+  searchProducts,
+  searchUsedProducts,
 } from "../model.js"
 import { setFlashMessage } from "../controllers/flashmessages_controller.js";
 import { join, dirname } from "https://deno.land/std/path/mod.ts";
@@ -68,12 +74,11 @@ export class ProductController {
     };
   }
 
-  async getUsedProductsData(user, flashMessage, csrfToken, filterParams)
-  {
+  async getUsedProductsData(user, flashMessage, csrfToken, filterParams = {}) {
     const db = connection()
-    const kategorien = await db.query("SELECT id, name FROM kategorie")
-    const zustände = await db.query("SELECT id, name FROM zustand")
-  
+    const kategorien = await this.getKategorien()
+    const zustände = await this.getZustände()
+
     const allUsedProducts = await getAllUsedProducts(filterParams)
     return {
       user,
@@ -81,8 +86,8 @@ export class ProductController {
       flashMessage,
       csrfToken,
       filters: filterParams,
-      kategorien: kategorien.map(([id, name]) => ({ id, name })),
-      zustände: zustände.map(([id, name]) => ({ id, name })),
+      kategorien,
+      zustände,
     }
   }
 
@@ -236,7 +241,10 @@ async handleCreateUsedProduct(request, user) {
     const formData = await getRequestBody(request)
     log("Form data received:", formData)
 
-    return this.processUsedProductCreation(formData, user)
+    const kategorien = await this.getKategorien()
+    const zustände = await this.getZustände()
+
+    return this.processUsedProductCreation(formData, user, kategorien, zustände)
   } catch (error) {
     log("Error reading form data:", error)
     const response = new Response("", {
@@ -248,14 +256,14 @@ async handleCreateUsedProduct(request, user) {
   }
 }
 
-async processUsedProductCreation(formData, user) {
+async processUsedProductCreation(formData, user, kategorien, zustände) {
   const productData = {
     name: formData.productName,
     produkt_verweis: formData.productDescription,
     preis: Number.parseFloat(formData.productPrice),
     kategorie_id: Number.parseInt(formData.productCategory),
     zustand_id: Number.parseInt(formData.productCondition),
-    seller_id: user.id,
+    verkäufer_id: user.id,
     show_dia: formData.diaShow === "on",
   }
 
@@ -279,7 +287,7 @@ async processUsedProductCreation(formData, user) {
       log("Image file saved successfully")
 
       log("Creating image record in database...")
-      await createImage(newProductId, `/assets/Produktbilder/${fileName}`, true)
+      await createUsedProductImage(newProductId, `/assets/Produktbilder/${fileName}`)
       log("Image record created successfully")
     }
 
@@ -356,67 +364,68 @@ async processUsedProductCreation(formData, user) {
     }
   }
 
-  async handleUsedProductUpdate(request, user, productId) {
-    if (!user) {
+  async handleUsedProductUpdate(request, user, productId)
+{
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 })
+  }
+
+  try {
+    const formData = await getRequestBody(request)
+    log("Received form data for used product update:", formData)
+
+    const product = await getSingleUsedProduct(productId)
+    if (product.verkäufer_id !== user.id && user.role !== "admin") {
       return new Response("Unauthorized", { status: 401 })
     }
 
-    try {
-      const formData = await getRequestBody(request)
-      log("Received form data for used product update:", formData)
-
-      const product = await getSingleUsedProduct(productId)
-      if (product.verkäufer_id !== user.id && user.role !== "admin") {
-        return new Response("Unauthorized", { status: 401 })
-      }
-
-      const updatedData = {
-        name: formData.name,
-        preis: Number.parseFloat(formData.preis),
-        produkt_verweis: formData.produkt_verweis,
-        show_dia: formData.show_dia === "on",
-        kategorie_id: Number.parseInt(formData.kategorie_id),
-        zustand_id: Number.parseInt(formData.zustand_id),
-      }
-
-      log("Updating used product with data:", updatedData)
-      await updateUsedProduct(productId, updatedData)
-
-      const deleteExistingImage = formData.delete_image === "on"
-      const newImage = formData.new_image
-
-      if (deleteExistingImage) {
-        log("Deleting existing image for used product:", productId)
-        await deleteImage(productId, true)
-      }
-
-      if (newImage && newImage.size > 0) {
-        const fileName = `used_product_${productId}_${Date.now()}.jpg`
-        const projectRoot = Deno.cwd()
-        const imagePath = join(projectRoot, "assets", "Produktbilder", fileName)
-
-        log("Saving new image to:", imagePath)
-        await this.saveImageFile(newImage, imagePath)
-        const bild_pfad = `/assets/Produktbilder/${fileName}`
-        await updateImage(productId, bild_pfad, true)
-      }
-
-      const response = new Response("", {
-        status: 302,
-        headers: { Location: `/used-product/${productId}` },
-      })
-      setFlashMessage(response, "Gebrauchtes Produkt erfolgreich aktualisiert.", "success")
-      return response
-    } catch (error) {
-      log("Error updating used product:", error)
-      const response = new Response("", {
-        status: 302,
-        headers: { Location: `/used-product/${productId}/edit` },
-      })
-      setFlashMessage(response, `Fehler beim Aktualisieren des gebrauchten Produkts: ${error.message}`, "error")
-      return response
+    const updatedData = {
+      name: formData.name,
+      preis: Number.parseFloat(formData.preis),
+      produkt_verweis: formData.produkt_verweis,
+      show_dia: formData.show_dia === "on",
+      kategorie_id: Number.parseInt(formData.kategorie_id),
+      zustand_id: Number.parseInt(formData.zustand_id),
     }
+
+    log("Updating used product with data:", updatedData)
+    await updateUsedProduct(productId, updatedData)
+
+    const deleteExistingImage = formData.delete_image === "on"
+    const newImage = formData.new_image
+
+    if (deleteExistingImage) {
+      log("Deleting existing image for used product:", productId)
+      await deleteUsedProductImage(productId)
+    }
+
+    if (newImage && newImage.size > 0) {
+      const fileName = `used_product_${productId}_${Date.now()}.jpg`
+      const projectRoot = Deno.cwd()
+      const imagePath = join(projectRoot, "assets", "Produktbilder", fileName)
+
+      log("Saving new image to:", imagePath)
+      await this.saveImageFile(newImage, imagePath)
+      const bild_pfad = `/assets/Produktbilder/${fileName}`
+      await updateUsedProductImage(productId, bild_pfad)
+    }
+
+    const response = new Response("", {
+      status: 302,
+      headers: { Location: `/used-product/${productId}` },
+    })
+    setFlashMessage(response, "Gebrauchtes Produkt erfolgreich aktualisiert.", "success")
+    return response
+  } catch (error) {
+    log("Error updating used product:", error)
+    const response = new Response("", {
+      status: 302,
+      headers: { Location: `/used-product/${productId}/edit` },
+    })
+    setFlashMessage(response, `Fehler beim Aktualisieren des gebrauchten Produkts: ${error.message}`, "error")
+    return response
   }
+}
 
   // Produkte löschen
   async handleProductDelete(user, productId) {
@@ -490,54 +499,30 @@ async processUsedProductCreation(formData, user) {
 
   // Suchfunktion
   async getSearchResults(user, searchQuery, flashMessage, csrfToken) {
-    log('ProductController: Received search query:', searchQuery);
-    
-    try {
-      const products = await searchProducts(searchQuery);
-      log('ProductController: Search results returned:', products.length);
-      
-      return { 
-        user, 
-        products, 
-        searchQuery, 
-        flashMessage, 
-        csrfToken 
-      };
-    } catch (error) {
-      log('Error in search:', error);
-      return { 
-        user, 
-        products: [], 
-        searchQuery, 
-        flashMessage: { type: 'error', message: 'Ein Fehler ist bei der Suche aufgetreten.' }, 
-        csrfToken 
-      };
-    }
-  }
-    async getUsedProductSearchResults(user, searchQuery, flashMessage, csrfToken) {
-    log("ProductController: Received search query for used products:", searchQuery)
+    log("ProductController: Received search query:", searchQuery)
 
     try {
-      const products = await searchUsedProducts(searchQuery)
-      log("ProductController: Used product search results returned:", products.length)
+      const newProducts = await searchProducts(searchQuery)
+      const usedProducts = await searchUsedProducts(searchQuery)
+      log("ProductController: New products returned:", newProducts.length)
+      log("ProductController: Used products returned:", usedProducts.length)
 
       return {
         user,
-        products,
+        newProducts,
+        usedProducts,
         searchQuery,
         flashMessage,
         csrfToken,
       }
     } catch (error) {
-      log("Error in used product search:", error)
+      log("Error in search:", error)
       return {
         user,
-        products: [],
+        newProducts: [],
+        usedProducts: [],
         searchQuery,
-        flashMessage: {
-          type: "error",
-          message: "Ein Fehler ist bei der Suche nach gebrauchten Produkten aufgetreten.",
-        },
+        flashMessage: { type: "error", message: "Ein Fehler ist bei der Suche aufgetreten." },
         csrfToken,
       }
     }
